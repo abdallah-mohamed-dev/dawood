@@ -1,0 +1,21 @@
+{
+    "Login": "دخول",
+    "Logout": "تسجيل الخروج",
+    "Save": "حفظ",
+    "Cancel": "إلغاء",
+    "Edit": "تعديل",
+    "Delete": "حذف",
+    "Add": "إضافة",
+    "Back": "رجوع",
+    "Search": "بحث",
+    "Confirm": "تأكيد",
+    "Yes": "نعم",
+    "No": "لا",
+    "Actions": "إجراءات",
+    "No results found.": "لا توجد نتائج.",
+    "Pagination Navigation": "التنقل بين الصفحات",
+    "Showing": "عرض",
+    "to": "إلى",
+    "of": "من",
+    "results": "نتيجة"
+}

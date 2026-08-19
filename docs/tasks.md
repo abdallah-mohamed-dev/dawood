@@ -1,289 +1,623 @@
-# خطة المهام (Tasks) — تنفيذ MVP نظام إدارة وحسابات الورشة
+# خطة المهام (Tasks) — تنفيذ MVP نظام إدارة وحسابات ورشة الأثاث
 
-مرجع: `furniture_workshop_mvp_implementation_plan(1).md`
-
-## قرارات تم اعتمادها
-
-- قاعدة البيانات: **SQLite** (كما هي معدة حاليًا في `.env`، `DB_CONNECTION=sqlite`).
-- Auth Starter Kit: **Laravel Breeze (Blade + Tailwind)**. لا حاجة لصفحة تسجيل (register) — يوجد Admin واحد فقط يُنشأ عبر Seeder، وتُحذف/تُعطَّل مسارات `register`.
-- لغة الواجهة: **عربي (RTL)**.
-- العملة: **جنيه مصري (EGP)** — تنسيق عرض فقط، بدون تحويل عملات.
-
-قواعد عامة على كل Task:
-
-- Task واحد فقط ينفَّذ وتُختبر نتيجته قبل الانتقال للي بعده.
-- ممنوع تعديل ملفات/موديولات خارج نطاق الـTask إلا إذا كان ضروريًا ومبررًا (ويُذكر السبب).
-- كل Task ينتهي بتشغيل `php artisan test` (Pest) و `vendor/bin/pint --dirty --format agent`.
-- أي قرار غير واضح في الـlogic يُكتب في `docs/*.md` بدل تخمينه في الكود.
+> **نسخة 3 — مراجَعة نهائيًا ومغلقة.**
+> مرجع أصلي: `furniture_workshop_mvp_implementation_plan(1).md`
+> هذه الوثيقة مكتوبة لتكون **مرجعًا نهائيًا للتنفيذ** — كل قرار كان معلقًا في الخطة الأصلية تم حسمه هنا.
+> لا يُبدأ أي Task بقرار مؤجل. أي سؤال جديد يظهر أثناء التنفيذ → يُحسم ويُكتب في `docs/` **قبل** كتابة الكود.
 
 ---
 
-## Task 0 — تجهيز بيئة العمل (تكملة Phase 0)
+## القسم أ — القرارات المعتمدة (مغلقة، لا يُعاد فتحها)
 
-**الحالة الحالية:** المشروع Laravel 13 فارغ، SQLite migrated (users/cache/jobs فقط)، Tailwind v4 مثبت، لا يوجد Auth.
+### أ-1. البنية التقنية
+
+| البند | القرار | السبب |
+|---|---|---|
+| قاعدة البيانات | **SQLite** (`DB_CONNECTION=sqlite`) | Admin واحد، لا حاجة لسيرفر منفصل، النسخ الاحتياطي = نسخ ملف |
+| Auth | **يدوي (Controller + middleware + throttle)** | أدمن واحد ثابت فقط؛ لا حاجة لـRegister/password-reset بإيميل/حذف حساب. تجنّب scaffolding كامل وتعارض Tailwind v3/v4 |
+| CSS | **Tailwind v4** (`@tailwindcss/vite`) | مثبت بالفعل في المشروع |
+| الاختبارات | **Pest 5** | مثبت بالفعل |
+| اللغة | **عربي RTL** (`APP_LOCALE=ar`) | المستخدم النهائي عربي |
+| العملة | **جنيه مصري (EGP)** | عرض فقط، بدون تحويل عملات |
+| التوقيت | **`Africa/Cairo`** | كل الحسابات مرتبطة بتواريخ (`occurred_at`, `paid_at`) |
+
+### أ-2. تمثيل الأرقام — قرار حرج
+
+> **المشكلة:** SQLite ليس فيه نوع `DECIMAL` حقيقي. عمود `decimal(14,2)` يأخذ NUMERIC affinity ويُخزَّن كـ`REAL` (عائم) عند وجود كسور → أخطاء تراكمية مثل `539.9999999999999` وفشل مقارنة `remaining_quantity == 0` في خوارزمية FIFO (الدفعة لا تنفد أبدًا).
+
+**القرار: كل الأرقام تُخزَّن كأعداد صحيحة في أصغر وحدة.**
+
+| النوع | التخزين | المضاعف | مثال |
+|---|---|---|---|
+| المبالغ المالية | `bigInteger` بالقروش | ×100 | 540.00 ج.م → `54000` |
+| الكميات | `bigInteger` بالأجزاء من الألف | ×1000 | 2.5 متر → `2500` |
+
+- تُنفَّذ عبر Custom Casts: `App\Casts\MoneyCast` و `App\Casts\QuantityCast` (تحويل تلقائي عند القراءة/الكتابة، بدون أي `float` في طبقة الأعمال).
+- **كل العمليات الحسابية (جمع، طرح، FIFO) تتم على الأعداد الصحيحة** → نتائج مضبوطة 100% ومقارنات `=== 0` تعمل بشكل موثوق.
+- **قاعدة التقريب:** عند ضرب كمية كسرية × سعر وحدة، النتيجة تُقرَّب لأقرب قرش صحيح بطريقة **round half up**. تُنفَّذ في دالة واحدة مشتركة داخل `InventoryService` ولا تُكرَّر.
+- عرض المبالغ في الواجهة عبر Blade component واحد `<x-money :amount="..." />` بصيغة `12,345.00 ج.م`.
+
+**⚠️ تنبيه ضرب بين نطاقين مختلفين (مصدر أخطاء شائع):** الكمية مُخزَّنة ×1000 والمبلغ ×100 — أي ضرب بينهما يجب أن يُقسَّم على 1000 ليرجع لوحدة القروش الصحيحة، وإلا كانت النتيجة أكبر بـ1000 مرة من الصحيح:
+
+```text
+التكلفة (بالقروش) = round( (الكمية_المخزَّنة × سعر_الوحدة_بالقروش) / 1000 )
+```
+
+مثال تحقق: صرف 3000 (=3 ألواح) × سعر وحدة 10000 قرش (=100 ج.م) ÷ 1000 = 30000 قرش = 300 ج.م. ✅ (هذه هي الدالة المشتركة المذكورة في القاعدة السابقة، وتُستخدم أيضًا في Task 9 لحساب نصيب الشريك بنفس المبدأ مع نطاق النسبة المئوية).
+
+### أ-3. القواعد المحاسبية
+
+**تعريف الإيراد (كان معلقًا في الخطة الأصلية):**
+
+```text
+Revenue = مجموع sale_price للغرف ذات الحالة "مكتملة" فقط
+```
+
+**ولأن الإيراد على أساس الاستحقاق، التكلفة يجب أن تُطابقه (matching principle):**
+
+```text
+Net Profit = Σ(sale_price للغرف المكتملة)
+           − Σ(تكلفة الخامات المصروفة للغرف المكتملة)
+           − Σ(كل المصروفات الإدارية)
+```
+
+- خامات مصروفة لغرفة **تحت التنفيذ** = **إنتاج تحت التشغيل (WIP)** — أصل، **ليست** تكلفة بعد.
+- خامات **مشتراة ولم تُصرف** = مخزون — أصل، **ليست** تكلفة (هذه القاعدة موجودة في الخطة الأصلية §15).
+- المصروفات الإدارية = تكاليف فترة → تُحمَّل كاملة فورًا.
+- **رصيد الخزنة ≠ الربح.** الفرق يُشرح صراحة في `docs/profit-calculation.md` وتُعرض الأرقام منفصلة في الواجهة.
+
+**حالات الغرفة (كانت غير معرَّفة):**
+
+| الحالة | الوصف | تدخل الإيراد؟ | تدخل التكلفة؟ |
+|---|---|---|---|
+| `draft` | مسودة | ❌ | ❌ (WIP) |
+| `in_progress` | تحت التنفيذ | ❌ | ❌ (WIP) |
+| `completed` | مكتملة | ✅ | ✅ |
+| `cancelled` | ملغاة | ❌ | ❌ |
+
+**قاعدة إلزام إضافية:** تحويل الحالة إلى `cancelled` هو مجرد **استبعاد من الحسابات** — لا يُرجع الخامات المصروفة للمخزون تلقائيًا ولا يُلغي تكلفتها المسجَّلة. إرجاع الخامات فعليًا لا يحدث إلا عبر **حذف الغرفة** واختيار "إرجاع" في الـModal (أ-4). إن أراد الأدمن إرجاع الخامات، عليه حذف الغرفة لا مجرد تغيير حالتها.
+
+### أ-4. سياسة التعديل والحذف (كانت غائبة تمامًا — أخطر ثغرة)
+
+**القرار: الحذف مسموح، لكن مع عكس كل الآثار داخل `DB::transaction()` واحدة.**
+
+| العملية المحذوفة | ما يحدث |
+|---|---|
+| دفعة عميل | تُحذف حركة الخزنة المرتبطة بها في نفس الـtransaction |
+| مصروف إداري | تُحذف حركة الخزنة المرتبطة بها |
+| سحب شريك | تُحذف حركة الخزنة المرتبطة بها |
+| عملية شراء (Batch) | **مسموح فقط إذا لم يُصرف منها شيء** (`remaining == quantity`). غير ذلك → خطأ واضح |
+| غرفة | **Modal تأكيد** يسأل: هل تُرجَع الخامات للمخزون أم اعتُبرت مستهلكة؟ (تفصيل في Task 5) |
+
+- الربط بين أي عملية وحركة الخزنة **polymorphic** (`source_type` + `source_id`) → لا توجد حركة خزنة يتيمة أبدًا.
+- **لا يوجد إدخال يدوي مباشر لحركة خزنة** من صفحة الخزنة (باستثناء الرصيد الافتتاحي — أ-5).
+- التعديل (edit) على مبلغ عملية مالية → يُحدِّث حركة الخزنة المرتبطة في نفس الـtransaction.
+
+### أ-5. قرارات نطاق إضافية
+
+| البند | القرار |
+|---|---|
+| رصيد افتتاحي للخزنة | ✅ **داخل الـMVP** — حركة واحدة فقط بنوع `opening_balance`، قابلة للتعديل، غير قابلة للتكرار |
+| مساهمات رأسمال الشركاء | ❌ خارج الـMVP |
+| إرجاع خامات للمخزون | ✅ عند حذف غرفة فقط، عبر Modal اختياري (Task 5) |
+| صرف كمية أكبر من المتاح | ❌ ممنوع — خطأ واضح، **بدون صرف جزئي**، والعملية كلها تُلغى (atomic) |
+| دفعة تتجاوز المتبقي | ❌ ممنوع — validation |
+| `paid_amount` للغرفة | **محسوب** من مجموع الدفعات (لا يُخزَّن) → استحالة الـdrift |
+| مجموع نسب الشركاء | ≤ 100% — validation |
+| صافي ربح سالب | نصيب الشريك = 0، والمتبقي = `−(المسحوب)` مع تحذير ظاهر في الواجهة |
+| فترة زمنية للتقارير | الـMVP يحسب **الإجمالي التراكمي** فقط، بدون فلاتر تواريخ |
+| ترتيب FIFO | `purchase_date ASC` ثم `id ASC` (لفض التعادل) |
+
+---
+
+## القسم ب — قواعد التنفيذ
+
+1. **Task واحد فقط** ينفَّذ ويُختبر بالكامل قبل الانتقال للتالي.
+2. ممنوع تعديل ملفات خارج نطاق الـTask إلا بضرورة مبرَّرة تُذكر صراحة.
+3. كل Task ينتهي إجباريًا بـ:
+   - `php artisan test --compact` → **كل الاختبارات تنجح** (الحالية والسابقة — منع regression).
+   - `vendor/bin/pint --dirty --format agent`.
+4. **كل Task ينشئ Factory** للموديلات الجديدة + **اختبارات Pest** تغطي: المسار الطبيعي، حالات الخطأ، وقواعد الأعمال.
+5. **ممنوع استخدام tinker أو verification scripts** للتحقق — الاختبارات هي الدليل (طبقًا لـ`AGENTS.md`).
+6. كل عملية تمس أكثر من جدول تُغلَّف بـ`DB::transaction()`.
+
+### تعريف "تم" (Definition of Done)
+
+Task لا يُعتبر مكتملًا إلا إذا تحقق كل التالي:
+
+- [ ] Migrations تعمل من الصفر (`migrate:fresh --seed`)
+- [ ] Models + Relations + Casts صحيحة
+- [ ] Form Requests للتحقق من المدخلات
+- [ ] Factory لكل موديل جديد
+- [ ] اختبارات Pest للمسار الطبيعي **وحالات الخطأ**
+- [ ] الأرقام مطابقة للسيناريو المحسوب يدويًا مسبقًا
+- [ ] كل الاختبارات السابقة ما زالت تنجح
+- [ ] Pint نظيف
+- [ ] UI بسيط يعمل ورسائل نجاح/خطأ بالعربي
+
+---
+
+## القسم ج — المهام
+
+### الترتيب النهائي
+
+```text
+Task 0  → 1  → 2  → 3  → 4  → 5  → 6  → 7  → 8  → 9  → 10 → 11
+أساس   docs  خزنة  أصناف batches غرف  دفعات مصروفات ربح  شركاء  UI  تكامل
+```
+
+> **ملاحظة على الترتيب:** تم تغييره عن الخطة الأصلية لسببين تقنيين:
+> 1. **الخزنة قبل المخزون** — لأن عملية شراء المخزون يجب أن تسجل خروجًا من الخزنة من أول لحظة. الخطة الأصلية كانت تؤجل ذلك ثم ترجع لتعديل الجزء المنفَّذ (خرق لقاعدة عدم الرجوع).
+> 2. **الربح قبل الشركاء** — لأن نصيب الشريك مشتق من صافي الربح. الترتيب الأصلي كان يفرض حسابًا مبسطًا مؤقتًا ثم إعادة كتابته لاحقًا (شغل يُرمى).
+
+---
+
+### Task 0 — الأساس والمصادقة
+
+**الوضع الحالي المُتحقَّق منه:** Laravel 13 نظيف، SQLite بها جداول `users`/`cache`/`jobs` فقط، Tailwind v4 مثبت، لا يوجد Auth، لا يوجد Models.
+
+**قرار: بدون Laravel Breeze.** النظام أدمن واحد ثابت فقط — لا تسجيل، لا نسيان باسورد بإيميل، لا إدارة حسابات متعددة. Breeze كان سيجلب scaffolding كامل (register، password reset، email verification، حذف حساب) يلزم تفكيكه بعد ذلك، وينشر إعدادات **Tailwind v3** تتعارض مع **v4** المثبت بالفعل في المشروع. **Auth يدوي بسيط أسرع وأنضف هنا** ومتسق مع فلسفة الخطة (§2: "بدون تعقيد غير ضروري").
 
 **المطلوب:**
 
-1. تثبيت Laravel Breeze (Blade stack).
-2. إزالة/تعطيل مسار وصفحة التسجيل (register) — الدخول فقط عبر Login.
-3. إنشاء Seeder لإداري واحد (Admin) بإيميل وباسورد من `.env` أو قيم seed ثابتة تُذكر للمستخدم.
-4. حماية كل صفحات النظام بـ middleware `auth` (باستثناء `/login`).
-5. ضبط اتجاه الصفحة RTL (`dir="rtl"` + `lang="ar"`) في الـlayout الأساسي لـ Breeze.
-6. تعديل `/` بحيث يوجّه لـ `/login` أو `/dashboard` حسب حالة تسجيل الدخول.
+1. **Auth يدوي:**
+   - `App\Http\Controllers\Auth\LoginController` بدالتين: `create()` (عرض النموذج) و`store()` (التحقق + `Auth::attempt()` + `session()->regenerate()`) و`destroy()` (logout + `session()->invalidate()` + `session()->regenerateToken()`).
+   - Form Request أو تحقق مباشر: `email` (required, email)، `password` (required).
+   - `routes/web.php`: `GET /login`, `POST /login`, `POST /logout` (خارج `middleware('auth')` عدا logout).
+   - Rate limiting على `POST /login`: `middleware('throttle:5,1')` (5 محاولات/دقيقة) — يمنع bruteforce بدون أي مكتبة إضافية.
+   - View واحد: `resources/views/auth/login.blade.php` (Tailwind، بدون أي أثر لـBreeze).
+   - **لا صفحة Register، لا نسيان باسورد، لا صفحة حذف حساب.** لو الأدمن نسي الباسورد → إعادة تعيينها عبر `php artisan tinker` أو Artisan command مخصص (خارج الواجهة تمامًا).
+2. **Admin Seeder:** مستخدم واحد من `ADMIN_EMAIL` و`ADMIN_PASSWORD` في `.env` (مع قيم افتراضية في `.env.example`)، يُستدعى من `DatabaseSeeder`. Seeder **idempotent** (`updateOrCreate`) حتى لا يفشل عند إعادة التشغيل.
+3. **RTL والعربية:**
+   - `<html lang="ar" dir="rtl">` في الـlayout الأساسي.
+   - `APP_LOCALE=ar` في `.env` و`config/app.php`.
+   - `php artisan lang:publish` ثم إنشاء `lang/ar/validation.php` و`lang/ar/auth.php` بترجمات عربية للقواعد المستخدمة فعليًا (`required`, `numeric`, `min`, `max`, `unique`, `exists`, `gt`, `date`…) ولرسالة فشل تسجيل الدخول (`auth.failed`).
+   - ملف `lang/ar.json` لنصوص الواجهة.
+   - اسم الخط العربي (Cairo أو Tajawal) يُعرَّف داخل بند "Design Tokens" التالي — لا يُكتب في أكثر من مكان.
+4. **Design Tokens (ألوان وخطوط — مصدر واحد للنظام كله):**
+   - **كل** ألوان النظام وخط النظام تُعرَّف **مرة واحدة فقط**، داخل `resources/css/app.css` الموجود بالفعل، باستخدام توجيه `@theme` من Tailwind v4 (نفس الآلية المستخدمة حاليًا لـ`--font-sans`):
+     ```css
+     @theme {
+         --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif, ...;
+
+         --color-primary: #...;
+         --color-primary-dark: #...;
+         --color-secondary: #...;
+         --color-success: #...;
+         --color-danger: #...;
+         --color-warning: #...;
+         --color-surface: #...;
+         --color-border: #...;
+     }
+     ```
+   - Tailwind v4 يولّد تلقائيًا utility classes من هذه المتغيرات (`bg-primary`, `text-primary`, `border-primary`, `font-sans`...) — فكل مكوّنات الواجهة في كل الـTasks القادمة (أزرار، جداول، روابط، تنبيهات...) تُبنى بهذه الـclasses فقط.
+   - استبدال خط `Instrument Sans` (اللاتيني الحالي) بخط عربي (`Cairo` مثلًا) عبر `bunny()` في `vite.config.js`، بحيث الاسم المُحمَّل يطابق قيمة `--font-sans` في `app.css` بالضبط.
+   - **قاعدة إلزامية على كل UI في Tasks 2–10:** ممنوع أي لون hex مباشر في أي Blade file (مثل `bg-[#1a2b3c]` أو `style="color:...; font-family:..."`)، وممنوع تعريف `font-family` في أي مكان غير `app.css`. أي لون جديد يُحتاج له لاحقًا (تحذير، نجاح...) يُضاف كمتغير جديد هنا أولًا لا كقيمة مباشرة في الصفحة.
+   - **النتيجة:** تغيير `--color-primary` أو `--font-sans` في هذا الملف وحده، ثم `npm run build`، يغيّر المظهر في كل صفحات النظام دفعة واحدة بدون لمس أي Blade file.
+5. **إعدادات البيئة:**
+   - `config/app.php`: `'timezone' => env('APP_TIMEZONE', 'Africa/Cairo')` (حاليًا مثبت على `'UTC'`).
+   - `config/database.php` → اتصال sqlite: `'journal_mode' => 'WAL'`، `'busy_timeout' => 5000`، `'synchronous' => 'NORMAL'`، و**`'transaction_mode' => 'IMMEDIATE'`** (حاليًا `DEFERRED`).
+     > السبب: `lockForUpdate()` لا يفعل شيئًا في SQLite. وضع `IMMEDIATE` يأخذ قفل الكتابة عند بدء الـtransaction ويمنع تعارضات ترقية القفل في عمليات FIFO.
+6. **Casts الأساسية:** إنشاء `App\Casts\MoneyCast` و`App\Casts\QuantityCast` + اختبارات وحدة لهما (تحويل، تقريب، قيم سالبة، صفر، null).
+7. **Blade component:** `<x-money>` لعرض المبالغ بصيغة `12,345.00 ج.م`.
+8. **حماية المسارات:** كل مسارات النظام داخل `middleware('auth')`. `/` يوجّه لـ`/dashboard` إن كان مسجلًا، وإلا لـ`/login`. صفحة `/dashboard` بسيطة (ترحيب فقط).
 
 **Acceptance Criteria:**
 
-- `php artisan migrate:fresh --seed` يعمل بدون أخطاء وينشئ الـAdmin.
-- زيارة أي صفحة نظام وأنت غير مسجل → تحويل لصفحة Login.
-- تسجيل دخول بالـAdmin يعمل، تسجيل خروج يعمل.
-- لا يوجد مسار `/register` متاح.
-- الصفحات تظهر RTL بشكل صحيح.
+- `php artisan migrate:fresh --seed` ينجح وينشئ الـAdmin.
+- `npm run build` ينجح بدون أي تعديل على إعدادات Tailwind الحالية.
+- لا يوجد مسار `/register` أصلًا (لم يُنشأ من الأساس).
+- كل صفحات النظام محمية.
+- الواجهة تظهر RTL بخط عربي سليم، ورسائل الـvalidation بالعربي.
+- كل الألوان والخط معرَّفة حصرًا في `resources/css/app.css` عبر `@theme` — لا يوجد أي hex أو `font-family` مكتوب مباشرة في أي Blade file. تغيير `--color-primary` وحده ينعكس على كل الصفحات بعد `npm run build`.
+- 6 محاولات دخول فاشلة متتالية خلال دقيقة → التالية تُرفض بـ429 (throttle).
+- `MoneyCast` و`QuantityCast` مغطاة باختبارات.
 
 **Test Scenarios:**
 
-1. زيارة `/dashboard` بدون تسجيل دخول → redirect لـ `/login`.
-2. تسجيل دخول ببيانات خاطئة → رسالة خطأ validation.
-3. تسجيل دخول صحيح → دخول ناجح لصفحة رئيسية.
-4. تسجيل خروج → رجوع لصفحة `/login` وعدم القدرة على الرجوع بالـback button لصفحة محمية.
+1. زيارة `/dashboard` بدون تسجيل دخول → تحويل لـ`/login`.
+2. تسجيل دخول ببيانات خاطئة → رسالة خطأ **بالعربي**، والجلسة لا تُنشأ.
+3. تسجيل دخول صحيح بحساب الـAdmin → `/dashboard`، والـsession id يتغيّر (`regenerate`).
+4. تسجيل خروج → لا يمكن الوصول لصفحة محمية بعدها (session مبطَلة).
+5. `GET /register` → 404.
+6. 6 محاولات دخول فاشلة خلال دقيقة → 429 في المحاولة السادسة.
+7. `MoneyCast`: `54000` ↔ `540.00`؛ `QuantityCast`: `2500` ↔ `2.500`.
 
 ---
 
-## Task 1 — توثيق الـBusiness Logic (Phase 1)
+### Task 1 — توثيق قواعد الأعمال (بدون كود)
 
-**المطلوب:** إنشاء ملفات التوثيق التالية في `docs/` قبل أي كود إضافي:
+**المطلوب:** إنشاء ملفات `docs/` التالية، وكل ملف يوثّق: التعريفات، الحقول، القواعد، حالات الحافة، والقرارات المعتمدة من **القسم أ** أعلاه:
 
 ```text
 docs/
-├── system-overview.md
-├── business-rules.md
-├── customers-and-rooms.md
-├── inventory.md
-├── inventory-costing.md
-├── customer-payments.md
-├── expenses.md
-├── cashbox.md
-├── partners.md
-├── profit-calculation.md
-└── mvp-scope.md
+├── system-overview.md        نظرة عامة + مخطط العلاقات
+├── business-rules.md         القواعد العامة + سياسة الحذف والعكس (أ-4)
+├── customers-and-rooms.md    دورة حياة الغرفة + حالاتها (أ-3)
+├── inventory.md              الأصناف والمواد + منع الصرف الزائد
+├── inventory-costing.md      FIFO بالتفصيل + التقريب (أ-2)
+├── customer-payments.md      قواعد الدفعات + منع تجاوز المتبقي
+├── expenses.md               المصروفات الإدارية
+├── cashbox.md                الخزنة + الرصيد الافتتاحي + منع الإدخال اليدوي
+├── partners.md               النسب + السحوبات + حالة الربح السالب
+├── profit-calculation.md     معادلة الربح + الفرق بين الخزنة والربح + WIP
+└── mvp-scope.md              ما بداخل الـMVP وما خارجه
 ```
 
-كل ملف يوثّق: التعريفات، الحقول المطلوبة، القواعد (مثال: هل يمكن صرف كمية أكبر من المتاح؟ هل يمكن حذف غرفة بعد صرف خامات فيها؟ هل الدفعة يمكن أن تتجاوز المتبقي؟)، وحالات الحافة (edge cases).
-
-**Acceptance Criteria:** كل قرار غير محسوم في الخطة الأصلية (مثال: طريقة تقريب الأرقام، هل الصرف الجزئي مسموح، هل يمكن تعديل غرفة بعد الدفع) يكون له إجابة صريحة موثقة قبل البدء في Task 2.
-
-**ملاحظة:** هذا الـTask نص/توثيق فقط، بدون كود.
+**Acceptance Criteria:** كل قرار في القسم أ منقول ومشروح بأمثلة رقمية. لا يوجد في أي ملف عبارة "يُحدَّد لاحقًا".
 
 ---
 
-## Task 2 — تأسيس المخزون (Phase 3): Categories + Materials
+### Task 2 — أساس الخزنة (السجل المالي)
 
-**Scope:** الجداول الأساسية فقط، بدون صرف بعد.
+> يُنفَّذ **أولًا** لأن كل العمليات المالية اللاحقة تكتب فيه.
 
-**DB:**
+**DB — `cashbox_transactions`:**
 
-- `categories` (id, name, timestamps)
-- `materials` (id, category_id, name, unit [قطعة/متر/لوح...], timestamps)
+| العمود | النوع | ملاحظات |
+|---|---|---|
+| `id` | id | |
+| `type` | string/enum | `in` / `out` |
+| `amount` | bigInteger | بالقروش، **دائمًا موجب** (الاتجاه من `type`) |
+| `source_type` / `source_id` | nullable morphs | العملية الأصلية؛ null للرصيد الافتتاحي فقط |
+| `kind` | string | `opening_balance` / `customer_payment` / `inventory_purchase` / `expense` / `partner_withdrawal` |
+| `description` | string nullable | |
+| `occurred_at` | date | تاريخ العملية الفعلي (منفصل عن `created_at`) |
+| timestamps | | |
 
-**Backend:** Model + Migration + Controller (Resource) + Form Requests (validation) لكل من Category وMaterial.
+فهارس: `(source_type, source_id)`، `occurred_at`، `type`.
 
-**UI:** صفحات بسيطة: `/inventory/materials` (index + create + edit).
+**Backend — `App\Services\CashboxService`:**
 
-**Acceptance Criteria:**
+- `recordIn($source, int $amount, string $kind, $date, ?string $description)`
+- `recordOut(...)` بنفس التوقيع
+- `removeFor($source)` — لحذف الحركة عند حذف العملية الأصلية
+- `updateFor($source, int $amount)` — لتحديثها عند تعديل العملية
+- `balance(): int`, `totalIn(): int`, `totalOut(): int`
+- `setOpeningBalance(int $amount, $date)` — يُنشئ أو يُحدِّث الحركة الوحيدة من نوع `opening_balance`
 
-- إضافة صنف وتصنيف يعملان مع validation (name required, unique عند الحاجة).
-- عرض قائمة المواد مع تصنيفها.
+**قواعد إلزامية:**
+
+- **لا يوجد أي مسار في التطبيق ينشئ `CashboxTransaction` مباشرة** — كل شيء عبر `CashboxService`. (يُطبَّق باختبار معماري أو مراجعة).
+- `amount` لا يقبل صفر أو قيمة سالبة.
+- محاولة إنشاء رصيد افتتاحي ثانٍ → يُحدِّث الموجود بدل الإضافة.
+
+**UI:** `/cashbox` — للقراءة فقط: ملخص (رصيد حالي / إجمالي داخل / إجمالي خارج) + جدول الحركات مرتبًا بـ`occurred_at DESC, id DESC`. + نموذج مستقل واحد لتعيين/تعديل الرصيد الافتتاحي.
 
 **Test Scenarios:**
 
-1. إضافة تصنيف "أخشاب" ثم مادة "لوح MDF" مرتبطة به → تظهر في القائمة.
-2. محاولة إضافة مادة بدون اسم → رسالة validation.
+1. رصيد افتتاحي 5,000 → `balance = 5,000`، وعدد الحركات = 1.
+2. تعيين رصيد افتتاحي مرة ثانية بـ7,000 → `balance = 7,000` وعدد الحركات ما زال 1 (تحديث لا إضافة).
+3. `recordIn` بـ1,000 ثم `recordOut` بـ400 → `balance = 7,600`، `totalIn = 8,000`، `totalOut = 400`.
+4. `removeFor($source)` → الحركة تختفي والرصيد يرجع لما قبلها.
+5. `recordIn` بمبلغ 0 أو سالب → استثناء/خطأ validation.
 
 ---
 
-## Task 3 — Batches والمخزون (Phase 3 تكملة)
+### Task 3 — التصنيفات والمواد
 
 **DB:**
 
-- `inventory_batches` (id, material_id, quantity, remaining_quantity, unit_cost, purchase_date, timestamps)
-- `inventory_movements` (id, material_id, batch_id, type [in/out], quantity, related_type/related_id [polymorphic لاحقًا لربطها بالغرفة], timestamps)
+- `categories`: `id`, `name` (unique), timestamps
+- `materials`: `id`, `category_id` (FK, restrict on delete), `name`, `unit` (نص: قطعة/متر/لوح…), timestamps
+  - قيد فريد مركب: `(category_id, name)`
 
-**Backend:**
+**Backend:** Models + Resource Controllers + Form Requests + Factories.
 
-- عند إضافة كمية شراء جديدة → إنشاء Batch جديد (لا يُدمج مع batch قديم بسعر مختلف).
-- حساب الكمية الحالية للمادة = مجموع `remaining_quantity` لكل الـbatches الخاصة بها.
-- Service class مسؤول عن الصرف بمنطق FIFO على الـbatches (`InventoryService` أو مشابه).
+**UI:** `/inventory/categories` و`/inventory/materials` (index + create + edit + delete).
 
-**UI:** `/inventory/purchases` (تسجيل عملية شراء تنشئ Batch)، وعرض الكمية الحالية في `/inventory/materials`.
+**قواعد:**
 
-**Acceptance Criteria + Test Scenario (مطابق للخطة الأصلية):**
+- منع حذف تصنيف مرتبط بمواد → رسالة خطأ واضحة.
+- منع حذف مادة لها دفعات مخزون → رسالة خطأ واضحة (تُطبَّق كاملة في Task 4).
 
-1. إضافة 3 ألواح بسعر 100 → Batch A.
-2. إضافة 10 ألواح بسعر 120 → Batch B.
-3. الكمية الكلية = 13.
-4. صرف 5 (عبر tinker/test مباشر مؤقتًا لحين وجود الغرف في Task 4) → 3 من Batch A (تصبح 0) + 2 من Batch B (تصبح 8)، تكلفة الصرف = 540.
-5. لا تُحذف بيانات الـBatch بعد نفاذها (remaining_quantity = 0 لكنها تبقى موجودة للتتبع).
+**Test Scenarios:**
+
+1. إضافة تصنيف "أخشاب" ثم مادة "لوح MDF" بوحدة "لوح" → تظهر في القائمة مع تصنيفها.
+2. إضافة مادة بدون اسم → رسالة validation بالعربي.
+3. إضافة مادة بنفس الاسم في نفس التصنيف → خطأ تكرار.
+4. حذف تصنيف له مواد → مرفوض برسالة واضحة.
 
 ---
 
-## Task 4 — العملاء والغرف (Phase 4)
+### Task 4 — دفعات المخزون (Batches) + الشراء + FIFO
 
 **DB:**
 
-- `customers` (id, name, phone, address?, timestamps)
-- `rooms` (id, customer_id, room_type, sale_price, status, timestamps)
-- `room_materials` (id, room_id, material_id, required_quantity, issued_quantity, cost, timestamps)
+`inventory_batches`:
+
+| العمود | النوع | ملاحظات |
+|---|---|---|
+| `id` | id | |
+| `material_id` | FK | |
+| `quantity` | bigInteger | الكمية الأصلية (×1000) — **لا تتغير أبدًا** |
+| `remaining_quantity` | bigInteger | المتبقي (×1000) |
+| `unit_cost` | bigInteger | سعر الوحدة بالقروش |
+| `purchase_date` | date | |
+| timestamps | | |
+
+`inventory_movements`:
+
+| العمود | النوع | ملاحظات |
+|---|---|---|
+| `id` | id | |
+| `material_id` | FK | |
+| `batch_id` | FK | |
+| `type` | string | `in` / `out` / `return` |
+| `quantity` | bigInteger | (×1000)، دائمًا موجب |
+| `cost` | bigInteger | التكلفة الفعلية لهذه الحركة بالقروش |
+| `related_type` / `related_id` | **nullable** morphs | null لحركات الشراء، ومرتبط بـ`RoomMaterial` عند الصرف |
+| `occurred_at` | date | |
+| timestamps | | |
+
+فهارس: `material_id`, `batch_id`, `(related_type, related_id)`, `(material_id, purchase_date)`.
+
+**Backend — `App\Services\InventoryService`:**
+
+- `purchase(Material $m, int $qty, int $unitCost, $date): InventoryBatch`
+  - داخل transaction: إنشاء Batch (`remaining = quantity`) + حركة `in` + **`CashboxService::recordOut(...)` بقيمة `qty × unitCost` بنوع `inventory_purchase`**.
+  - **كل عملية شراء تنشئ Batch مستقلة** — لا دمج مع دفعة قديمة حتى لو بنفس السعر.
+- `currentStock(Material $m): int` = `SUM(remaining_quantity)` للدفعات غير المنتهية.
+- `issue(Material $m, int $qty, $relatedModel, $date): array{cost:int, allocations:array}`
+  - داخل transaction بترتيب FIFO (`purchase_date ASC, id ASC`).
+  - **إن كان المتاح أقل من المطلوب → استثناء ورفض العملية بالكامل. لا صرف جزئي.**
+  - كل تخصيص ينشئ حركة `out` مرتبطة بالـbatch وبتكلفتها.
+- `deletePurchase(InventoryBatch $b)` — مسموح **فقط** إذا `remaining_quantity == quantity`، ويحذف حركة الخزنة عبر `CashboxService::removeFor`.
+
+**UI:** `/inventory/purchases` (index + create + delete) + عمود "الكمية الحالية" في `/inventory/materials`.
+
+**Acceptance Criteria + Test Scenarios (السيناريو المرجعي من الخطة الأصلية §18):**
+
+1. شراء 3 ألواح @ 100 ج.م → Batch A، وحركة خزنة `out` بـ300 ج.م.
+2. شراء 10 ألواح @ 120 ج.م → Batch B، وحركة خزنة `out` بـ1,200 ج.م.
+3. `currentStock` = **13**.
+4. صرف 5 (عبر اختبار Pest يستدعي `InventoryService::issue` — **لا tinker**):
+   - 3 من Batch A → `remaining = 0`
+   - 2 من Batch B → `remaining = 8`
+   - **تكلفة الصرف = 540 ج.م** (`3×100 + 2×120`)
+   - `currentStock` = 8
+5. **Batch A تظل موجودة** بعد نفادها (`remaining = 0`) — لا تُحذف، للتتبع.
+6. صرف 20 (أكبر من المتاح) → استثناء، **والمخزون لم يتغير إطلاقًا** وحركات الصرف لم تُنشأ (اختبار ذرّية الـtransaction).
+7. حذف Batch B بعد الصرف منها → مرفوض. حذف Batch لم يُصرف منها → ينجح وتختفي حركة الخزنة معها.
+8. الرصيد النهائي للخزنة بعد الشراءين = `الرصيد الافتتاحي − 1,500`.
+
+---
+
+### Task 5 — العملاء والغرف وصرف الخامات
+
+**DB:**
+
+- `customers`: `id`, `name`, `phone` (nullable), `address` (nullable), timestamps
+- `rooms`: `id`, `customer_id` (FK), `room_type`, `sale_price` (bigInteger قروش), `status` (enum: `draft`/`in_progress`/`completed`/`cancelled`)، timestamps
+- `room_materials`: `id`, `room_id` (FK), `material_id` (FK), `required_quantity` (×1000), `issued_quantity` (×1000, default 0), `cost` (قروش, default 0), timestamps
 
 **Backend:**
 
-- إنشاء عميل، إنشاء غرفة مرتبطة به.
-- إضافة احتياجات المادة للغرفة (`room_materials`) بدون صرف فوري.
-- عملية "صرف" منفصلة تستدعي `InventoryService` من Task 3 وتُسجّل `inventory_movements` مرتبطة بالغرفة، وتحسب `cost` الفعلية حسب الـbatches المستخدمة.
-- حساب `materials_cost` الإجمالي للغرفة = مجموع تكاليف المواد المصروفة.
+- CRUD للعملاء والغرف.
+- إضافة احتياجات الغرفة (`room_materials`) **بدون صرف فوري** — الصرف عملية منفصلة صريحة.
+- **الصرف:** `RoomMaterialService::issue(RoomMaterial $rm, int $qty)` → يستدعي `InventoryService::issue`، ويحدّث `issued_quantity` و`cost` تراكميًا.
+  - ممنوع صرف أكثر من `required_quantity` (أو تُعدَّل الاحتياجات أولًا).
+- `Room::materialsCost()` = `SUM(room_materials.cost)`.
+- `Room::paidAmount()` = مجموع الدفعات (**محسوب، غير مخزَّن** — Task 6).
+- `Room::remainingAmount()` = `sale_price − paidAmount()`.
 
-**UI:** `/customers`, `/customers/create`, `/customers/{customer}` (تعرض غرفه)، `/rooms/create`, `/rooms/{room}` (تعرض المواد المطلوبة/المصروفة والتكلفة).
+**حذف الغرفة — Modal التأكيد (متطلب صريح):**
+
+عند الضغط على حذف غرفة صُرفت لها خامات، يظهر Modal يعرض ملخص الخامات المصروفة ويطلب **اختيارًا إلزاميًا** بين:
+
+| الخيار | الأثر |
+|---|---|
+| **إرجاع الخامات للمخزون** | تُرجَّع الكميات إلى **نفس الدفعات** التي صُرفت منها بنفس التكلفة، وتُسجَّل حركات `return` في `inventory_movements` (لا تُحذف حركات الصرف الأصلية — يبقى الأثر للتتبع) |
+| **الخامات استُهلكت فعلًا** | لا يُرجَّع شيء للمخزون؛ تظل حركات الصرف كما هي وتبقى تكلفتها محمَّلة (تُسجَّل كخسارة/هالك) |
+
+- العملية كلها داخل `DB::transaction()`.
+- تُحذف أيضًا كل دفعات العميل المرتبطة بالغرفة وحركات الخزنة الخاصة بها (Task 6).
+- إن لم تُصرف خامات أصلًا → حذف مباشر بتأكيد بسيط بدون Modal الخيارات.
+
+**UI:** `/customers`, `/customers/create`, `/customers/{customer}` (تعرض غرفه)، `/rooms/create`, `/rooms/{room}` (المطلوب/المصروف/التكلفة/المدفوع/المتبقي).
+
+**Test Scenarios:**
+
+1. عميل "أحمد" + غرفة "غرفة نوم" بسعر 30,000 ج.م → تظهر في صفحة العميل.
+2. إضافة احتياج 5 ألواح ثم صرفها (بمعطيات Task 4) → `issued_quantity = 5`، `cost = 540`، `materialsCost() = 540`، والمخزون = 8.
+3. صرف كمية أكبر من المتاح → خطأ واضح والمخزون لم يتغير.
+4. صرف كمية أكبر من `required_quantity` → مرفوض.
+5. **حذف غرفة مع اختيار "إرجاع"** → مخزون Batch A يرجع 3 وBatch B يرجع 2 → `currentStock = 13`، وحركات `return` مسجَّلة.
+6. **حذف غرفة مع اختيار "استُهلكت"** → `currentStock` يظل 8 ولا تُنشأ حركات `return`.
+7. حذف عميل له غرف → **مرفوض** برسالة واضحة (يجب حذف غرفه أولًا، لأن حذف الغرفة له قرار خامات خاص به). متسق مع سياسة حذف التصنيفات والمواد.
+
+---
+
+### Task 6 — مدفوعات العملاء
+
+**DB — `customer_payments`:** `id`, `room_id` (FK), `amount` (قروش), `paid_at` (date), `note` (nullable), timestamps.
+
+**Backend:**
+
+- إنشاء دفعة داخل transaction → `CashboxService::recordIn(..., kind: 'customer_payment')`.
+- **منع** أي دفعة تجعل `paidAmount() > sale_price` → validation برسالة تبيّن المتبقي.
+- منع مبلغ ≤ 0.
+- حذف/تعديل دفعة → عكس/تحديث حركة الخزنة في نفس الـtransaction (أ-4).
+
+**UI:** `/payments` (سجل عام) + إضافة دفعة من صفحة `/rooms/{room}`.
+
+**Test Scenarios:**
+
+1. غرفة بـ30,000 + دفعة 10,000 → `paid = 10,000`، `remaining = 20,000`، وحركة خزنة `in` بـ+10,000 مرتبطة بالدفعة.
+2. دفعة ثانية 25,000 (المجموع 35,000 > السعر) → مرفوضة برسالة "المتبقي 20,000 فقط".
+3. دفعة ثانية 20,000 → `remaining = 0`.
+4. حذف الدفعة الأولى → `paid = 20,000`، والخزنة نقصت 10,000، ولا توجد حركة يتيمة.
+5. دفعة بمبلغ 0 أو سالب → مرفوضة.
+
+---
+
+### Task 7 — المصروفات الإدارية
+
+**DB:**
+
+- `expense_categories`: `id`, `name` (unique), timestamps
+- `expenses`: `id`, `expense_category_id` (FK), `amount` (قروش), `occurred_at` (date), `description` (nullable), timestamps
+
+**Backend:** إنشاء مصروف داخل transaction → `CashboxService::recordOut(..., kind: 'expense')`. الحذف/التعديل يعكس/يحدّث حركة الخزنة. منع حذف تصنيف مصروف مرتبط بمصروفات.
+
+**UI:** `/expenses`, `/expenses/create`, `/expenses/categories`.
+
+**Test Scenarios:**
+
+1. مصروف "كهرباء" 2,000 → `Expense = 2,000` وحركة خزنة `out` بـ2,000.
+2. حذف المصروف → الخزنة ترجع 2,000 ولا توجد حركة يتيمة.
+3. تعديل المبلغ من 2,000 لـ2,500 → حركة الخزنة تصبح 2,500 (**وليس** حركتين).
+4. مبلغ ≤ 0 → مرفوض.
+5. حذف تصنيف مصروف مستخدم → مرفوض.
+
+---
+
+### Task 8 — حساب الربح
+
+**Scope:** لا جداول جديدة — منطق تجميعي بحت.
+
+**Backend — `App\Services\ProfitService`** (كل الأرقام بالقروش، أعداد صحيحة):
+
+```text
+revenue()          = Σ rooms.sale_price   WHERE status = 'completed'
+costOfMaterials()  = Σ room_materials.cost عبر الغرف WHERE status = 'completed'
+adminExpenses()    = Σ expenses.amount
+netProfit()        = revenue() − costOfMaterials() − adminExpenses()
+
+workInProgress()   = Σ room_materials.cost عبر الغرف WHERE status IN (draft, in_progress)
+stockValue()       = Σ (inventory_batches.remaining_quantity × unit_cost)
+```
+
+**UI:** صفحة `/reports/profit` (أو قسم في `/dashboard`) تعرض الأرقام الخمسة + صافي الربح، مع **توضيح صريح للفرق بين رصيد الخزنة وصافي الربح**.
 
 **Acceptance Criteria:**
 
-- إنشاء عميل "أحمد" ثم غرفة "غرفة نوم" له.
-- إضافة احتياج 5 ألواح، ثم صرف → نقص المخزون فعليًا (باستخدام سيناريو Task 3)، وتُحسب تكلفة الغرفة = 540 بنفس المثال.
-- محاولة صرف كمية أكبر من المتاح في المخزون → خطأ واضح، بدون صرف جزئي غير متوقع (القرار يُوثَّق في Task 1 / `inventory.md`).
+- خامة مشتراة ولم تُصرف → لا تدخل التكلفة إطلاقًا (تظهر في `stockValue`).
+- خامة مصروفة لغرفة تحت التنفيذ → لا تدخل التكلفة (تظهر في `workInProgress`).
+- تغيير حالة غرفة من `in_progress` إلى `completed` → إيرادها وتكلفتها يدخلان الحساب في نفس اللحظة.
+- غرفة `cancelled` لا تدخل الإيراد ولا التكلفة.
 
-**Test Scenarios:** نفس سيناريو Task 3 لكن من خلال واجهة/منطق الغرفة الفعلي بدلاً من استدعاء مباشر.
+**Test Scenarios:**
+
+1. غرفة بـ30,000 تكلفة خاماتها 540، حالتها `in_progress`، مصروفات 2,000 → `revenue = 0`، `cost = 0`، `netProfit = −2,000`، `WIP = 540`.
+2. تحويل الغرفة إلى `completed` → `revenue = 30,000`، `cost = 540`، `netProfit = 27,460`، `WIP = 0`.
+3. `netProfit` لا يتغير عند إضافة/حذف دفعة عميل (الدفعات تؤثر على الخزنة فقط، لا على الربح) — **اختبار حاسم يثبت فصل الأساسين**.
+4. `stockValue` بعد سيناريو Task 4 = `8 × 120 = 960`.
 
 ---
 
-## Task 5 — مدفوعات العملاء (Phase 5)
+### Task 9 — الشركاء والسحوبات
 
 **DB:**
 
-- `customer_payments` (id, room_id, amount, paid_at, timestamps)
-- `cashbox_transactions` (id, type [in/out], amount, source_type, source_id [polymorphic]، description, timestamps) — الجدول الأساسي للخزنة، يُنشأ في هذا الـTask ويُستخدم من باقي الموديولات.
+- `partners`: `id`, `name`, `percentage` (integer، النسبة % × 100 — مثلًا 20% → `2000`، يسمح بدقة كسرين عشريين مثل 33.33%), timestamps
+- `partner_withdrawals`: `id`, `partner_id` (FK), `amount` (قروش), `occurred_at` (date), `note` (nullable), timestamps
 
 **Backend:**
 
-- إضافة دفعة لغرفة → تحديث `paid_amount` (محسوب أو مخزّن) و`remaining` = `sale_price - paid_amount`.
-- كل دفعة تُنشئ تلقائيًا `cashbox_transaction` من نوع `in` بنفس القيمة (لا إدخال يدوي منفصل للخزنة).
-- منع الدفع بقيمة تجعل المدفوع أكبر من سعر الغرفة (تُوثَّق القاعدة في `customer-payments.md`).
-
-**UI:** `/payments` (أو صفحة دفعة مرتبطة بالغرفة من `/rooms/{room}`).
-
-**Acceptance Criteria + Test Scenario:**
-
-- سعر غرفة = 30,000، دفعة = 10,000 → `paid = 10,000`, `remaining = 20,000`, وتظهر حركة خزنة `+10,000` مرتبطة بنفس الدفعة.
-
----
-
-## Task 6 — المصروفات الإدارية (Phase 6)
-
-**DB:**
-
-- `expense_categories` (id, name, timestamps)
-- `expenses` (id, expense_category_id, amount, date, description?, timestamps)
-
-**Backend:** إضافة مصروف → إنشاء `cashbox_transaction` نوع `out` تلقائيًا (نفس آلية Task 5، بدون تكرار منطق الخزنة).
-
-**UI:** `/expenses`, `/expenses/create`.
-
-**Test Scenario:** مصروف كهرباء 2,000 → `Expense = 2,000` و `cashbox transaction = -2,000`.
-
----
-
-## Task 7 — صفحة الخزنة (Phase 7)
-
-**Scope:** لا جداول جديدة — `cashbox_transactions` موجود من Task 5. هذا الـTask للعرض والتجميع فقط.
-
-**Backend:** حساب: إجمالي الداخل، إجمالي الخارج، الرصيد الحالي = مجموع كل الحركات (in - out).
-
-**UI:** `/cashbox` — جدول الحركات (مرتبة بالتاريخ) + ملخص علوي (رصيد حالي، إجمالي دخل، إجمالي خرج).
-
-**Acceptance Criteria:**
-
-- الرصيد = مجموع كل حركات الدفعات (+) والمشتريات (-) والمصروفات (-) المسجلة من Tasks 3, 5, 6.
-- لا يوجد أي إدخال يدوي لحركة خزنة من هذه الصفحة (read-only على الحركات نفسها).
-
-**Test Scenario:** تنفيذ سيناريوهات Task 3+5+6 معًا والتأكد أن الرصيد النهائي = مجموعها الجبري الصحيح.
-
-**ملاحظة:** عند تنفيذ Task 3 (شراء المخزون) لازم يُضاف هنا أيضًا: إنشاء `cashbox_transaction` نوع `out` عند كل عملية شراء مخزون (كانت مؤجلة في Task 3 لعدم وجود جدول الخزنة وقتها) — إما بالرجوع لـTask 3 وإضافتها الآن، أو تنفيذها كجزء من هذا الـTask مع إعادة اختبار Task 3.
-
----
-
-## Task 8 — الشركاء (Phase 8)
-
-**DB:**
-
-- `partners` (id, name, percentage, timestamps)
-- `partner_withdrawals` (id, partner_id, amount, date, timestamps)
-
-**Backend:**
-
-- حساب نصيب كل شريك = `net_profit * percentage / 100` (net_profit من Task 9، لذا هذا الـTask يعتمد جزئيًا على المنطق الحسابي فيه — يمكن تنفيذه بحساب مبسط هنا ثم ربطه الكامل بعد Task 9).
-- تسجيل سحب شريك → `cashbox_transaction` نوع `out` تلقائيًا.
-- حساب `remaining = share - total_withdrawn`.
+- **⚠️ الصيغة الدقيقة (نطاق ثالث مختلف — راجع تنبيه الضرب بين النطاقين في أ-2):**
+  ```text
+  share() = round( netProfit()_بالقروش × percentage / 10000 )
+  ```
+  مثال تحقق: `netProfit = 2,500,000` قرش (25,000 ج.م) × `percentage = 2000` (20%) ÷ 10000 = `500,000` قرش = 5,000 ج.م. ✅
+  (من `ProfitService` الحقيقي مباشرة — بلا حساب مؤقت).
+- **إذا كان `netProfit ≤ 0` → `share = 0`** مع تحذير في الواجهة.
+- `totalWithdrawn()` = مجموع السحوبات. `remaining() = share() − totalWithdrawn()` (قد تكون سالبة = سحب زائد، تُعرض بتنبيه أحمر).
+- سحب شريك داخل transaction → `CashboxService::recordOut(..., kind: 'partner_withdrawal')`. الحذف يعكس الحركة.
+- **Validation:** مجموع نسب كل الشركاء ≤ 100% عند الإضافة/التعديل.
 
 **UI:** `/partners`, `/partners/{partner}`.
 
-**Test Scenario:** Net Profit = 25,000، شريك بنسبة 20% → Share = 5,000. سحب 2,000 → Remaining = 3,000، وتُسجَّل -2,000 في الخزنة.
+**Test Scenarios:**
 
-**قاعدة:** مجموع نسب الشركاء لا يتجاوز 100% (تُوثَّق في `partners.md`، وتُطبَّق كـvalidation).
+1. صافي ربح 25,000 + شريك 20% → `share = 5,000`.
+2. سحب 2,000 → `withdrawn = 2,000`، `remaining = 3,000`، وحركة خزنة `out` بـ2,000.
+3. حذف السحب → `remaining = 5,000` والخزنة ترجع 2,000.
+4. إضافة شريك بنسبة تجعل المجموع 110% → مرفوض.
+5. صافي ربح سالب → `share = 0` و`remaining` سالبة بقيمة المسحوب، مع تحذير.
+6. تغيّر صافي الربح (بإضافة مصروف) → نصيب الشريك يتحدَّث تلقائيًا (يثبت الربط الحقيقي بـ`ProfitService`).
 
 ---
 
-## Task 9 — حساب الربح (Phase 9)
+### Task 10 — تجانس الواجهة والتنقل
 
-**Scope:** لا جداول جديدة — هذا الـTask حسابي بحت (Service/aggregation) يجمع بيانات من الموديولات السابقة.
+**المطلوب (بدون منطق جديد):**
 
-**Backend:** `ProfitService` أو مشابه يحسب:
+- Layout موحد + قائمة تنقل واحدة تربط: لوحة التحكم، العملاء، الغرف، المخزون (مواد/مشتريات)، الدفعات، المصروفات، الخزنة، الشركاء، تقرير الربح.
+- توحيد رسائل النجاح/الخطأ (flash) وشكل عرض أخطاء الـvalidation.
+- توحيد الجداول والنماذج والأزرار (Blade components مشتركة).
+- التأكد أن كل المبالغ تُعرض عبر `<x-money>` وكل التواريخ بتنسيق موحد.
+- حالات فارغة (empty states) واضحة لكل جدول.
+- **تدقيق Design Tokens:** مراجعة كل ملفات `resources/views/**/*.blade.php` (بحث نصي عن `#[0-9a-fA-F]{3,6}` وعن `font-family`) للتأكد أن Tasks 2–9 لم تُدخل أي لون أو خط مباشر خارج `app.css` (أ-4 من Task 0). أي مخالفة تُصحَّح هنا بالكامل.
+
+**Acceptance Criteria:** الوصول لكل أجزاء النظام من القائمة بدون كتابة أي URL يدويًا، وكل الاختبارات السابقة ما زالت تنجح، وتدقيق الـDesign Tokens نظيف (صفر نتائج).
+
+---
+
+### Task 11 — اختبار الدورة الكاملة (Integration Test)
+
+**المطلوب:** اختبار Pest شامل يغطي الدورة كاملة بأرقام محسوبة يدويًا **قبل** كتابة الاختبار:
 
 ```text
-Revenue = مجموع sale_price لكل الغرف (أو مجموع المدفوعات الفعلية — يُحسم القرار في docs/profit-calculation.md)
-- Cost of used materials = مجموع room_materials.cost للمواد المصروفة فعليًا فقط
-- Administrative expenses = مجموع expenses
-= Net Profit
-```
-
-**UI:** صفحة ملخص بسيطة (يمكن أن تكون جزء من `/dashboard` أو صفحة منفصلة) تعرض الأرقام الثلاثة والنتيجة.
-
-**Acceptance Criteria:**
-
-- الفرق واضح بين قيمة شراء الخامة والمصروف الفعلي في تكلفة الإنتاج (خامة مُشتراة ولم تُصرف بعد لا تدخل في Cost of used materials).
-- الربح لا يتأثر برصيد الخزنة مباشرة (توضيح الفرق بين Cash balance و Net Profit في التوثيق).
-
----
-
-## Task 10 — تجميع الشركاء بالربح الفعلي + مراجعة نهائية (ربط Task 8 و Task 9)
-
-**المطلوب:** ربط حساب نصيب الشركاء في Task 8 بـ`ProfitService` الحقيقي من Task 9 بدل الرقم المبسط، وإعادة اختبار Task 8 بالكامل.
-
----
-
-## Task 11 — تجانس الواجهة (Phase 10)
-
-**المطلوب:**
-
-- مراجعة كل الصفحات المنفذة (Tasks 0–9): تنسيق موحد بـTailwind، رسائل نجاح/خطأ موحدة، Navigation بسيط يربط كل الصفحات (Customers, Inventory, Payments, Expenses, Cashbox, Partners).
-- التأكد أن كل validation errors تظهر بشكل واضح بالعربي.
-- لا تصميم جديد أو صفحات جديدة — فقط تجانس وربط الموجود.
-
-**Acceptance Criteria:** إمكانية التنقل بين كل أجزاء النظام من قائمة تنقل واحدة، بدون الحاجة لكتابة URL يدويًا.
-
----
-
-## Task 12 — اختبار الدورة الكاملة (Integration Test — Section 19)
-
-**المطلوب:** Pest Feature Test واحد شامل (أو سلسلة تعمل بالتتابع) يغطي الدورة كاملة:
-
-```text
-شراء خامات → المخزون → إنشاء غرفة → صرف خامات → تكلفة الغرفة
-→ دفع العميل → الخزنة → مصروف إداري → الخزنة
+رصيد افتتاحي → شراء خامات → المخزون → إنشاء غرفة → صرف خامات → تكلفة الغرفة
+→ دفع العميل → الخزنة → مصروف إداري → الخزنة → إكمال الغرفة
 → حساب الربح → نصيب الشركاء → سحب شريك → الخزنة + حساب الشريك
 ```
 
-**Acceptance Criteria:** كل الأرقام النهائية (تكلفة، خزنة، ربح، أنصبة) صحيحة رياضيًا ومطابقة لتوقعات السيناريو المكتوب يدويًا قبل التنفيذ. هذا الـTest هو معيار اعتبار الـMVP جاهزًا (Section 24 من الخطة).
+**السيناريو المرجعي المتوقَّع:**
+
+| الخطوة | الأثر | الخزنة | الربح |
+|---|---|---|---|
+| رصيد افتتاحي 10,000 | — | 10,000 | 0 |
+| شراء 3 @ 100 | مخزون 3 | 9,700 | 0 |
+| شراء 10 @ 120 | مخزون 13 | 8,500 | 0 |
+| غرفة بـ30,000 (`in_progress`) | — | 8,500 | 0 |
+| صرف 5 ألواح | تكلفة 540، مخزون 8 | 8,500 | 0 (WIP 540) |
+| دفعة عميل 10,000 | — | 18,500 | 0 |
+| مصروف 2,000 | — | 16,500 | −2,000 |
+| إكمال الغرفة | — | 16,500 | **27,460** |
+| شريك 20% يسحب 2,000 | نصيبه 5,492 → متبقٍ 3,492 | 14,500 | 27,460 |
+
+**Acceptance Criteria:**
+
+- كل رقم في الجدول أعلاه يتطابق مع نتيجة النظام.
+- لا توجد أي حركة خزنة بلا مصدر (`source_id` null عدا الرصيد الافتتاحي).
+- **لا توجد حركة مالية محسوبة مرتين** — يُتحقق منه باختبار يقارن `CashboxService::balance()` بمجموع محسوب يدويًا من الجداول المصدر.
+- هذا الاختبار هو معيار اعتبار الـMVP جاهزًا (§24 من الخطة الأصلية).
 
 ---
 
-## ترتيب التنفيذ
+## القسم د — ملخص التعديلات على الخطة الأصلية
 
-Task 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12
+| # | الثغرة في الخطة الأصلية | الحل المعتمد |
+|---|---|---|
+| 1 | نوع بيانات المبالغ غير محدد + SQLite بلا DECIMAL حقيقي | أعداد صحيحة بالقروش + `MoneyCast` (أ-2) |
+| 2 | نوع بيانات الكميات غير محدد (كسور FIFO) | أعداد صحيحة ×1000 + `QuantityCast` (أ-2) |
+| 3 | قاعدة التقريب غير محددة | round half up في دالة مشتركة واحدة |
+| 4 | Task المخزون كان يستلزم الرجوع إليه لاحقًا لإضافة حركة الخزنة | الخزنة نُقلت لتكون Task 2 قبل المخزون |
+| 5 | اعتمادية دائرية بين الشركاء والربح + Task يُرمى | الربح (Task 8) قبل الشركاء (Task 9)؛ حُذف Task الربط |
+| 6 | **لا توجد سياسة حذف/تعديل للحركات المالية** | حذف مع عكس الأثر داخل transaction واحدة (أ-4) |
+| 7 | تعريف Revenue مؤجَّل | سعر الغرف المكتملة فقط (أ-3) |
+| 8 | خلط بين أساس نقدي وأساس استحقاق في معادلة الربح | مطابقة كاملة: تكلفة الغرف المكتملة فقط + مفهوم WIP |
+| 9 | `rooms.status` بلا قيم معرَّفة | 4 حالات محددة وأثر كل منها (أ-3) |
+| 10 | `paid_amount` "محسوب أو مخزَّن" | محسوب دائمًا — يمنع الـdrift |
+| 11 | إرجاع الخامات عند إلغاء غرفة غير مذكور | Modal تأكيد بخيارين عند الحذف (Task 5) |
+| 12 | الرصيد الافتتاحي "إذا كان مطلوبًا" | ✅ مدرَج، حركة واحدة غير مكررة |
+| 13 | حالة الربح السالب مع الشركاء | `share = 0` + تحذير |
+| 14 | Breeze كان سيجلب scaffolding كامل (register/reset/حذف حساب) وتعارض Tailwind v3/v4 لحالة أدمن واحد فقط | Auth يدوي بسيط بدل Breeze — لا مكتبة، لا تعارض، لا تفكيك لاحق |
+| 15 | `config/app.php` توقيت UTC ولغة en | `Africa/Cairo` + `ar` + ترجمات validation عربية |
+| 16 | إعدادات SQLite للتزامن غير مضبوطة (`lockForUpdate` لا يعمل) | WAL + `busy_timeout` + `transaction_mode = IMMEDIATE` |
+| 17 | الاختبار عبر tinker يخالف `AGENTS.md` | اختبارات Pest فقط + Factories إلزامية |
+| 18 | صفحة "حذف الحساب" لو استُخدم starter kit تسمح للأدمن الوحيد بقفل النظام على نفسه | غير موجودة أصلًا في الـauth اليدوي |
+| 19 | صيغة نصيب الشريك كانت مكتوبة بلا قاسم (`netProfit × percentage` فقط) — كانت ستنتج رقمًا أكبر بـ10,000 مرة من الصحيح | قسمة صريحة على 10000 + مثال تحقق رقمي (Task 9) |
+| 20 | لا توضيح لكيفية الضرب الصحيح بين نطاق المبالغ (×100) ونطاق الكميات (×1000) في حساب تكلفة FIFO | صيغة موحدة `round(qty×cost/1000)` مذكورة صراحة في أ-2 وتُستخدم في Task 4 وTask 9 |
+| 21 | تغيير حالة غرفة إلى `cancelled` — هل يُرجع الخامات؟ غير محسوم | لا إرجاع تلقائي؛ الإرجاع فقط عبر حذف الغرفة والـModal (أ-3) |
+| 22 | لا آلية موحدة للألوان/الخطوط — خطر تكرار قيم متضاربة عبر الصفحات في Tasks 2–10 | Design Tokens مركزية في `app.css` عبر `@theme` (Task 0) + تدقيق إلزامي في Task 10 |
 
-لا يبدأ Task جديد قبل نجاح كل Acceptance Criteria وTest Scenarios الخاصة بالـTask الذي قبله، وإعادة تشغيل اختبارات المراحل السابقة للتأكد من عدم وجود regression (Section 20 من الخطة).
+---
+
+## القسم هـ — ما هو خارج الـMVP (مؤكَّد)
+
+Dashboard متقدم، Charts، Notifications، PDF/Excel، بحث متقدم، Elasticsearch، إدارة موردين، أوامر شراء، workflow تصنيع، معايير محاسبية كاملة، فروع متعددة، مستخدمون متعددون، Roles & Permissions، Audit log، تطبيق موبايل، API، مساهمات رأسمال الشركاء، تقارير بفترات زمنية، مرتجعات مشتريات للموردين.
+
+**الأولوية دائمًا: Correctness > Business Logic > Data Integrity > Testing > UI polish.**
