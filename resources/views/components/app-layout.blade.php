@@ -10,6 +10,7 @@
         ['route' => 'payments.index', 'active' => 'payments.*', 'label' => 'المدفوعات'],
         ['route' => 'expenses.index', 'active' => 'expenses.*', 'label' => 'المصروفات'],
         ['route' => 'cashbox.index', 'active' => 'cashbox.*', 'label' => 'الخزنة'],
+        ['route' => 'partners.index', 'active' => 'partners.*', 'label' => 'الشركاء'],
         ['route' => 'reports.profit', 'active' => 'reports.profit', 'label' => 'تقرير الربح'],
     ];
 @endphp
