@@ -6,41 +6,21 @@
         </a>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
-        <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-bg-subtle">
-                <tr>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الاسم</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">رقم الهاتف</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">عدد الغرف</th>
-                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
-                @forelse ($customers as $customer)
-                    <tr>
-                        <td class="px-4 py-2">
-                            <a href="{{ route('customers.show', $customer) }}" class="text-primary hover:underline">{{ $customer->name }}</a>
-                        </td>
-                        <td class="px-4 py-2">{{ $customer->phone ?? '—' }}</td>
-                        <td class="px-4 py-2">{{ $customer->rooms_count }}</td>
-                        <td class="px-4 py-2 text-end">
-                            <a href="{{ route('customers.edit', $customer) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
-                            <form method="POST" action="{{ route('customers.destroy', $customer) }}" class="inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="ms-3 text-danger hover:underline">{{ __('Delete') }}</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-secondary">{{ __('No results found.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :headings="['الاسم', 'رقم الهاتف', 'عدد الغرف', __('Actions')]" :rows="$customers">
+        @foreach ($customers as $customer)
+            <tr>
+                <td class="px-4 py-2">
+                    <a href="{{ route('customers.show', $customer) }}" class="text-primary hover:underline">{{ $customer->name }}</a>
+                </td>
+                <td class="px-4 py-2">{{ $customer->phone ?? '—' }}</td>
+                <td class="px-4 py-2">{{ $customer->rooms_count }}</td>
+                <td class="px-4 py-2 text-end">
+                    <a href="{{ route('customers.edit', $customer) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
+                    <x-delete-button :action="route('customers.destroy', $customer)" class="ms-3" />
+                </td>
+            </tr>
+        @endforeach
+    </x-data-table>
 
     <div class="mt-4">
         {{ $customers->links() }}

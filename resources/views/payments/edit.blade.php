@@ -9,23 +9,7 @@
         @csrf
         @method('PUT')
 
-        <div>
-            <label for="amount" class="mb-1 block text-sm font-medium text-gray-700">المبلغ (ج.م)</label>
-            <input
-                id="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                name="amount"
-                value="{{ old('amount', $payment->amount) }}"
-                required
-                autofocus
-                class="w-full max-w-md rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-            @error('amount')
-                <p class="mt-1 text-sm text-danger">{{ $message }}</p>
-            @enderror
-        </div>
+        <x-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" :value="old('amount', $payment->amount)" required autofocus />
 
         <div class="flex gap-3">
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">

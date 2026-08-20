@@ -18,47 +18,25 @@
         </div>
     @endif
 
-    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
-        <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-bg-subtle">
-                <tr>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الاسم</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">النسبة</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">النصيب</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">السحوبات</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المتبقي</th>
-                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
-                @forelse ($rows as $row)
-                    <tr>
-                        <td class="px-4 py-2">
-                            <a href="{{ route('partners.show', $row['partner']) }}" class="text-primary hover:underline">{{ $row['partner']->name }}</a>
-                        </td>
-                        <td class="px-4 py-2">{{ number_format($row['partner']->percentage / 100, 2) }}%</td>
-                        <td class="px-4 py-2"><x-money :amount="$row['share']" /></td>
-                        <td class="px-4 py-2"><x-money :amount="$row['withdrawn']" /></td>
-                        <td class="px-4 py-2 {{ $row['remaining'] < 0 ? 'text-danger' : '' }}">
-                            <x-money :amount="$row['remaining']" />
-                        </td>
-                        <td class="px-4 py-2 text-end">
-                            <a href="{{ route('partners.edit', $row['partner']) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
-                            <form method="POST" action="{{ route('partners.destroy', $row['partner']) }}" class="inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="ms-3 text-danger hover:underline">{{ __('Delete') }}</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-secondary">{{ __('No results found.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :headings="['الاسم', 'النسبة', 'النصيب', 'السحوبات', 'المتبقي', __('Actions')]" :rows="$rows">
+        @foreach ($rows as $row)
+            <tr>
+                <td class="px-4 py-2">
+                    <a href="{{ route('partners.show', $row['partner']) }}" class="text-primary hover:underline">{{ $row['partner']->name }}</a>
+                </td>
+                <td class="px-4 py-2">{{ number_format($row['partner']->percentage / 100, 2) }}%</td>
+                <td class="px-4 py-2"><x-money :amount="$row['share']" /></td>
+                <td class="px-4 py-2"><x-money :amount="$row['withdrawn']" /></td>
+                <td class="px-4 py-2 {{ $row['remaining'] < 0 ? 'text-danger' : '' }}">
+                    <x-money :amount="$row['remaining']" />
+                </td>
+                <td class="px-4 py-2 text-end">
+                    <a href="{{ route('partners.edit', $row['partner']) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
+                    <x-delete-button :action="route('partners.destroy', $row['partner'])" class="ms-3" />
+                </td>
+            </tr>
+        @endforeach
+    </x-data-table>
 
     <div class="mt-4">
         {{ $partners->links() }}

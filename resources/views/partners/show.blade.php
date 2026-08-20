@@ -66,36 +66,16 @@
         </form>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
-        <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-bg-subtle">
-                <tr>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التاريخ</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">ملاحظة</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المبلغ</th>
-                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
-                @forelse ($withdrawals as $withdrawal)
-                    <tr>
-                        <td class="px-4 py-2">{{ $withdrawal->occurred_at->format('Y-m-d') }}</td>
-                        <td class="px-4 py-2 text-secondary">{{ $withdrawal->note ?? '—' }}</td>
-                        <td class="px-4 py-2"><x-money :amount="$withdrawal->amount" /></td>
-                        <td class="px-4 py-2 text-end">
-                            <form method="POST" action="{{ route('partners.withdrawals.destroy', [$partner, $withdrawal]) }}" class="inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-danger hover:underline">{{ __('Delete') }}</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-secondary">{{ __('No results found.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :headings="['التاريخ', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$withdrawals">
+        @foreach ($withdrawals as $withdrawal)
+            <tr>
+                <td class="px-4 py-2">{{ $withdrawal->occurred_at->format('Y-m-d') }}</td>
+                <td class="px-4 py-2 text-secondary">{{ $withdrawal->note ?? '—' }}</td>
+                <td class="px-4 py-2"><x-money :amount="$withdrawal->amount" /></td>
+                <td class="px-4 py-2 text-end">
+                    <x-delete-button :action="route('partners.withdrawals.destroy', [$partner, $withdrawal])" />
+                </td>
+            </tr>
+        @endforeach
+    </x-data-table>
 </x-app-layout>

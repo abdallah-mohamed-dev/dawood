@@ -84,51 +84,33 @@
         </form>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
-        <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-bg-subtle">
-                <tr>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المادة</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المطلوب</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المصروف</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التكلفة</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المخزون الحالي</th>
-                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
-                @forelse ($room->roomMaterials as $roomMaterial)
-                    <tr>
-                        <td class="px-4 py-2">{{ $roomMaterial->material->name }}</td>
-                        <td class="px-4 py-2"><x-quantity :amount="$roomMaterial->required_quantity" :unit="$roomMaterial->material->unit" /></td>
-                        <td class="px-4 py-2"><x-quantity :amount="$roomMaterial->issued_quantity" :unit="$roomMaterial->material->unit" /></td>
-                        <td class="px-4 py-2"><x-money :amount="$roomMaterial->cost" /></td>
-                        <td class="px-4 py-2"><x-quantity :amount="(int) ($stockByMaterial[$roomMaterial->material_id] ?? 0)" :unit="$roomMaterial->material->unit" /></td>
-                        <td class="px-4 py-2 text-end">
-                            @if (! $roomMaterial->isFullyIssued())
-                                <form method="POST" action="{{ route('rooms.materials.issue', [$room, $roomMaterial]) }}" class="inline-flex items-center gap-2">
-                                    @csrf
-                                    <input type="number" step="0.001" min="0" name="quantity" placeholder="الكمية" class="w-24 rounded-md border border-border px-2 py-1 text-xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" required>
-                                    <button type="submit" class="text-primary hover:underline">صرف</button>
-                                </form>
-                            @endif
-                            @if (! $roomMaterial->hasBeenIssued())
-                                <form method="POST" action="{{ route('rooms.materials.destroy', [$room, $roomMaterial]) }}" class="inline" onsubmit="return confirm('هل أنت متأكد؟');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="ms-3 text-danger hover:underline">{{ __('Delete') }}</button>
-                                </form>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-4 py-6 text-center text-secondary">{{ __('No results found.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :headings="['المادة', 'المطلوب', 'المصروف', 'التكلفة', 'المخزون الحالي', __('Actions')]" :rows="$room->roomMaterials">
+        @foreach ($room->roomMaterials as $roomMaterial)
+            <tr>
+                <td class="px-4 py-2">{{ $roomMaterial->material->name }}</td>
+                <td class="px-4 py-2"><x-quantity :amount="$roomMaterial->required_quantity" :unit="$roomMaterial->material->unit" /></td>
+                <td class="px-4 py-2"><x-quantity :amount="$roomMaterial->issued_quantity" :unit="$roomMaterial->material->unit" /></td>
+                <td class="px-4 py-2"><x-money :amount="$roomMaterial->cost" /></td>
+                <td class="px-4 py-2"><x-quantity :amount="(int) ($stockByMaterial[$roomMaterial->material_id] ?? 0)" :unit="$roomMaterial->material->unit" /></td>
+                <td class="px-4 py-2 text-end">
+                    @if (! $roomMaterial->isFullyIssued())
+                        <form method="POST" action="{{ route('rooms.materials.issue', [$room, $roomMaterial]) }}" class="inline-flex items-center gap-2">
+                            @csrf
+                            <input type="number" step="0.001" min="0" name="quantity" placeholder="الكمية" class="w-24 rounded-md border border-border px-2 py-1 text-xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" required>
+                            <button type="submit" class="text-primary hover:underline">صرف</button>
+                        </form>
+                    @endif
+                    @if (! $roomMaterial->hasBeenIssued())
+                        <form method="POST" action="{{ route('rooms.materials.destroy', [$room, $roomMaterial]) }}" class="inline" onsubmit="return confirm('هل أنت متأكد؟');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="ms-3 text-danger hover:underline">{{ __('Delete') }}</button>
+                        </form>
+                    @endif
+                </td>
+            </tr>
+        @endforeach
+    </x-data-table>
 
     <div class="mb-6 mt-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <h2 class="mb-3 text-sm font-semibold text-gray-900">إضافة دفعة</h2>
@@ -156,39 +138,19 @@
         </form>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
-        <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-bg-subtle">
-                <tr>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التاريخ</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">ملاحظة</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المبلغ</th>
-                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
-                @forelse ($room->customerPayments as $payment)
-                    <tr>
-                        <td class="px-4 py-2">{{ $payment->paid_at->format('Y-m-d') }}</td>
-                        <td class="px-4 py-2 text-secondary">{{ $payment->note ?? '—' }}</td>
-                        <td class="px-4 py-2"><x-money :amount="$payment->amount" /></td>
-                        <td class="px-4 py-2 text-end">
-                            <a href="{{ route('payments.edit', $payment) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
-                            <form method="POST" action="{{ route('payments.destroy', $payment) }}" class="inline" onsubmit="return confirm('هل أنت متأكد من الحذف؟');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="ms-3 text-danger hover:underline">{{ __('Delete') }}</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" class="px-4 py-6 text-center text-secondary">{{ __('No results found.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :headings="['التاريخ', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$room->customerPayments">
+        @foreach ($room->customerPayments as $payment)
+            <tr>
+                <td class="px-4 py-2">{{ $payment->paid_at->format('Y-m-d') }}</td>
+                <td class="px-4 py-2 text-secondary">{{ $payment->note ?? '—' }}</td>
+                <td class="px-4 py-2"><x-money :amount="$payment->amount" /></td>
+                <td class="px-4 py-2 text-end">
+                    <a href="{{ route('payments.edit', $payment) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
+                    <x-delete-button :action="route('payments.destroy', $payment)" class="ms-3" />
+                </td>
+            </tr>
+        @endforeach
+    </x-data-table>
 
     @if ($hasIssuedMaterials)
         <dialog id="delete-room-dialog" class="w-full max-w-md rounded-lg border border-border p-6 backdrop:bg-black/40">

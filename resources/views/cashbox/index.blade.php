@@ -62,40 +62,23 @@
         </form>
     </div>
 
-    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
-        <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-bg-subtle">
-                <tr>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التاريخ</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">النوع</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">البند</th>
-                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الوصف</th>
-                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">المبلغ</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
-                @forelse ($transactions as $transaction)
-                    <tr>
-                        <td class="px-4 py-2">{{ $transaction->occurred_at->format('Y-m-d') }}</td>
-                        <td class="px-4 py-2">
-                            <span class="{{ $transaction->type === \App\Enums\CashboxTransactionType::In ? 'text-success' : 'text-danger' }}">
-                                {{ $transaction->type->label() }}
-                            </span>
-                        </td>
-                        <td class="px-4 py-2">{{ $transaction->kind->label() }}</td>
-                        <td class="px-4 py-2 text-secondary">{{ $transaction->description ?? '—' }}</td>
-                        <td class="px-4 py-2 text-end">
-                            <x-money :amount="$transaction->amount" />
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-4 py-6 text-center text-secondary">{{ __('No results found.') }}</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <x-data-table :headings="['التاريخ', 'النوع', 'البند', 'الوصف', 'المبلغ']" :rows="$transactions">
+        @foreach ($transactions as $transaction)
+            <tr>
+                <td class="px-4 py-2">{{ $transaction->occurred_at->format('Y-m-d') }}</td>
+                <td class="px-4 py-2">
+                    <span class="{{ $transaction->type === \App\Enums\CashboxTransactionType::In ? 'text-success' : 'text-danger' }}">
+                        {{ $transaction->type->label() }}
+                    </span>
+                </td>
+                <td class="px-4 py-2">{{ $transaction->kind->label() }}</td>
+                <td class="px-4 py-2 text-secondary">{{ $transaction->description ?? '—' }}</td>
+                <td class="px-4 py-2 text-end">
+                    <x-money :amount="$transaction->amount" />
+                </td>
+            </tr>
+        @endforeach
+    </x-data-table>
 
     <div class="mt-4">
         {{ $transactions->links() }}
