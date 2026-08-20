@@ -25,7 +25,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-50 font-sans text-gray-900 antialiased">
+<body class="min-h-screen bg-bg font-sans text-gray-900 antialiased">
     @auth
         <input type="checkbox" id="sidebar-toggle" class="peer hidden">
         <label for="sidebar-toggle" class="fixed inset-0 z-30 hidden bg-gray-900/40 peer-checked:block md:hidden" aria-hidden="true"></label>
@@ -33,27 +33,27 @@
 
     <div class="flex min-h-screen">
         @auth
-            <aside class="fixed inset-y-0 start-0 z-40 flex w-64 translate-x-full flex-col border-e border-border bg-surface transition-transform duration-200 peer-checked:translate-x-0 md:static md:translate-x-0">
-                <div class="flex h-16 shrink-0 items-center gap-3 border-b border-border px-5">
-                    <span class="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white">D</span>
-                    <a href="{{ route('dashboard') }}" class="text-lg font-bold tracking-wide text-primary">DAWOOD</a>
+            <aside class="fixed inset-y-0 start-0 z-40 flex w-64 translate-x-full flex-col bg-sidebar text-sidebar-text shadow-xl transition-transform duration-200 peer-checked:translate-x-0 md:static md:translate-x-0">
+                <div class="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 px-5">
+                    <span class="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white shadow-sm">D</span>
+                    <a href="{{ route('dashboard') }}" class="text-lg font-bold tracking-wide text-sidebar-text">DAWOOD</a>
                 </div>
 
                 <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
                     @foreach ($navItems as $item)
                         <a
                             href="{{ route($item['route']) }}"
-                            class="block rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs($item['active']) ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}"
+                            class="block rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs($item['active']) ? 'bg-primary text-white shadow-sm' : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-text' }}"
                         >
                             {{ $item['label'] }}
                         </a>
                     @endforeach
                 </nav>
 
-                <div class="border-t border-border p-3">
+                <div class="border-t border-white/10 p-3">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-secondary hover:bg-gray-100 hover:text-danger">
+                        <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-muted transition-colors hover:bg-sidebar-hover hover:text-danger">
                             {{ __('Logout') }}
                         </button>
                     </form>
@@ -75,13 +75,13 @@
 
             <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
                 @if (session('success'))
-                    <div class="mb-4 rounded-md border border-success/30 bg-success/10 px-4 py-3 text-sm text-success">
+                    <div class="mb-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success shadow-sm">
                         {{ session('success') }}
                     </div>
                 @endif
 
                 @if (session('error'))
-                    <div class="mb-4 rounded-md border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">
+                    <div class="mb-4 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm font-medium text-danger shadow-sm">
                         {{ session('error') }}
                     </div>
                 @endif

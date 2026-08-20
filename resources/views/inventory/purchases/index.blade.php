@@ -1,24 +1,24 @@
 <x-app-layout title="مشتريات المخزون">
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-900">مشتريات المخزون</h1>
-        <a href="{{ route('inventory.purchases.create') }}" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">مشتريات المخزون</h1>
+        <a href="{{ route('inventory.purchases.create') }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
             {{ __('Add') }}
         </a>
     </div>
 
-    <div class="overflow-x-auto rounded-lg border border-border bg-surface">
+    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
         <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-gray-50">
+            <thead class="bg-bg-subtle">
                 <tr>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">تاريخ الشراء</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">المادة</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">الكمية الأصلية</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">المتبقي</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">سعر الوحدة</th>
-                    <th class="px-4 py-2 text-end font-medium text-secondary">{{ __('Actions') }}</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">تاريخ الشراء</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المادة</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الكمية الأصلية</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المتبقي</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">سعر الوحدة</th>
+                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-border">
+            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
                 @forelse ($purchases as $purchase)
                     <tr>
                         <td class="px-4 py-2">{{ $purchase->purchase_date->format('Y-m-d') }}</td>

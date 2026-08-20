@@ -1,19 +1,19 @@
 <x-app-layout title="مدفوعات العملاء">
-    <h1 class="mb-6 text-xl font-semibold text-gray-900">مدفوعات العملاء</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">مدفوعات العملاء</h1>
 
-    <div class="overflow-x-auto rounded-lg border border-border bg-surface">
+    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
         <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-gray-50">
+            <thead class="bg-bg-subtle">
                 <tr>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">التاريخ</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">العميل</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">الغرفة</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">ملاحظة</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">المبلغ</th>
-                    <th class="px-4 py-2 text-end font-medium text-secondary">{{ __('Actions') }}</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التاريخ</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">العميل</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الغرفة</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">ملاحظة</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المبلغ</th>
+                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-border">
+            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
                 @forelse ($payments as $payment)
                     <tr>
                         <td class="px-4 py-2">{{ $payment->paid_at->format('Y-m-d') }}</td>

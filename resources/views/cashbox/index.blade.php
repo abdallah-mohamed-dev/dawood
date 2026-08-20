@@ -1,24 +1,24 @@
 <x-app-layout title="الخزنة">
-    <h1 class="mb-6 text-xl font-semibold text-gray-900">الخزنة</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">الخزنة</h1>
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-lg border border-border bg-surface p-4">
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">الرصيد الحالي</div>
             <div class="mt-1 text-2xl font-bold {{ $balance < 0 ? 'text-danger' : 'text-gray-900' }}">
                 <x-money :amount="$balance" />
             </div>
         </div>
-        <div class="rounded-lg border border-border bg-surface p-4">
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">إجمالي الداخل</div>
             <div class="mt-1 text-2xl font-bold text-success"><x-money :amount="$totalIn" /></div>
         </div>
-        <div class="rounded-lg border border-border bg-surface p-4">
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">إجمالي الخارج</div>
             <div class="mt-1 text-2xl font-bold text-danger"><x-money :amount="$totalOut" /></div>
         </div>
     </div>
 
-    <div class="mb-6 rounded-lg border border-border bg-surface p-4">
+    <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <h2 class="mb-3 text-sm font-semibold text-gray-900">الرصيد الافتتاحي</h2>
 
         <form method="POST" action="{{ route('cashbox.opening-balance.store') }}" class="flex flex-wrap items-end gap-3">
@@ -34,7 +34,7 @@
                     name="amount"
                     value="{{ old('amount', $openingBalance?->amount) }}"
                     required
-                    class="w-40 rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                 @error('amount')
                     <p class="mt-1 text-xs text-danger">{{ $message }}</p>
@@ -49,31 +49,31 @@
                     name="occurred_at"
                     value="{{ old('occurred_at', $openingBalance?->occurred_at?->toDateString() ?? now()->toDateString()) }}"
                     required
-                    class="rounded-md border border-border px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                 @error('occurred_at')
                     <p class="mt-1 text-xs text-danger">{{ $message }}</p>
                 @enderror
             </div>
 
-            <button type="submit" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
                 {{ __('Save') }}
             </button>
         </form>
     </div>
 
-    <div class="overflow-x-auto rounded-lg border border-border bg-surface">
+    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
         <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-gray-50">
+            <thead class="bg-bg-subtle">
                 <tr>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">التاريخ</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">النوع</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">البند</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">الوصف</th>
-                    <th class="px-4 py-2 text-end font-medium text-secondary">المبلغ</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التاريخ</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">النوع</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">البند</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الوصف</th>
+                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">المبلغ</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-border">
+            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
                 @forelse ($transactions as $transaction)
                     <tr>
                         <td class="px-4 py-2">{{ $transaction->occurred_at->format('Y-m-d') }}</td>

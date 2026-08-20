@@ -1,28 +1,28 @@
 <x-app-layout title="المصروفات الإدارية">
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-xl font-semibold text-gray-900">المصروفات الإدارية</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">المصروفات الإدارية</h1>
         <div class="flex gap-3">
-            <a href="{{ route('expenses.categories.index') }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+            <a href="{{ route('expenses.categories.index') }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
                 البنود
             </a>
-            <a href="{{ route('expenses.create') }}" class="rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark">
+            <a href="{{ route('expenses.create') }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
                 {{ __('Add') }}
             </a>
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-lg border border-border bg-surface">
+    <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
         <table class="min-w-full divide-y divide-border text-sm">
-            <thead class="bg-gray-50">
+            <thead class="bg-bg-subtle">
                 <tr>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">التاريخ</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">البند</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">الوصف</th>
-                    <th class="px-4 py-2 text-start font-medium text-secondary">المبلغ</th>
-                    <th class="px-4 py-2 text-end font-medium text-secondary">{{ __('Actions') }}</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">التاريخ</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">البند</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">الوصف</th>
+                    <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide text-secondary">المبلغ</th>
+                    <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wide text-secondary">{{ __('Actions') }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-border">
+            <tbody class="divide-y divide-border [&>tr:hover]:bg-bg-subtle">
                 @forelse ($expenses as $expense)
                     <tr>
                         <td class="px-4 py-2">{{ $expense->occurred_at->format('Y-m-d') }}</td>

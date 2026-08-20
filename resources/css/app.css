@@ -7,12 +7,25 @@
     --font-sans: 'Cairo', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-primary: #1d4ed8;
-    --color-primary-dark: #1e3a8a;
-    --color-secondary: #475569;
-    --color-success: #16a34a;
-    --color-danger: #dc2626;
-    --color-warning: #d97706;
-    --color-surface: #ffffff;
-    --color-border: #e2e8f0;
+    /* Warm, workshop-inspired palette — copper hardware + walnut wood + linen
+       paper, in place of a generic SaaS blue. See docs/tasks-checklist.md
+       Task 8.6 for the design rationale. */
+    --color-primary: #b8672e;
+    --color-primary-dark: #96531f;
+    --color-accent: #c17a3b;
+    --color-secondary: #6b5f52;
+    --color-success: #5b7a45;
+    --color-danger: #b8452f;
+    --color-warning: #c08a2e;
+    --color-surface: #fffdf8;
+    --color-border: #e7dcc9;
+    --color-bg: #f6f1e7;
+    --color-bg-subtle: #efe6d6;
+
+    /* The sidebar is the app's one deliberate signature: a dark walnut rail
+       against the light linen content area, evoking a workshop bench. */
+    --color-sidebar: #2e2013;
+    --color-sidebar-hover: #3e2c1b;
+    --color-sidebar-text: #ede4d3;
+    --color-sidebar-muted: #a6957e;
 }
