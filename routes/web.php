@@ -8,6 +8,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\MaterialController;
 use App\Http\Controllers\Inventory\PurchaseController;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\RoomController;
@@ -59,6 +60,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('categories', ExpenseCategoryController::class)->except('show');
     });
     Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+    Route::resource('partners', PartnerController::class);
+    Route::post('/partners/{partner}/withdrawals', [PartnerController::class, 'storeWithdrawal'])->name('partners.withdrawals.store');
+    Route::delete('/partners/{partner}/withdrawals/{withdrawal}', [PartnerController::class, 'destroyWithdrawal'])->name('partners.withdrawals.destroy');
 
     Route::get('/reports/profit', [ProfitController::class, 'index'])->name('reports.profit');
 });
