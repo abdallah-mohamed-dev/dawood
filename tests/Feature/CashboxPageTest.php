@@ -79,6 +79,16 @@ test('the opening balance form rejects scientific notation as a clean validation
     expect(app(CashboxService::class)->balance())->toBe(0);
 });
 
+test('the opening balance form rejects an unsafely large magnitude as a clean validation error, not a 500', function () {
+    $response = $this->actingAs($this->admin)->post(route('cashbox.opening-balance.store'), [
+        'amount' => '9999999999999999.00', // 16 digits — over ScaledIntegerCast's safe limit
+        'occurred_at' => '2026-01-01',
+    ]);
+
+    $response->assertSessionHasErrors('amount');
+    expect(app(CashboxService::class)->balance())->toBe(0);
+});
+
 test('the opening balance form rejects a missing date', function () {
     $response = $this->actingAs($this->admin)->post(route('cashbox.opening-balance.store'), [
         'amount' => '10.00',

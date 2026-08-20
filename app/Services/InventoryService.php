@@ -10,6 +10,7 @@ use App\Models\InventoryMovement;
 use App\Models\Material;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -76,6 +77,25 @@ class InventoryService
     }
 
     /**
+     * Current stock for several materials in one grouped query — the
+     * single implementation behind every "stock per material" listing
+     * (materials index, a room's material requirements) instead of each
+     * controller hand-rolling the same SUM/GROUP BY. Pass null for every
+     * material in the catalog.
+     *
+     * @param  array<int>|null  $materialIds
+     * @return Collection<int, int>
+     */
+    public function stockByMaterialIds(?array $materialIds = null): Collection
+    {
+        return InventoryBatch::query()
+            ->when($materialIds !== null, fn ($query) => $query->whereIn('material_id', $materialIds))
+            ->selectRaw('material_id, SUM(remaining_quantity) as total')
+            ->groupBy('material_id')
+            ->pluck('total', 'material_id');
+    }
+
+    /**
      * Issue $quantity of $material FIFO across batches, all-or-nothing.
      *
      * @return array{cost: int, allocations: array<int, array{batch_id: int, quantity: int, cost: int}>}
@@ -137,6 +157,43 @@ class InventoryService
         });
     }
 
+    /**
+     * Reverse every `out` movement previously issued to $related, crediting
+     * each quantity back to the exact batch it was taken from (not the
+     * cheapest/oldest available batch) — see "الإرجاع بعد حذف غرفة" in
+     * docs/inventory-costing.md. The original `out` movements are left
+     * untouched for audit; new `return` movements record the reversal.
+     */
+    public function returnIssued(Model $related): void
+    {
+        DB::transaction(function () use ($related) {
+            $outMovements = InventoryMovement::query()
+                ->where('related_type', $related::class)
+                ->where('related_id', $related->getKey())
+                ->where('type', InventoryMovementType::Out)
+                ->get();
+
+            foreach ($outMovements as $movement) {
+                $batch = InventoryBatch::query()->whereKey($movement->batch_id)->lockForUpdate()->firstOrFail();
+
+                $batch->update([
+                    'remaining_quantity' => $batch->getRawOriginal('remaining_quantity') + $movement->getRawOriginal('quantity'),
+                ]);
+
+                InventoryMovement::query()->create([
+                    'material_id' => $movement->material_id,
+                    'batch_id' => $movement->batch_id,
+                    'type' => InventoryMovementType::ReturnedToStock,
+                    'quantity' => $movement->getRawOriginal('quantity'),
+                    'cost' => $movement->getRawOriginal('cost'),
+                    'related_type' => $related::class,
+                    'related_id' => $related->getKey(),
+                    'occurred_at' => now()->toDateString(),
+                ]);
+            }
+        });
+    }
+
     public function deletePurchase(InventoryBatch $batch): void
     {
         // The "untouched" check and the delete must happen inside the same
@@ -154,6 +211,22 @@ class InventoryService
             $this->cashbox->removeFor($batch);
             $batch->delete();
         });
+    }
+
+    /**
+     * Total value of all unissued stock, at each batch's own purchase cost —
+     * see stockValue() in docs/profit-calculation.md. An asset, never a cost,
+     * until issued.
+     */
+    public function stockValue(): int
+    {
+        return InventoryBatch::query()
+            ->where('remaining_quantity', '>', 0)
+            ->get(['remaining_quantity', 'unit_cost'])
+            ->sum(fn (InventoryBatch $batch) => $this->cost(
+                $batch->getRawOriginal('remaining_quantity'),
+                $batch->getRawOriginal('unit_cost'),
+            ));
     }
 
     /**

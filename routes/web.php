@@ -2,9 +2,15 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CashboxController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ExpenseCategoryController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\MaterialController;
 use App\Http\Controllers\Inventory\PurchaseController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfitController;
+use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,4 +40,25 @@ Route::middleware('auth')->group(function () {
         Route::resource('materials', MaterialController::class)->except('show');
         Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store', 'destroy']);
     });
+
+    Route::resource('customers', CustomerController::class);
+
+    Route::resource('rooms', RoomController::class)->only(['create', 'store', 'show', 'destroy']);
+    Route::post('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.status.update');
+    Route::post('/rooms/{room}/materials', [RoomController::class, 'storeMaterial'])->name('rooms.materials.store');
+    Route::post('/rooms/{room}/materials/{roomMaterial}/issue', [RoomController::class, 'issueMaterial'])->name('rooms.materials.issue');
+    Route::delete('/rooms/{room}/materials/{roomMaterial}', [RoomController::class, 'destroyMaterial'])->name('rooms.materials.destroy');
+
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
+    Route::post('/rooms/{room}/payments', [PaymentController::class, 'store'])->name('rooms.payments.store');
+    Route::get('/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
+    Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
+
+    Route::prefix('expenses')->name('expenses.')->group(function () {
+        Route::resource('categories', ExpenseCategoryController::class)->except('show');
+    });
+    Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+    Route::get('/reports/profit', [ProfitController::class, 'index'])->name('reports.profit');
 });

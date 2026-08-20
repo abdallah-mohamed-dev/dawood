@@ -203,6 +203,15 @@ return [
         'material_id' => 'المادة',
         'unit_cost' => 'سعر الوحدة',
         'purchase_date' => 'تاريخ الشراء',
+        'customer_id' => 'العميل',
+        'room_type' => 'نوع الغرفة',
+        'sale_price' => 'سعر البيع',
+        'required_quantity' => 'الكمية المطلوبة',
+        'return_materials' => 'إرجاع الخامات',
+        'status' => 'الحالة',
+        'paid_at' => 'تاريخ الدفعة',
+        'room_id' => 'الغرفة',
+        'expense_category_id' => 'بند المصروف',
     ],
 
 ];

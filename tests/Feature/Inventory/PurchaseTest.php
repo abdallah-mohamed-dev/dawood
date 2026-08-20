@@ -88,6 +88,35 @@ test('a zero quantity is attributed to the quantity field, not unit_cost', funct
     $response->assertSessionDoesntHaveErrors('unit_cost');
 });
 
+test('a quantity with an unsafely large magnitude is rejected as a clean validation error, not a 500', function () {
+    $material = Material::factory()->create();
+
+    $response = $this->actingAs($this->admin)->post(route('inventory.purchases.store'), [
+        'material_id' => $material->id,
+        'quantity' => '9999999999999999.000', // 16 digits — over ScaledIntegerCast's safe limit
+        'unit_cost' => '100.00',
+        'purchase_date' => '2026-01-01',
+    ]);
+
+    $response->assertSessionHasErrors('quantity');
+    expect(InventoryBatch::query()->count())->toBe(0);
+});
+
+test('a unit_cost with an unsafely large magnitude is attributed to unit_cost, not quantity', function () {
+    $material = Material::factory()->create();
+
+    $response = $this->actingAs($this->admin)->post(route('inventory.purchases.store'), [
+        'material_id' => $material->id,
+        'quantity' => '3',
+        'unit_cost' => '9999999999999999.00', // 16 digits — over ScaledIntegerCast's safe limit
+        'purchase_date' => '2026-01-01',
+    ]);
+
+    $response->assertSessionHasErrors('unit_cost');
+    $response->assertSessionDoesntHaveErrors('quantity');
+    expect(InventoryBatch::query()->count())->toBe(0);
+});
+
 test('creating a purchase with scientific-notation quantity is rejected as a clean validation error', function () {
     $material = Material::factory()->create();
 
@@ -145,7 +174,7 @@ test('the materials index shows current stock after a purchase', function () {
 
     $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
 
-    $response->assertOk()->assertSee('3.000 '.$material->unit);
+    $response->assertOk()->assertSee('3 '.$material->unit);
 });
 
 test('a material with a purchase batch cannot be deleted', function () {

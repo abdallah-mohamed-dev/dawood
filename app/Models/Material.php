@@ -24,4 +24,9 @@ class Material extends Model
     {
         return $this->hasMany(InventoryBatch::class);
     }
+
+    public function roomMaterials(): HasMany
+    {
+        return $this->hasMany(RoomMaterial::class);
+    }
 }

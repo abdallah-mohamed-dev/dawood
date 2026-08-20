@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StoreMaterialRequest;
 use App\Http\Requests\Inventory\UpdateMaterialRequest;
 use App\Models\Category;
-use App\Models\InventoryBatch;
 use App\Models\Material;
+use App\Services\InventoryService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +15,8 @@ use Illuminate\View\View;
 
 class MaterialController extends Controller
 {
+    public function __construct(private readonly InventoryService $inventory) {}
+
     public function index(): View
     {
         $materials = Material::query()
@@ -25,15 +27,9 @@ class MaterialController extends Controller
             ->select('materials.*')
             ->get();
 
-        // One grouped aggregate instead of calling currentStock() per row.
-        $stockByMaterial = InventoryBatch::query()
-            ->selectRaw('material_id, SUM(remaining_quantity) as total')
-            ->groupBy('material_id')
-            ->pluck('total', 'material_id');
-
         return view('inventory.materials.index', [
             'materials' => $materials,
-            'stockByMaterial' => $stockByMaterial,
+            'stockByMaterial' => $this->inventory->stockByMaterialIds(),
         ]);
     }
 
@@ -66,8 +62,8 @@ class MaterialController extends Controller
 
     public function destroy(Material $material): RedirectResponse
     {
-        if ($material->batches()->exists()) {
-            return back()->with('error', 'لا يمكن حذف هذه المادة لأنها تحتوي على دفعات مخزون مرتبطة بها.');
+        if ($material->batches()->exists() || $material->roomMaterials()->exists()) {
+            return back()->with('error', 'لا يمكن حذف هذه المادة لأنها مستخدمة في دفعات مخزون أو غرف.');
         }
 
         // See CategoryController::destroy() — same check-then-delete race,
@@ -75,7 +71,7 @@ class MaterialController extends Controller
         try {
             $material->delete();
         } catch (QueryException) {
-            return back()->with('error', 'لا يمكن حذف هذه المادة لأنها تحتوي على دفعات مخزون مرتبطة بها.');
+            return back()->with('error', 'لا يمكن حذف هذه المادة لأنها مستخدمة في دفعات مخزون أو غرف.');
         }
 
         return redirect()->route('inventory.materials.index')->with('success', 'تم حذف المادة.');

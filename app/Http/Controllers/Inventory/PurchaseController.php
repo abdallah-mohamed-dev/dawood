@@ -38,8 +38,18 @@ class PurchaseController extends Controller
     public function store(StorePurchaseRequest $request): RedirectResponse
     {
         $material = Material::query()->findOrFail($request->integer('material_id'));
-        $quantity = QuantityCast::toScaledInt($request->string('quantity')->toString());
-        $unitCost = MoneyCast::toScaledInt($request->string('unit_cost')->toString());
+
+        try {
+            $quantity = QuantityCast::toScaledInt($request->string('quantity')->toString());
+        } catch (InvalidArgumentException) {
+            return back()->withInput()->withErrors(['quantity' => 'قيمة الكمية غير صالحة.']);
+        }
+
+        try {
+            $unitCost = MoneyCast::toScaledInt($request->string('unit_cost')->toString());
+        } catch (InvalidArgumentException) {
+            return back()->withInput()->withErrors(['unit_cost' => 'قيمة سعر الوحدة غير صالحة.']);
+        }
 
         // Checked here (not just left to InventoryService::purchase()'s own
         // guard) so each bad field gets its own attributed error instead of

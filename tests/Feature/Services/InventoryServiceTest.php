@@ -43,6 +43,25 @@ test('two purchases of the same material at different prices create two independ
     expect($this->inventory->currentStock($this->material))->toBe(13_000);
 });
 
+test('stockByMaterialIds groups stock per material in one query, matching currentStock per material', function () {
+    $otherMaterial = Material::factory()->create();
+    $this->inventory->purchase($this->material, 3_000, 10_000, '2026-01-01');
+    $this->inventory->purchase($this->material, 10_000, 12_000, '2026-01-02');
+    $this->inventory->purchase($otherMaterial, 5_000, 8_000, '2026-01-01');
+
+    $filtered = $this->inventory->stockByMaterialIds([$this->material->id]);
+    expect($filtered->get($this->material->id))->toBe(13_000);
+    expect($filtered->has($otherMaterial->id))->toBeFalse();
+
+    $all = $this->inventory->stockByMaterialIds();
+    expect($all->get($this->material->id))->toBe(13_000);
+    expect($all->get($otherMaterial->id))->toBe(5_000);
+});
+
+test('stockByMaterialIds omits a material with no purchases entirely', function () {
+    expect($this->inventory->stockByMaterialIds([$this->material->id])->has($this->material->id))->toBeFalse();
+});
+
 test('the full FIFO reference scenario from docs/tasks.md produces exact expected numbers', function () {
     $related = User::factory()->create();
 

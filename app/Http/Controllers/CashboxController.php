@@ -39,12 +39,11 @@ class CashboxController extends Controller
 
     public function storeOpeningBalance(SetOpeningBalanceRequest $request): RedirectResponse
     {
-        $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
-
         try {
+            $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
             $this->cashbox->setOpeningBalance($amount, $request->date('occurred_at'));
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['amount' => 'لا يمكن أن يكون الرصيد الافتتاحي سالبًا.']);
+            return back()->withInput()->withErrors(['amount' => 'قيمة الرصيد الافتتاحي غير صالحة.']);
         }
 
         return redirect()->route('cashbox.index')->with('success', 'تم تحديث الرصيد الافتتاحي.');

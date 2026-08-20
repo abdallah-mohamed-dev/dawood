@@ -10,10 +10,6 @@
     $piastres = is_string($amount) && str_contains($amount, '.')
         ? \App\Casts\MoneyCast::toScaledInt($amount)
         : (int) $amount;
-
-    [$whole, $fraction] = explode('.', \App\Casts\MoneyCast::toDecimalString($piastres));
-    $negative = str_starts_with($whole, '-');
-    $whole = ltrim($whole, '-');
 @endphp
 
-<span {{ $attributes->merge(['class' => 'tabular-nums']) }}>{{ $negative ? '-' : '' }}{{ number_format((int) $whole) }}.{{ $fraction }} ج.م</span>
+<span {{ $attributes->merge(['class' => 'tabular-nums']) }}>{{ \App\Casts\MoneyCast::toDisplayString($piastres) }} ج.م</span>

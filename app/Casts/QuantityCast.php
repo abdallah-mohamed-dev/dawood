@@ -18,4 +18,9 @@ class QuantityCast extends ScaledIntegerCast
     {
         return 3;
     }
+
+    protected static function trimTrailingZeroDecimals(): bool
+    {
+        return true;
+    }
 }

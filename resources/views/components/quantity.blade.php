@@ -9,10 +9,6 @@
     $scaled = is_string($amount) && str_contains($amount, '.')
         ? \App\Casts\QuantityCast::toScaledInt($amount)
         : (int) $amount;
-
-    [$whole, $fraction] = explode('.', \App\Casts\QuantityCast::toDecimalString($scaled));
-    $negative = str_starts_with($whole, '-');
-    $whole = ltrim($whole, '-');
 @endphp
 
-<span {{ $attributes->merge(['class' => 'tabular-nums']) }}>{{ $negative ? '-' : '' }}{{ number_format((int) $whole) }}.{{ $fraction }}{{ $unit ? ' '.$unit : '' }}</span>
+<span {{ $attributes->merge(['class' => 'tabular-nums']) }}>{{ \App\Casts\QuantityCast::toDisplayString($scaled) }}{{ $unit ? ' '.$unit : '' }}</span>

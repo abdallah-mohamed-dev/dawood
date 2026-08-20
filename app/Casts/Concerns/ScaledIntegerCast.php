@@ -75,6 +75,40 @@ abstract class ScaledIntegerCast implements CastsAttributes
         return ($negative ? '-' : '').$whole.'.'.str_pad((string) $fraction, static::decimals(), '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Whether trailing zero decimals are trimmed from toDisplayString()'s
+     * output (and the point dropped entirely once nothing real is left) —
+     * true for QuantityCast, false for MoneyCast, which always shows a fixed
+     * 2-decimal currency format regardless of trailing zeros.
+     */
+    protected static function trimTrailingZeroDecimals(): bool
+    {
+        return false;
+    }
+
+    /**
+     * toDecimalString() with thousands separators on the whole part — e.g.
+     * "20000.00" → "20,000.00", or with trailing zeros trimmed when
+     * trimTrailingZeroDecimals() is true — e.g. "20000.500" → "20,000.5".
+     * The single implementation behind both <x-money>/<x-quantity> and any
+     * server-side message that needs to show a formatted amount (e.g. a
+     * validation error quoting a remaining balance).
+     */
+    public static function toDisplayString(int $scaled): string
+    {
+        [$whole, $fraction] = explode('.', static::toDecimalString($scaled));
+        $negative = str_starts_with($whole, '-');
+        $whole = ltrim($whole, '-');
+
+        if (static::trimTrailingZeroDecimals()) {
+            $fraction = rtrim($fraction, '0');
+        }
+
+        $formatted = ($negative ? '-' : '').number_format((int) $whole);
+
+        return $fraction === '' ? $formatted : $formatted.'.'.$fraction;
+    }
+
     public static function toScaledInt(string $value): int
     {
         $value = trim($value);
