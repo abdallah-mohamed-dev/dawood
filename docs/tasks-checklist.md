@@ -179,22 +179,22 @@
 
 ## Task 9 — الشركاء والسحوبات
 
-- [ ] Migration: partners (name, percentage ×100)
-- [ ] Migration: partner_withdrawals
-- [ ] Partner model + factory
-- [ ] PartnerWithdrawal model + factory
-- [ ] PartnerService::share() — صيغة القسمة على 10000
-- [ ] PartnerService::totalWithdrawn()
-- [ ] PartnerService::remaining()
-- [ ] PartnerService::withdraw() (+ CashboxService::recordOut)
-- [ ] PartnerService::deleteWithdrawal() (+ عكس حركة الخزنة)
-- [ ] Validation: مجموع نسب الشركاء ≤ 100%
-- [ ] PartnerController (CRUD)
-- [ ] Withdrawal store/destroy (مسارات فرعية)
-- [ ] UI: /partners (index)
-- [ ] UI: /partners/{partner} (نصيب/سحوبات/متبقي)
-- [ ] تحذير واضح عند صافي ربح سالب أو سحب زائد
-- [ ] اختبارات Task 9 (6 سيناريوهات)
+- [x] Migration: partners (name, percentage ×100)
+- [x] Migration: partner_withdrawals
+- [x] Partner model + factory
+- [x] PartnerWithdrawal model + factory
+- [x] PartnerService::share() — صيغة القسمة على 10000
+- [x] PartnerService::totalWithdrawn()
+- [x] PartnerService::remaining()
+- [x] PartnerService::withdraw() (+ CashboxService::recordOut)
+- [x] PartnerService::deleteWithdrawal() (+ عكس حركة الخزنة)
+- [x] Validation: مجموع نسب الشركاء ≤ 100%
+- [x] PartnerController (CRUD)
+- [x] Withdrawal store/destroy (مسارات فرعية)
+- [x] UI: /partners (index)
+- [x] UI: /partners/{partner} (نصيب/سحوبات/متبقي)
+- [x] تحذير واضح عند صافي ربح سالب أو سحب زائد
+- [x] اختبارات Task 9 (6 سيناريوهات)
 
 ## Task 10 — تجانس الواجهة والتنقل
 
@@ -221,4 +221,4 @@
 
 ---
 
-**الإجمالي:** Tasks 0–8 و8.5 مكتملة بالكامل (اختبارات: 202/202 ناجحة). في انتظار ملاحظات المستخدم على شكل الـSidebar الجديد قبل المتابعة. Tasks 9، 11 لم يبدأ فيهما. Task 10 بدأ جزئيًا فقط (Layout موحد وflash موحد، الـSidebar الجديد يغطي جزءًا من متطلباته)، والباقي (مكونات مشتركة، تدقيق Design Tokens) لم يُنفَّذ.
+**الإجمالي:** Tasks 0–8، 8.5، 8.6، 8.7 (عدا عرض الشكل على المستخدم)، و9 مكتملة بالكامل (اختبارات: 222/222 ناجحة). Task 11 لم يبدأ. Task 10 بدأ جزئيًا فقط (Layout موحد وflash موحد، الـSidebar الجديد يغطي جزءًا من متطلباته)، والباقي (رابط الشركاء في التنقل، مكونات مشتركة، تدقيق Design Tokens) لم يُنفَّذ.
