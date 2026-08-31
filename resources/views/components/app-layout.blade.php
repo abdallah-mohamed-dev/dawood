@@ -52,6 +52,13 @@
                 </nav>
 
                 <div class="border-t border-white/10 p-3">
+                    <a
+                        href="{{ route('profile.edit') }}"
+                        class="mb-1 block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('profile.*') ? 'bg-primary text-white shadow-sm' : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-text' }}"
+                    >
+                        {{ auth()->user()->name }}
+                    </a>
+
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-muted transition-colors hover:bg-sidebar-hover hover:text-danger">

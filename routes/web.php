@@ -10,6 +10,7 @@ use App\Http\Controllers\Inventory\MaterialController;
 use App\Http\Controllers\Inventory\PurchaseController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\RoomController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
     Route::get('/cashbox', [CashboxController::class, 'index'])->name('cashbox.index');
     Route::post('/cashbox/opening-balance', [CashboxController::class, 'storeOpeningBalance'])

@@ -189,6 +189,7 @@ return [
     'attributes' => [
         'email' => 'البريد الإلكتروني',
         'password' => 'كلمة المرور',
+        'current_password' => 'كلمة المرور الحالية',
         'name' => 'الاسم',
         'phone' => 'رقم الهاتف',
         'address' => 'العنوان',
