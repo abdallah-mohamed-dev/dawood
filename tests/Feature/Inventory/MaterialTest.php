@@ -93,6 +93,54 @@ test('renaming a material to another existing material name fails validation', f
     expect($material->fresh()->name)->toBe('خشب زان');
 });
 
+test('the materials page and its nav link are labelled المخزون, not المواد', function () {
+    $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
+
+    $response->assertOk()
+        ->assertSee('المخزون')
+        ->assertDontSee('المواد');
+});
+
+test('searching by name shows only the matching materials', function () {
+    Material::factory()->create(['name' => 'لوح MDF']);
+    Material::factory()->create(['name' => 'خشب زان']);
+
+    $response = $this->actingAs($this->admin)->get(route('inventory.materials.index', ['q' => 'زان']));
+
+    $response->assertOk()
+        ->assertSee('خشب زان')
+        ->assertDontSee('لوح MDF');
+});
+
+test('searching matches a partial name anywhere in it', function () {
+    Material::factory()->create(['name' => 'لوح MDF مستورد']);
+
+    $response = $this->actingAs($this->admin)->get(route('inventory.materials.index', ['q' => 'MDF']));
+
+    $response->assertOk()->assertSee('لوح MDF مستورد');
+});
+
+test('an empty search shows every material', function () {
+    Material::factory()->create(['name' => 'لوح MDF']);
+    Material::factory()->create(['name' => 'خشب زان']);
+
+    $response = $this->actingAs($this->admin)->get(route('inventory.materials.index', ['q' => '']));
+
+    $response->assertOk()
+        ->assertSee('لوح MDF')
+        ->assertSee('خشب زان');
+});
+
+test('a search with no matches shows a clear message', function () {
+    Material::factory()->create(['name' => 'لوح MDF']);
+
+    $response = $this->actingAs($this->admin)->get(route('inventory.materials.index', ['q' => 'حاجة مش موجودة']));
+
+    $response->assertOk()
+        ->assertSee('لا توجد مادة بهذا الاسم.')
+        ->assertDontSee('لوح MDF');
+});
+
 test('a material can be deleted', function () {
     $material = Material::factory()->create();
 

@@ -9,21 +9,26 @@ use App\Models\Material;
 use App\Services\InventoryService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MaterialController extends Controller
 {
     public function __construct(private readonly InventoryService $inventory) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim($request->string('q')->toString());
+
         $materials = Material::query()
+            ->when($search !== '', fn ($query) => $query->where('name', 'like', '%'.$search.'%'))
             ->orderBy('name')
             ->get();
 
         return view('inventory.materials.index', [
             'materials' => $materials,
             'stockByMaterial' => $this->inventory->stockByMaterialIds(),
+            'search' => $search,
         ]);
     }
 
