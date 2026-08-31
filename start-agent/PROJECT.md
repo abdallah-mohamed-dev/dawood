@@ -10,9 +10,13 @@
 - دفعات العملاء والمصروفات الإدارية
 - خزنة مركزية (كل حركة مالية بتعدي منها)
 - حساب ربح دقيق (أساس استحقاق، منفصل تمامًا عن رصيد الخزنة النقدي)
-- (لسه هيتضاف) شركاء ونسب أرباح وسحوبات
+- شركاء ونسب أرباح وسحوبات
 
-المرجع الكامل والمعتمد نهائيًا: [`../docs/tasks.md`](../docs/tasks.md). أي قرار موجود هناك **لا يُعاد فتحه أو مناقشته** إلا لو المستخدم نفسه طلب كدا صراحة.
+**الحالة:** الـMVP مكتمل بالكامل (Tasks 0–11)، 223/223 اختبار ناجح.
+
+الخريطة الشاملة ونقطة الدخول: [`../CLAUDE.md`](../CLAUDE.md). الشغل الجديد كله في [`../specs/`](../specs/README.md).
+
+مرجع القرارات المعتمدة نهائيًا: [`../docs/tasks.md`](../docs/tasks.md) (القسم أ). أي قرار موجود هناك **لا يُعاد فتحه أو مناقشته** إلا لو المستخدم نفسه طلب كدا صراحة.
 
 ## التقنيات
 
@@ -76,7 +80,7 @@ SQLite: `lockForUpdate()` لوحده مبيعملش حاجة إلا مع `transa
 
 - `resources/views/components/app-layout.blade.php` — الـlayout الأساسي (Sidebar غامق + محتوى فاتح، هوية "ورشة/خشب" مش SaaS أزرق عام).
 - كل الألوان/الخطوط في `resources/css/app.css` عبر `@theme` — تغيير القيم هناك بينعكس على كل الصفحات فورًا بعد `npm run build`.
-- Blade components مشتركة: `<x-money>`, `<x-quantity>`, `<x-status-badge>`.
+- Blade components مشتركة: `<x-money>`, `<x-quantity>`, `<x-status-badge>`, `<x-data-table>`, `<x-field>`, `<x-delete-button>` — استخدمهم بدل تكرار الـmarkup.
 
 ## خريطة الملفات المهمة
 
@@ -95,9 +99,13 @@ database/
   factories/                 Factory لكل Model
 
 docs/
-  tasks.md                   الخطة المعتمدة الكاملة (المرجع الأعلى)
-  tasks-checklist.md          checklist تفصيلي لكل تاسك فرعي — المصدر الوحيد لمعرفة "احنا فين"
+  tasks.md                   خطة الـMVP المعتمدة (أرشيف — القسم أ لسه ساري كقرارات)
+  tasks-checklist.md          تتبع الـMVP (أرشيف مكتمل ✔)
   *.md                        توثيق منطق كل جزء (inventory-costing, customer-payments, profit-calculation...)
+
+specs/                        ← الشغل الجديد: ملف لكل تاسك كبير (README.md = الفهرس)
+CLAUDE.md                     ← نقطة الدخول والخريطة الشاملة لأي موديل
+USER-GUIDE.md                 ← دليل المستخدم النهائي — لازم يتحدّث مع أي تغيير منطق
 
 resources/
   css/app.css                 Design Tokens (الألوان/الخط) — المصدر الوحيد المسموح
