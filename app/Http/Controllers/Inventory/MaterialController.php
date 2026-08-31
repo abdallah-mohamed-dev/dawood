@@ -5,10 +5,8 @@ namespace App\Http\Controllers\Inventory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StoreMaterialRequest;
 use App\Http\Requests\Inventory\UpdateMaterialRequest;
-use App\Models\Category;
 use App\Models\Material;
 use App\Services\InventoryService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -20,11 +18,7 @@ class MaterialController extends Controller
     public function index(): View
     {
         $materials = Material::query()
-            ->with('category')
-            ->join('categories', 'categories.id', '=', 'materials.category_id')
-            ->orderBy('categories.name')
-            ->orderBy('materials.name')
-            ->select('materials.*')
+            ->orderBy('name')
             ->get();
 
         return view('inventory.materials.index', [
@@ -35,7 +29,7 @@ class MaterialController extends Controller
 
     public function create(): View
     {
-        return view('inventory.materials.create', ['categories' => $this->categories()]);
+        return view('inventory.materials.create');
     }
 
     public function store(StoreMaterialRequest $request): RedirectResponse
@@ -47,10 +41,7 @@ class MaterialController extends Controller
 
     public function edit(Material $material): View
     {
-        return view('inventory.materials.edit', [
-            'material' => $material,
-            'categories' => $this->categories(),
-        ]);
+        return view('inventory.materials.edit', ['material' => $material]);
     }
 
     public function update(UpdateMaterialRequest $request, Material $material): RedirectResponse
@@ -66,8 +57,10 @@ class MaterialController extends Controller
             return back()->with('error', 'لا يمكن حذف هذه المادة لأنها مستخدمة في دفعات مخزون أو غرف.');
         }
 
-        // See CategoryController::destroy() — same check-then-delete race,
-        // same defense: the FK restrictOnDelete() is the real guarantee.
+        // The exists() check above and this delete() are not atomic — a batch or
+        // a room requirement could appear in between. The FK's restrictOnDelete()
+        // is the real guarantee; this catch just turns that race from a raw 500
+        // into the same friendly message.
         try {
             $material->delete();
         } catch (QueryException) {
@@ -75,13 +68,5 @@ class MaterialController extends Controller
         }
 
         return redirect()->route('inventory.materials.index')->with('success', 'تم حذف المادة.');
-    }
-
-    /**
-     * @return Collection<int, Category>
-     */
-    private function categories(): Collection
-    {
-        return Category::query()->orderBy('name')->get();
     }
 }

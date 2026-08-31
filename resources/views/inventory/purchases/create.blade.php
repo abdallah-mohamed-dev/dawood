@@ -15,7 +15,7 @@
                 <option value="">اختر مادة</option>
                 @foreach ($materials as $material)
                     <option value="{{ $material->id }}" @selected((int) old('material_id') === $material->id)>
-                        {{ $material->category->name }} — {{ $material->name }} ({{ $material->unit }})
+                        {{ $material->name }} ({{ $material->unit }})
                     </option>
                 @endforeach
             </select>

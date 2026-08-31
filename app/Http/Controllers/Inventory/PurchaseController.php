@@ -97,6 +97,6 @@ class PurchaseController extends Controller
      */
     private function materials(): Collection
     {
-        return Material::query()->with('category')->orderBy('name')->get();
+        return Material::query()->orderBy('name')->get();
     }
 }

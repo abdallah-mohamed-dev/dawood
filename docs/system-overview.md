@@ -17,8 +17,7 @@
 | `User` | المستخدم الإداري الوحيد للنظام |
 | `Customer` | عميل الورشة |
 | `Room` | غرفة/طلب أثاث تابع لعميل |
-| `Category` | تصنيف للخامات (مثال: أخشاب) |
-| `Material` | خامة/مادة محددة (مثال: لوح MDF) |
+| `Material` | خامة/مادة محددة (مثال: لوح MDF) — الاسم فريد على مستوى النظام |
 | `InventoryBatch` | دفعة شراء واحدة من خامة معينة، بسعر وحدة ثابت |
 | `InventoryMovement` | حركة دخول/خروج/إرجاع لكمية من دفعة معينة |
 | `RoomMaterial` | ربط بين غرفة وخامة: الكمية المطلوبة والمصروفة والتكلفة |
@@ -37,9 +36,8 @@ customers
           ├── room_materials (room_id, material_id)
           └── customer_payments (room_id)
 
-categories
-    └── materials (category_id)
-          └── inventory_batches (material_id)
+materials
+    └── inventory_batches (material_id)
                 └── inventory_movements (batch_id, material_id, related: room_materials عند الصرف)
 
 expense_categories

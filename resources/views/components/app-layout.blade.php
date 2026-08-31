@@ -4,7 +4,6 @@
     $navItems = [
         ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'لوحة التحكم'],
         ['route' => 'customers.index', 'active' => 'customers.*', 'label' => 'العملاء'],
-        ['route' => 'inventory.categories.index', 'active' => 'inventory.categories.*', 'label' => 'التصنيفات'],
         ['route' => 'inventory.materials.index', 'active' => 'inventory.materials.*', 'label' => 'المواد'],
         ['route' => 'inventory.purchases.index', 'active' => 'inventory.purchases.*', 'label' => 'المشتريات'],
         ['route' => 'payments.index', 'active' => 'payments.*', 'label' => 'المدفوعات'],

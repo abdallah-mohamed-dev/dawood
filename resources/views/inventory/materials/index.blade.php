@@ -6,10 +6,9 @@
         </a>
     </div>
 
-    <x-data-table :headings="['التصنيف', 'اسم المادة', 'وحدة القياس', 'الكمية الحالية', __('Actions')]" :rows="$materials">
+    <x-data-table :headings="['اسم المادة', 'وحدة القياس', 'الكمية الحالية', __('Actions')]" :rows="$materials">
         @foreach ($materials as $material)
             <tr>
-                <td class="px-4 py-2">{{ $material->category->name }}</td>
                 <td class="px-4 py-2">{{ $material->name }}</td>
                 <td class="px-4 py-2">{{ $material->unit }}</td>
                 <td class="px-4 py-2">

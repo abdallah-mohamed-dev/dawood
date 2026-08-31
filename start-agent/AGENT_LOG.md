@@ -189,3 +189,30 @@
 - **مراجعة الموديل التاني مش متاحة حاليًا:** `codex` وصل لحد الاستخدام (لحد 22 سبتمبر)، و`gemini` CLI حسابه المجاني بقى غير مدعوم (بيطلب الترحيل لـAntigravity). المتاح للتجربة: `agy` و`opencode`.
 - التاسك 2 (حذف التصنيفات) فيه migration مدمّرة على SQLite — **لازم `dropUnique` قبل `dropColumn`** لأن SQLite بيرفض حذف عمود عليه فهرس. متجربتش الـmigration فعليًا لسه.
 ---
+
+---
+### 2026-09-01 — Claude (Opus 5، عبر Claude Code / VS Code extension)
+
+**النوع:** نهاية تاسك
+
+**التاسك:** التاسك 2 في `specs/TASKS.md` — حذف طبقة تصنيفات المواد بالكامل
+
+**اللي اتعمل:**
+- **Migration `2026_09_01_022358_drop_categories_from_materials`:** حذف `unique(category_id,name)` → حذف الـFK والعمود `category_id` → `unique(name)` → `dropIfExists('categories')`. **كل خطوة في `Schema::table()` منفصلة عمدًا** لأن SQLite بيرفض `drop column` على عمود لسه عليه فهرس. الـ`down()` بيرجّع شكل الـschema بس (كل المواد بتترّبط بتصنيف واحد "غير مصنّف") — معلومة التصنيف الأصلية ضايعة نهائيًا وده مقصود.
+- **اتحذف:** `Category` model + factory + controller + `{Store,Update}CategoryRequest` + `resources/views/inventory/categories/` + `tests/Feature/Inventory/CategoryTest.php` + مسار `categories` + عنصر "التصنيفات" من الـSidebar + `'category_id'` من `attributes` في `lang/ar/validation.php`.
+- **اتعدّل:** `Material` model (شيل العلاقة و`category_id` من `#[Fillable]`)، `MaterialFactory`، `{Store,Update}MaterialRequest` (الـ`unique` بقى على `name` لوحده على مستوى الجدول كله)، `MaterialController` (شيل الـjoin على `categories` ودالة `categories()` الخاصة)، `materials/index` (شيل العمود)، `materials/_fields` (شيل الـselect)، `purchases/create` و`rooms/show` (شيل `{{ $material->category->name }} — ` من الـoptions)، `PurchaseController` و`RoomController` (شيل الـeager loading).
+- **`MaterialTest.php` اتعاد كتابته:** اختبار "نفس الاسم مسموح في تصنيفين مختلفين" **اتقلب** لاختبار "الاسم المكرر مرفوض في كل النظام"، وضفت اختبار "إعادة تسمية مادة لاسم مادة تانية موجودة → مرفوض" واختبار "بدون وحدة قياس → مرفوض". 8 → 9 اختبارات.
+- **تحقق فعلي على قاعدة البيانات الحقيقية:** شغّلت `php artisan migrate --force` على `database/database.sqlite` (بعد أخد نسخة احتياطية) والنتيجة: الـ7 مواد كلها موجودة بأسمائها ووحداتها، الـ7 دفعات مخزون سليمة، جدول `categories` اتمسح، والفهرس `materials_name_unique` اتعمل. اتأكدت من شكل الجدول النهائي بقراءة `sqlite_master` مباشرة.
+- **`grep` تأكيدي:** صفر إشارة باقية لـ`Category` أو `category_id` في `app/`، `resources/`، `routes/`، `tests/`، `lang/` (خارج `expense_categories` طبعًا).
+- **توثيق:** `docs/inventory.md` (اتعاد كتابة قسم المادة + ملحوظة تاريخية بسبب الحذف)، `docs/system-overview.md` (صف `Category` + مخطط العلاقات)، `docs/mvp-scope.md`، `start-agent/PROJECT.md`، و`USER-GUIDE.md` القسم 2 (+ تصحيح إشارة "زي المخزون بالظبط" في قسم المصروفات اللي بقت بلا معنى).
+
+**حالة الاختبارات:** 235/235 → **228/228 ناجحة** (606 assertion). النقص مقصود: `CategoryTest.php` (8 اختبارات) اتحذف مع الميزة، و`MaterialTest` زاد اختبار واحد صافي. Pint نظيف، `npm run build` ناجح.
+
+**بنود اتعلّمت:** التاسك 2 كامل (2.1 → 2.19) في `specs/TASKS.md`.
+
+**ملاحظات لأي Agent جاي:**
+- **`expense_categories` (بنود المصروفات) حاجة تانية تمامًا ولسه موجودة وشغالة** — متلخبطش بينها وبين تصنيفات المواد اللي اتشالت.
+- **معلومة مؤكدة عن SQLite (تستاهل تتضاف لـPITFALLS لو حصلت تاني):** `alter table … drop column` بيفشل لو العمود داخل في فهرس. لازم `dropUnique`/`dropIndex` في `Schema::table()` **منفصلة وقبلها**. الترتيب دا اتجرّب فعليًا على بيانات حقيقية ونجح.
+- نسخة احتياطية من قاعدة البيانات قبل الـmigration اتحطت في مجلد الـscratchpad الخاص بالجلسة (مش في الريبو) — مش هتلاقيها بعد كدا.
+- التاسك 3 (إعادة تسمية "المواد" لـ"المخزون" + شريط بحث) هو الباقي، وتفاصيله في `specs/TASKS.md`.
+---

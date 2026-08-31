@@ -5,7 +5,7 @@
 | # | التاسك | الحالة |
 |---|---|---|
 | 1 | صفحة البروفايل (اسم + إيميل + كلمة مرور) | ✅ **مكتمل** (235/235 اختبار) |
-| 2 | حذف فكرة تصنيفات المواد بالكامل | ⬜ لم يبدأ |
+| 2 | حذف فكرة تصنيفات المواد بالكامل | ✅ **مكتمل** (228/228 اختبار) |
 | 3 | صفحة المخزون: إعادة تسمية + شريط بحث | ⬜ لم يبدأ |
 
 **قرارات المستخدم المعتمدة (لكل التاسكات):**
@@ -41,30 +41,30 @@
 
 ---
 
-## التاسك 2 — حذف تصنيفات المواد ⬜
+## التاسك 2 — حذف تصنيفات المواد ✅
 
 **الغرض:** إلغاء طبقة تصنيف المواد الخام بالكامل. المادة تبقى: اسم + وحدة قياس بس.
 **⚠️ ده مش بيمس `expense_categories` (بنود المصروفات) — دي حاجة تانية وهتفضل زي ما هي.**
 
-- [ ] **2.1** Migration جديدة: `dropUnique(['category_id','name'])` → `dropForeign` + `dropColumn('category_id')` → `unique('name')` → `dropIfExists('categories')` — **كل خطوة في `Schema::table` منفصلة** (SQLite بيرفض حذف عمود عليه فهرس)
-- [ ] **2.2** حذف: `app/Models/Category.php`، `database/factories/CategoryFactory.php`، `app/Http/Controllers/Inventory/CategoryController.php`، `app/Http/Requests/Inventory/{Store,Update}CategoryRequest.php`، `resources/views/inventory/categories/` كامل، `tests/Feature/Inventory/CategoryTest.php`
-- [ ] **2.3** `app/Models/Material.php` — شيل `category()` و`category_id` من `#[Fillable]`
-- [ ] **2.4** `database/factories/MaterialFactory.php` — شيل `category_id`
-- [ ] **2.5** `app/Http/Requests/Inventory/{Store,Update}MaterialRequest.php` — شيل `category_id`، وخلّي `unique('materials','name')` عام (مع `ignore` في Update)
-- [ ] **2.6** `app/Http/Controllers/Inventory/MaterialController.php` — شيل الـ`join` على `categories` والـ`with('category')` ودالة `categories()` الخاصة، ورتّب بالاسم بس
-- [ ] **2.7** `resources/views/inventory/materials/index.blade.php` — شيل عمود "التصنيف"
-- [ ] **2.8** `resources/views/inventory/materials/_fields.blade.php` — شيل الـ`<select>` بالكامل
-- [ ] **2.9** `resources/views/inventory/purchases/create.blade.php` + `resources/views/rooms/show.blade.php` — شيل `{{ $material->category->name }} — ` من نص الـoption
-- [ ] **2.10** `app/Http/Controllers/Inventory/PurchaseController.php` + `app/Http/Controllers/RoomController.php` — شيل `with('category')` و`material.category` من الـeager loading
-- [ ] **2.11** `routes/web.php` — شيل مسار `categories` وimport الـ`CategoryController`
-- [ ] **2.12** `resources/views/components/app-layout.blade.php` — شيل عنصر "التصنيفات" من `$navItems`
-- [ ] **2.13** `lang/ar/validation.php` — شيل `'category_id' => 'التصنيف'` من `attributes`
-- [ ] **2.14** `tests/Feature/Inventory/MaterialTest.php` — تحديث كل الاختبارات؛ اختبار "نفس الاسم في تصنيفين" **يتقلب** لاختبار "اسم مكرر مرفوض على مستوى النظام"
-- [ ] **2.15** `php artisan test --compact` + `pint` + `npm run build`
-- [ ] **2.16** `php artisan migrate` على قاعدة البيانات الحقيقية والتأكد إن الـ7 مواد لسه موجودة
-- [ ] **2.17** `docs/inventory.md` (قسم التصنيف + القيد الفريد)، `docs/system-overview.md` (صف `Category` + مخطط العلاقات)، `docs/mvp-scope.md` (سطر 7)
-- [ ] **2.18** `USER-GUIDE.md` القسم 2 — شيل كلام الأصناف
-- [ ] **2.19** إدخال في `AGENT_LOG.md`
+- [x] **2.1** Migration جديدة: `dropUnique(['category_id','name'])` → `dropForeign` + `dropColumn('category_id')` → `unique('name')` → `dropIfExists('categories')` — **كل خطوة في `Schema::table` منفصلة** (SQLite بيرفض حذف عمود عليه فهرس)
+- [x] **2.2** حذف: `app/Models/Category.php`، `database/factories/CategoryFactory.php`، `app/Http/Controllers/Inventory/CategoryController.php`، `app/Http/Requests/Inventory/{Store,Update}CategoryRequest.php`، `resources/views/inventory/categories/` كامل، `tests/Feature/Inventory/CategoryTest.php`
+- [x] **2.3** `app/Models/Material.php` — شيل `category()` و`category_id` من `#[Fillable]`
+- [x] **2.4** `database/factories/MaterialFactory.php` — شيل `category_id`
+- [x] **2.5** `app/Http/Requests/Inventory/{Store,Update}MaterialRequest.php` — شيل `category_id`، وخلّي `unique('materials','name')` عام (مع `ignore` في Update)
+- [x] **2.6** `app/Http/Controllers/Inventory/MaterialController.php` — شيل الـ`join` على `categories` والـ`with('category')` ودالة `categories()` الخاصة، ورتّب بالاسم بس
+- [x] **2.7** `resources/views/inventory/materials/index.blade.php` — شيل عمود "التصنيف"
+- [x] **2.8** `resources/views/inventory/materials/_fields.blade.php` — شيل الـ`<select>` بالكامل
+- [x] **2.9** `resources/views/inventory/purchases/create.blade.php` + `resources/views/rooms/show.blade.php` — شيل `{{ $material->category->name }} — ` من نص الـoption
+- [x] **2.10** `app/Http/Controllers/Inventory/PurchaseController.php` + `app/Http/Controllers/RoomController.php` — شيل `with('category')` و`material.category` من الـeager loading
+- [x] **2.11** `routes/web.php` — شيل مسار `categories` وimport الـ`CategoryController`
+- [x] **2.12** `resources/views/components/app-layout.blade.php` — شيل عنصر "التصنيفات" من `$navItems`
+- [x] **2.13** `lang/ar/validation.php` — شيل `'category_id' => 'التصنيف'` من `attributes`
+- [x] **2.14** `tests/Feature/Inventory/MaterialTest.php` — تحديث كل الاختبارات؛ اختبار "نفس الاسم في تصنيفين" **يتقلب** لاختبار "اسم مكرر مرفوض على مستوى النظام"
+- [x] **2.15** `php artisan test --compact` + `pint` + `npm run build`
+- [x] **2.16** `php artisan migrate` على قاعدة البيانات الحقيقية والتأكد إن الـ7 مواد لسه موجودة
+- [x] **2.17** `docs/inventory.md` (قسم التصنيف + القيد الفريد)، `docs/system-overview.md` (صف `Category` + مخطط العلاقات)، `docs/mvp-scope.md` (سطر 7)
+- [x] **2.18** `USER-GUIDE.md` القسم 2 — شيل كلام الأصناف
+- [x] **2.19** إدخال في `AGENT_LOG.md`
 
 **ملاحظة:** `docs/tasks.md` و`docs/tasks-checklist.md` **أرشيف — ممنوع تعديلهم** حتى لو فيهم كلام عن التصنيفات.
 

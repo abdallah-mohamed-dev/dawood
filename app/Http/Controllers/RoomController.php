@@ -58,12 +58,12 @@ class RoomController extends Controller
 
     public function show(Room $room): View
     {
-        $room->load(['customer', 'roomMaterials.material.category', 'customerPayments' => fn ($query) => $query->latest('paid_at')->latest('id')]);
+        $room->load(['customer', 'roomMaterials.material', 'customerPayments' => fn ($query) => $query->latest('paid_at')->latest('id')]);
 
         return view('rooms.show', [
             'room' => $room,
             'stockByMaterial' => $this->inventory->stockByMaterialIds($room->roomMaterials->pluck('material_id')->all()),
-            'availableMaterials' => Material::query()->with('category')->orderBy('name')->get(),
+            'availableMaterials' => Material::query()->orderBy('name')->get(),
             'statuses' => RoomStatus::cases(),
         ]);
     }

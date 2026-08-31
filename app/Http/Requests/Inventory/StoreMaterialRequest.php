@@ -24,12 +24,11 @@ class StoreMaterialRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['required', 'integer', 'exists:categories,id'],
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('materials', 'name')->where('category_id', $this->input('category_id')),
+                Rule::unique('materials', 'name'),
             ],
             'unit' => ['required', 'string', 'max:50'],
         ];

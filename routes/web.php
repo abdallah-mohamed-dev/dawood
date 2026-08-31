@@ -5,7 +5,6 @@ use App\Http\Controllers\CashboxController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\Inventory\CategoryController;
 use App\Http\Controllers\Inventory\MaterialController;
 use App\Http\Controllers\Inventory\PurchaseController;
 use App\Http\Controllers\PartnerController;
@@ -42,7 +41,6 @@ Route::middleware('auth')->group(function () {
         ->name('cashbox.opening-balance.store');
 
     Route::prefix('inventory')->name('inventory.')->group(function () {
-        Route::resource('categories', CategoryController::class)->except('show');
         Route::resource('materials', MaterialController::class)->except('show');
         Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store', 'destroy']);
     });

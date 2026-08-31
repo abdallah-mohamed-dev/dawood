@@ -198,7 +198,6 @@ return [
         'date' => 'التاريخ',
         'description' => 'الوصف',
         'note' => 'ملاحظة',
-        'category_id' => 'التصنيف',
         'unit' => 'وحدة القياس',
         'occurred_at' => 'التاريخ',
         'material_id' => 'المادة',

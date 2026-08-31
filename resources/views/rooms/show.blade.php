@@ -66,7 +66,7 @@
                 <select id="material_id" name="material_id" required class="w-56 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                     <option value="">اختر مادة</option>
                     @foreach ($availableMaterials as $material)
-                        <option value="{{ $material->id }}">{{ $material->category->name }} — {{ $material->name }} ({{ $material->unit }})</option>
+                        <option value="{{ $material->id }}">{{ $material->name }} ({{ $material->unit }})</option>
                     @endforeach
                 </select>
                 @error('material_id')
