@@ -43,4 +43,8 @@
             </tr>
         @endforeach
     </x-data-table>
+
+    <div class="mt-4">
+        {{ $materials->links() }}
+    </div>
 </x-app-layout>

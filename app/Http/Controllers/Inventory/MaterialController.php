@@ -20,14 +20,20 @@ class MaterialController extends Controller
     {
         $search = trim($request->string('q')->toString());
 
+        // 50 rather than the usual 25: this page is read by scanning for a
+        // material, so longer pages mean less flipping. withQueryString keeps
+        // an active search alive on page two.
         $materials = Material::query()
             ->when($search !== '', fn ($query) => $query->where('name', 'like', '%'.$search.'%'))
             ->orderBy('name')
-            ->get();
+            ->paginate(50)
+            ->withQueryString();
 
         return view('inventory.materials.index', [
             'materials' => $materials,
-            'stockByMaterial' => $this->inventory->stockByMaterialIds(),
+            // Scoped to this page's materials — summing every batch in the
+            // warehouse to render 50 rows gets worse as the table grows.
+            'stockByMaterial' => $this->inventory->stockByMaterialIds($materials->pluck('id')->all()),
             'search' => $search,
         ]);
     }

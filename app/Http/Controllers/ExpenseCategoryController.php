@@ -16,7 +16,7 @@ class ExpenseCategoryController extends Controller
         $categories = ExpenseCategory::query()
             ->withCount('expenses')
             ->orderBy('name')
-            ->get();
+            ->paginate(25);
 
         return view('expenses.categories.index', ['categories' => $categories]);
     }

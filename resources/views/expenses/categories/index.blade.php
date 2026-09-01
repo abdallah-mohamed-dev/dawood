@@ -18,4 +18,8 @@
             </tr>
         @endforeach
     </x-data-table>
+
+    <div class="mt-4">
+        {{ $categories->links() }}
+    </div>
 </x-app-layout>
