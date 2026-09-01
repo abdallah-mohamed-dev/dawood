@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\CashboxTransactionKind;
 use App\Enums\CashboxTransactionType;
+use App\Enums\PaymentMethod;
 use App\Models\CashboxTransaction;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
@@ -19,14 +20,14 @@ use RuntimeException;
  */
 class CashboxService
 {
-    public function recordIn(Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description = null): CashboxTransaction
+    public function recordIn(Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description = null, PaymentMethod $method = PaymentMethod::Cash): CashboxTransaction
     {
-        return $this->record(CashboxTransactionType::In, $source, $amount, $kind, $date, $description);
+        return $this->record(CashboxTransactionType::In, $source, $amount, $kind, $date, $description, $method);
     }
 
-    public function recordOut(Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description = null): CashboxTransaction
+    public function recordOut(Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description = null, PaymentMethod $method = PaymentMethod::Cash): CashboxTransaction
     {
-        return $this->record(CashboxTransactionType::Out, $source, $amount, $kind, $date, $description);
+        return $this->record(CashboxTransactionType::Out, $source, $amount, $kind, $date, $description, $method);
     }
 
     public function removeFor(Model $source): void
@@ -37,16 +38,24 @@ class CashboxService
             ->delete();
     }
 
-    public function updateFor(Model $source, int $amount): void
+    public function updateFor(Model $source, int $amount, ?PaymentMethod $method = null): void
     {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Cashbox transaction amount must be greater than zero.');
         }
 
+        $attributes = ['amount' => $amount];
+
+        // Left untouched when null so callers that only change the amount
+        // don't silently reset how the money changed hands.
+        if ($method !== null) {
+            $attributes['payment_method'] = $method;
+        }
+
         $updated = CashboxTransaction::query()
             ->where('source_type', $source::class)
             ->where('source_id', $source->getKey())
-            ->update(['amount' => $amount]);
+            ->update($attributes);
 
         if ($updated === 0) {
             throw new RuntimeException(
@@ -55,7 +64,7 @@ class CashboxService
         }
     }
 
-    public function setOpeningBalance(int $amount, DateTimeInterface|string $date): CashboxTransaction
+    public function setOpeningBalance(int $amount, DateTimeInterface|string $date, PaymentMethod $method = PaymentMethod::Cash): CashboxTransaction
     {
         if ($amount < 0) {
             throw new InvalidArgumentException('The opening balance cannot be negative.');
@@ -72,6 +81,7 @@ class CashboxService
                 'amount' => $amount,
                 'source_type' => null,
                 'source_id' => null,
+                'payment_method' => $method,
                 'occurred_at' => $date,
             ],
         ));
@@ -118,7 +128,48 @@ class CashboxService
         ];
     }
 
-    private function record(CashboxTransactionType $type, Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description): CashboxTransaction
+    /**
+     * How much came in and went out through each payment method, in one
+     * aggregate query. Purely a presentation breakdown of a single balance —
+     * these are NOT separate wallets with their own balances, and nothing in
+     * the system enforces per-method solvency.
+     *
+     * @return array<string, array{in: int, out: int}> keyed by PaymentMethod
+     *                                                 value, plus 'unknown'
+     *                                                 for pre-existing rows
+     */
+    public function breakdownByMethod(): array
+    {
+        $rows = CashboxTransaction::query()
+            ->selectRaw(
+                'payment_method, SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_in, SUM(CASE WHEN type = ? THEN amount ELSE 0 END) as total_out',
+                [CashboxTransactionType::In->value, CashboxTransactionType::Out->value],
+            )
+            ->groupBy('payment_method')
+            ->get();
+
+        $breakdown = [];
+
+        foreach (PaymentMethod::cases() as $method) {
+            $breakdown[$method->value] = ['in' => 0, 'out' => 0];
+        }
+
+        foreach ($rows as $row) {
+            // ->value, not the enum itself: selectRaw still runs the model's
+            // casts, so payment_method comes back as a PaymentMethod here.
+            // Rows written before the column existed group under 'unknown'.
+            $key = $row->payment_method?->value ?? 'unknown';
+
+            $breakdown[$key] = [
+                'in' => (int) $row->total_in,
+                'out' => (int) $row->total_out,
+            ];
+        }
+
+        return $breakdown;
+    }
+
+    private function record(CashboxTransactionType $type, Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description, PaymentMethod $method): CashboxTransaction
     {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Cashbox transaction amount must be greater than zero.');
@@ -130,6 +181,7 @@ class CashboxService
             'source_type' => $source::class,
             'source_id' => $source->getKey(),
             'kind' => $kind,
+            'payment_method' => $method,
             'description' => $description,
             'occurred_at' => $date,
         ]);

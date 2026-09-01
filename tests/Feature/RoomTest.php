@@ -1,7 +1,9 @@
 <?php
 
+use App\Enums\PaymentMethod;
 use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
+use App\Models\CashboxTransaction;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Room;
@@ -72,7 +74,8 @@ test('issuing an unsafely large quantity is rejected as a clean validation error
         'quantity' => '9999999999999999.000',
     ]);
 
-    $response->assertSessionHasErrors('quantity');
+    // Per-row bag — the room page renders one issue form per material.
+    $response->assertSessionHasErrors('quantity', null, 'issue_'.$roomMaterial->id);
     expect($roomMaterial->fresh()->getRawOriginal('issued_quantity'))->toBe(0);
 });
 
@@ -161,7 +164,7 @@ test('issuing a zero quantity is rejected with a message about the quantity, not
         'quantity' => '0',
     ]);
 
-    $response->assertSessionHasErrors('quantity');
+    $response->assertSessionHasErrors('quantity', null, 'issue_'.$roomMaterial->id);
     $response->assertSessionMissing('error');
 });
 
@@ -288,6 +291,7 @@ test('a labour payment can be added from the room page and leaves the cashbox', 
         'description' => 'دفعة أولى للنجار',
         'amount' => '5000.00',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect();
@@ -305,6 +309,7 @@ test('an extra room expense can be added from the room page', function () {
         'description' => 'نقل',
         'amount' => '250.50',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ]);
 
     expect(RoomCost::query()->sole()->type)->toBe(RoomCostType::Other);
@@ -317,6 +322,7 @@ test('an invalid room cost amount is reported in its own error bag, not the paym
         'type' => 'labor',
         'amount' => 'abc',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ]);
 
     // The payment form shares the field name `amount` and lives on the same
@@ -333,6 +339,7 @@ test('the other-expense form uses its own error bag too', function () {
         'type' => 'other',
         'amount' => '',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ])->assertSessionHasErrors(['amount'], null, 'roomCost_other');
 });
 
@@ -343,6 +350,7 @@ test('a zero room cost is rejected', function () {
         'type' => 'labor',
         'amount' => '0',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ])->assertSessionHasErrors(['amount'], null, 'roomCost_labor');
 
     expect(RoomCost::query()->count())->toBe(0);
@@ -366,6 +374,7 @@ test('deleting a room cost puts the money back in the cashbox', function () {
         'type' => 'labor',
         'amount' => '5000.00',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ]);
     $cost = RoomCost::query()->sole();
 
@@ -381,6 +390,7 @@ test('a room carrying costs cannot be deleted', function () {
         'type' => 'labor',
         'amount' => '5000.00',
         'occurred_at' => '2026-01-05',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->delete(route('rooms.destroy', $room));
@@ -438,6 +448,7 @@ test('a failed labour submission does not repopulate the extra-expense form', fu
             'description' => 'دفعة النجار الأولى',
             'amount' => '',
             'occurred_at' => '2026-01-05',
+            'payment_method' => 'cash',
         ])
         ->getContent();
 
@@ -459,6 +470,7 @@ test('a failed submission keeps the amount and date the user typed in that secti
             'description' => '',
             'amount' => 'abc',
             'occurred_at' => '2026-02-20',
+            'payment_method' => 'cash',
         ])
         ->getContent();
 
@@ -501,6 +513,7 @@ test('a cost validation error renders inside its own section only', function () 
             'type' => 'other',
             'amount' => 'abc',
             'occurred_at' => '2026-01-05',
+            'payment_method' => 'cash',
         ])
         ->getContent();
 
@@ -522,6 +535,7 @@ test('the controller-level amount error also lands in the right section only', f
             'type' => 'labor',
             'amount' => '9999999999999999.00',
             'occurred_at' => '2026-01-05',
+            'payment_method' => 'cash',
         ])
         ->getContent();
 
@@ -539,10 +553,146 @@ test('a failed customer payment does not surface an error inside the cost forms'
         ->post(route('rooms.payments.store', $room), [
             'amount' => '99999.00', // more than the sale price
             'paid_at' => '2026-01-05',
+            'payment_method' => 'cash',
         ])
         ->getContent();
 
     expect($html)->toContain('المتبقي الفعلي');
     expect(substr($html, strpos($html, 'roomCost_labor_amount'), 600))->not->toContain('المتبقي الفعلي');
     expect(substr($html, strpos($html, 'roomCost_other_amount'), 600))->not->toContain('المتبقي الفعلي');
+});
+
+test('an invalid issue quantity reports under its own material row only', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $inventory = app(InventoryService::class);
+
+    $first = Material::factory()->create(['name' => 'خشب زان']);
+    $second = Material::factory()->create(['name' => 'مسامير']);
+    $inventory->purchase($first, 10_000, 10_000, '2026-01-01');
+    $inventory->purchase($second, 10_000, 10_000, '2026-01-01');
+
+    $firstRow = RoomMaterial::factory()->for($room)->for($first)->create(['required_quantity' => 5_000]);
+    RoomMaterial::factory()->for($room)->for($second)->create(['required_quantity' => 5_000]);
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.materials.issue', [$room, $firstRow]), ['quantity' => 'abc'])
+        ->getContent();
+
+    // The page renders two rows, each with a field called `quantity` — the
+    // message and the rejected value must appear exactly once.
+    expect(substr_count($html, 'صيغة حقل الكمية غير صحيحة.'))->toBe(1);
+    expect(substr_count($html, 'value="abc"'))->toBe(1);
+});
+
+test('a zero issue quantity is reported instead of silently reloading', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $material = Material::factory()->create();
+    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    $row = RoomMaterial::factory()->for($room)->for($material)->create(['required_quantity' => 5_000]);
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.materials.issue', [$room, $row]), ['quantity' => '0'])
+        ->getContent();
+
+    expect($html)->toContain('يجب أن تكون الكمية أكبر من صفر.');
+    expect($row->fresh()->getRawOriginal('issued_quantity'))->toBe(0);
+});
+
+test('an issue error does not leak into the cost or payment forms', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $material = Material::factory()->create();
+    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    $row = RoomMaterial::factory()->for($room)->for($material)->create(['required_quantity' => 5_000]);
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.materials.issue', [$room, $row]), ['quantity' => 'abc'])
+        ->getContent();
+
+    expect(substr($html, strpos($html, 'roomCost_labor_amount'), 600))->toContain('value=""');
+    expect(substr($html, strpos($html, 'roomCost_other_amount'), 600))->toContain('value=""');
+    expect(substr($html, strpos($html, 'صيغة حقل الكمية غير صحيحة.') - 2000, 2000))->not->toContain('roomCost_');
+});
+
+test('a failed labour submission does not change the payment method of the other two forms', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    // The room page renders payment_method three times (labour, extra
+    // expense, customer payment). old() is global, so without a guard this
+    // one choice would preselect itself in all three.
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.costs.store', $room), [
+            'type' => 'labor',
+            'amount' => '', // fails
+            'occurred_at' => '2026-01-05',
+            'payment_method' => 'instapay',
+        ])
+        ->getContent();
+
+    // Exactly one of the three selects has instapay selected — the one that
+    // was submitted; the others fall back to the cash default.
+    expect(substr_count($html, 'value="instapay" selected'))->toBe(1);
+    expect(substr_count($html, 'value="cash" selected'))->toBe(2);
+
+    $labor = substr($html, strpos($html, 'roomCost_labor_payment_method'), 900);
+    expect($labor)->toContain('value="instapay" selected');
+});
+
+test('a failed customer payment does not change the payment method of the cost forms', function () {
+    $room = Room::factory()->for($this->customer)->create(['sale_price' => 100_000]);
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.payments.store', $room), [
+            'amount' => '99999.00', // more than the sale price
+            'paid_at' => '2026-01-05',
+            'payment_method' => 'cheque',
+        ])
+        ->getContent();
+
+    expect(substr_count($html, 'value="cheque" selected'))->toBe(1);
+    expect(substr($html, strpos($html, 'payment_payment_method'), 900))->toContain('value="cheque" selected');
+});
+
+test('the room page defaults every payment method select to cash', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->getContent();
+
+    expect(substr_count($html, 'value="cash" selected'))->toBe(3);
+});
+
+test('a room cost records the chosen payment method on its cashbox row', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'labor',
+        'amount' => '5000.00',
+        'occurred_at' => '2026-01-05',
+        'payment_method' => 'wallet',
+    ]);
+
+    $transaction = CashboxTransaction::query()->where('source_type', RoomCost::class)->sole();
+    expect($transaction->payment_method)->toBe(PaymentMethod::Wallet);
+});
+
+test('an invalid payment method is rejected in the right bag', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'other',
+        'amount' => '100.00',
+        'occurred_at' => '2026-01-05',
+        'payment_method' => 'bitcoin',
+    ])->assertSessionHasErrors(['payment_method'], null, 'roomCost_other');
+
+    expect(RoomCost::query()->count())->toBe(0);
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use App\Enums\RoomCostType;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -39,6 +40,7 @@ class StoreRoomCostRequest extends FormRequest
             'amount' => ['required', 'regex:'.MoneyCast::validationPattern()],
             'occurred_at' => ['required', 'date'],
             'description' => ['nullable', 'string', 'max:255'],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
         ];
     }
 }

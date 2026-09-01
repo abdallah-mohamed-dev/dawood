@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use App\Http\Requests\StoreExpenseRequest;
 use App\Http\Requests\UpdateExpenseRequest;
 use App\Models\Expense;
@@ -41,7 +42,7 @@ class ExpenseController extends Controller
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
             $description = $request->filled('description') ? $request->string('description')->toString() : null;
-            $this->expenses->create($category, $amount, $request->date('occurred_at'), $description);
+            $this->expenses->create($category, $amount, $request->date('occurred_at'), $description, PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (InvalidArgumentException) {
             return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
         }
@@ -58,7 +59,7 @@ class ExpenseController extends Controller
     {
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
-            $this->expenses->update($expense, $amount);
+            $this->expenses->update($expense, $amount, PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (InvalidArgumentException) {
             return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
         } catch (RuntimeException) {

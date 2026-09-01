@@ -56,31 +56,96 @@
                 @enderror
             </div>
 
+            <x-payment-method-select :selected="$openingBalance?->payment_method" />
+
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
                 {{ __('Save') }}
             </button>
         </form>
     </div>
 
-    <x-data-table :headings="['التاريخ', 'النوع', 'البند', 'الوصف', 'المبلغ']" :rows="$transactions">
-        @foreach ($transactions as $transaction)
-            <tr>
-                <td class="px-4 py-2">{{ $transaction->occurred_at->format('Y-m-d') }}</td>
-                <td class="px-4 py-2">
-                    <span class="{{ $transaction->type === \App\Enums\CashboxTransactionType::In ? 'text-success' : 'text-danger' }}">
-                        {{ $transaction->type->label() }}
-                    </span>
-                </td>
-                <td class="px-4 py-2">{{ $transaction->kind->label() }}</td>
-                <td class="px-4 py-2 text-secondary">{{ $transaction->description ?? '—' }}</td>
-                <td class="px-4 py-2 text-end">
-                    <x-money :amount="$transaction->amount" />
-                </td>
-            </tr>
-        @endforeach
-    </x-data-table>
+    <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
+        <h2 class="mb-3 text-sm font-semibold text-gray-900">التقسيم حسب طريقة الدفع</h2>
 
-    <div class="mt-4">
-        {{ $transactions->links() }}
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            @foreach ($methods as $method)
+                @php $row = $breakdown[$method->value] ?? ['in' => 0, 'out' => 0]; @endphp
+                <div class="rounded-lg border border-border bg-bg-subtle p-3">
+                    <div class="text-xs font-semibold text-gray-900">{{ $method->label() }}</div>
+                    <div class="mt-2 text-xs text-secondary">
+                        داخل: <span class="font-semibold text-success"><x-money :amount="$row['in']" /></span>
+                    </div>
+                    <div class="mt-1 text-xs text-secondary">
+                        خارج: <span class="font-semibold text-danger"><x-money :amount="$row['out']" /></span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
+        @if (! empty($breakdown['unknown']))
+            <div class="mt-3 rounded-lg border border-border bg-bg-subtle p-3 text-xs text-secondary">
+                حركات قديمة بدون طريقة دفع مسجَّلة —
+                داخل: <x-money :amount="$breakdown['unknown']['in']" /> ·
+                خارج: <x-money :amount="$breakdown['unknown']['out']" />
+            </div>
+        @endif
+
+        <p class="mt-3 text-xs text-secondary">
+            التقسيم للعرض فقط. رصيد الخزنة رقم واحد، وهذه ليست محافظ منفصلة بأرصدة مستقلة.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div>
+            <h2 class="mb-3 text-sm font-semibold text-success">الداخل</h2>
+
+            <x-data-table :headings="['التاريخ', 'البند', 'طريقة الدفع', 'المبلغ']" :rows="$incoming" empty="لا توجد حركات داخلة.">
+                @foreach ($incoming as $transaction)
+                    <tr>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->occurred_at->format('Y-m-d') }}</td>
+                        <td class="px-4 py-2">
+                            {{ $transaction->detailedLabel() }}
+                            @if ($transaction->description)
+                                <span class="block text-xs text-secondary">{{ $transaction->description }}</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-2 text-secondary whitespace-nowrap">{{ $transaction->payment_method?->label() ?? '—' }}</td>
+                        <td class="px-4 py-2 text-end whitespace-nowrap text-success">
+                            <x-money :amount="$transaction->amount" />
+                        </td>
+                    </tr>
+                @endforeach
+            </x-data-table>
+
+            <div class="mt-4">
+                {{ $incoming->links() }}
+            </div>
+        </div>
+
+        <div>
+            <h2 class="mb-3 text-sm font-semibold text-danger">الخارج</h2>
+
+            <x-data-table :headings="['التاريخ', 'البند', 'طريقة الدفع', 'المبلغ']" :rows="$outgoing" empty="لا توجد حركات خارجة.">
+                @foreach ($outgoing as $transaction)
+                    <tr>
+                        <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->occurred_at->format('Y-m-d') }}</td>
+                        <td class="px-4 py-2">
+                            {{ $transaction->detailedLabel() }}
+                            @if ($transaction->description)
+                                <span class="block text-xs text-secondary">{{ $transaction->description }}</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-2 text-secondary whitespace-nowrap">{{ $transaction->payment_method?->label() ?? '—' }}</td>
+                        <td class="px-4 py-2 text-end whitespace-nowrap text-danger">
+                            <x-money :amount="$transaction->amount" />
+                        </td>
+                    </tr>
+                @endforeach
+            </x-data-table>
+
+            <div class="mt-4">
+                {{ $outgoing->links() }}
+            </div>
+        </div>
     </div>
 </x-app-layout>

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 #[Fillable(['expense_category_id', 'amount', 'occurred_at', 'description'])]
 class Expense extends Model
@@ -29,5 +30,15 @@ class Expense extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
+    }
+
+    /**
+     * The single cashbox row this record wrote, used only so the edit form
+     * can show which payment method was chosen — the method lives on the
+     * cashbox transaction, not here (see docs/cashbox.md).
+     */
+    public function cashboxTransaction(): MorphOne
+    {
+        return $this->morphOne(CashboxTransaction::class, 'source');
     }
 }

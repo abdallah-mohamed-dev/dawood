@@ -103,7 +103,7 @@
 | # | التاسك | الحالة |
 |---|---|---|
 | 4 | تكاليف الغرفة (المصنعية + مصروفات إضافية + ربح الغرفة) | ✅ **مكتمل** (262/262 اختبار) |
-| 5 | صفحة الخزنة (طريقة الدفع + جدولين + البند التفصيلي) | ⬜ لم يبدأ |
+| 5 | صفحة الخزنة (طريقة الدفع + جدولين + البند التفصيلي) | ✅ **مكتمل** (285/285 اختبار) |
 | 6 | الباجينيشن الناقص | ⬜ لم يبدأ |
 | 7 | الإضافة السريعة من نفس الصفحة | ⬜ لم يبدأ |
 | 8 | فلاتر وبحث المشتريات | ⬜ لم يبدأ |
@@ -180,7 +180,7 @@
 
 ---
 
-## التاسك 5 — صفحة الخزنة: طريقة الدفع + جدولين + البند التفصيلي ⬜
+## التاسك 5 — صفحة الخزنة: طريقة الدفع + جدولين + البند التفصيلي ✅
 
 **الغرض:** تعرف كل جنيه دخل أو خرج **إزاي** (كاش/محفظة/انستا/شيك/فيزا)، وتشوف الداخل والخارج في جدولين منفصلين، وعمود "البند" يقول الحاجة التفصيلية مش النوع العام.
 
@@ -191,33 +191,33 @@
 4. `morphWith` من غيره = N+1 مرعب (4 استعلامات × 25 صف).
 
 ### وسيلة الدفع
-- [ ] **5.1** `app/Enums/PaymentMethod.php` — `Cash` · `Wallet` · `Instapay` · `Cheque` · `Card` + `label()` عربي (كاش · محفظة · انستاباي · شيك · فيزا)
-- [ ] **5.2** Migration `add_payment_method_to_cashbox_transactions` — عمود `payment_method` string **nullable** + فهرس
-- [ ] **5.3** `app/Models/CashboxTransaction.php` — إضافته لـ`#[Fillable]` وcast لـ`PaymentMethod::class`
-- [ ] **5.4** `app/Services/CashboxService.php` — `recordIn`/`recordOut`/`record` تاخد `PaymentMethod $method = PaymentMethod::Cash` • `updateFor` تحدّثها لو اتبعتت • `setOpeningBalance` تاخدها كمان • **ميثود جديدة `breakdownByMethod()`** بترجّع الداخل والخارج لكل وسيلة في استعلام `GROUP BY` واحد
-- [ ] **5.5** الخدمات اللي بتنادي الخزنة تمرّر الوسيلة: `CustomerPaymentService` (create + update) · `InventoryService::purchase` · `ExpenseService` (create + update) · `PartnerService::withdraw` · `RoomCostService::create`
-- [ ] **5.6** علاقة `morphOne` اسمها `cashboxTransaction()` على `CustomerPayment` و`Expense` — عشان صفحات التعديل تعرض الوسيلة الحالية
+- [x] **5.1** `app/Enums/PaymentMethod.php` — `Cash` · `Wallet` · `Instapay` · `Cheque` · `Card` + `label()` عربي (كاش · محفظة · انستاباي · شيك · فيزا)
+- [x] **5.2** Migration `add_payment_method_to_cashbox_transactions` — عمود `payment_method` string **nullable** + فهرس
+- [x] **5.3** `app/Models/CashboxTransaction.php` — إضافته لـ`#[Fillable]` وcast لـ`PaymentMethod::class`
+- [x] **5.4** `app/Services/CashboxService.php` — `recordIn`/`recordOut`/`record` تاخد `PaymentMethod $method = PaymentMethod::Cash` • `updateFor` تحدّثها لو اتبعتت • `setOpeningBalance` تاخدها كمان • **ميثود جديدة `breakdownByMethod()`** بترجّع الداخل والخارج لكل وسيلة في استعلام `GROUP BY` واحد
+- [x] **5.5** الخدمات اللي بتنادي الخزنة تمرّر الوسيلة: `CustomerPaymentService` (create + update) · `InventoryService::purchase` · `ExpenseService` (create + update) · `PartnerService::withdraw` · `RoomCostService::create`
+- [x] **5.6** علاقة `morphOne` اسمها `cashboxTransaction()` على `CustomerPayment` و`Expense` — عشان صفحات التعديل تعرض الوسيلة الحالية
 
 ### الفورمات
-- [ ] **5.7** `<select>` طريقة الدفع (الافتراضي "كاش") في: فورم دفعة الغرفة · تعديل الدفعة · إضافة/تعديل مصروف · إضافة مشتريات · سحب شريك · المصنعية والمصروف الإضافي · الرصيد الافتتاحي
-- [ ] **5.8** الـForm Requests المقابلة: `payment_method` required + `Rule::enum(PaymentMethod::class)`
-- [ ] **5.9** `lang/ar/validation.php` — `'payment_method' => 'طريقة الدفع'`
+- [x] **5.7** `<select>` طريقة الدفع (الافتراضي "كاش") في: فورم دفعة الغرفة · تعديل الدفعة · إضافة/تعديل مصروف · إضافة مشتريات · سحب شريك · المصنعية والمصروف الإضافي · الرصيد الافتتاحي
+- [x] **5.8** الـForm Requests المقابلة: `payment_method` required + `Rule::enum(PaymentMethod::class)`
+- [x] **5.9** `lang/ar/validation.php` — `'payment_method' => 'طريقة الدفع'`
 
 ### الصفحة
-- [ ] **5.10** `CashboxController::index()` — استعلامين منفصلين بـ`pageName` مختلف (`in_page` / `out_page`)، الاتنين بـ`->withQueryString()`
-- [ ] **5.11** eager loading بـ`morphWith` على العلاقة `source` للجدولين: `Expense => ['category']` · `CustomerPayment => ['room.customer']` · `InventoryBatch => ['material']` · `PartnerWithdrawal => ['partner']` · `RoomCost => ['room.customer']`
-- [ ] **5.12** `CashboxTransaction::detailedLabel(): string` — `match` على `source_type`: مصروف → اسم البند • دفعة → "اسم العميل — نوع الغرفة" • شراء → اسم المادة • سحب → اسم الشريك • تكلفة غرفة → "مصنعية/مصروف — نوع الغرفة" • رصيد افتتاحي أو مصدر مفقود → `kind->label()`
-- [ ] **5.13** كروت التقسيم فوق: الرصيد + إجمالي الداخل + إجمالي الخارج (زي ما هم) ثم **صف كروت تقسيم بالوسيلة** (داخل وخارج لكل وسيلة) — **بدون صافي لكل وسيلة** عشان مايبقاش رقم مضلل
-- [ ] **5.14** `resources/views/cashbox/index.blade.php` — `grid gap-6 lg:grid-cols-2` (تحت بعض على الموبايل، الداخل على اليمين في RTL)، كل جدول بعنوان وباجينيشن مستقل، أعمدة: التاريخ · البند · طريقة الدفع · المبلغ
-- [ ] **5.15** لافتة تحذيرية صغيرة تحت كروت التقسيم: "التقسيم للعرض فقط — الرصيد رقم واحد، وليست محافظ منفصلة"
+- [x] **5.10** `CashboxController::index()` — استعلامين منفصلين بـ`pageName` مختلف (`in_page` / `out_page`)، الاتنين بـ`->withQueryString()`
+- [x] **5.11** eager loading بـ`morphWith` على العلاقة `source` للجدولين: `Expense => ['category']` · `CustomerPayment => ['room.customer']` · `InventoryBatch => ['material']` · `PartnerWithdrawal => ['partner']` · `RoomCost => ['room.customer']`
+- [x] **5.12** `CashboxTransaction::detailedLabel(): string` — `match` على `source_type`: مصروف → اسم البند • دفعة → "اسم العميل — نوع الغرفة" • شراء → اسم المادة • سحب → اسم الشريك • تكلفة غرفة → "مصنعية/مصروف — نوع الغرفة" • رصيد افتتاحي أو مصدر مفقود → `kind->label()`
+- [x] **5.13** كروت التقسيم فوق: الرصيد + إجمالي الداخل + إجمالي الخارج (زي ما هم) ثم **صف كروت تقسيم بالوسيلة** (داخل وخارج لكل وسيلة) — **بدون صافي لكل وسيلة** عشان مايبقاش رقم مضلل
+- [x] **5.14** `resources/views/cashbox/index.blade.php` — `grid gap-6 lg:grid-cols-2` (تحت بعض على الموبايل، الداخل على اليمين في RTL)، كل جدول بعنوان وباجينيشن مستقل، أعمدة: التاريخ · البند · طريقة الدفع · المبلغ
+- [x] **5.15** لافتة تحذيرية صغيرة تحت كروت التقسيم: "التقسيم للعرض فقط — الرصيد رقم واحد، وليست محافظ منفصلة"
 
 ### التحقق والتوثيق
-- [ ] **5.16** `tests/Feature/CashboxTest.php` — الجدولين منفصلين • الباجينيشن مستقل • التقسيم بالوسيلة صح • البند التفصيلي بيظهر لكل نوع مصدر • صف قديم بدون وسيلة مابيكسرش الصفحة
-- [ ] **5.17** `tests/Feature/Services/CashboxServiceTest.php` — الوسيلة بتتخزن • الافتراضي كاش • `updateFor` بتغيّرها
-- [ ] **5.18** اختبار عدد الاستعلامات ثابت مع زيادة الصفوف (N+1)
-- [ ] **5.19** `php artisan test --compact` + `pint` + `npm run build`
-- [ ] **5.20** `docs/cashbox.md` + `USER-GUIDE.md`
-- [ ] **5.21** إدخال في `AGENT_LOG.md`
+- [x] **5.16** `tests/Feature/CashboxTest.php` — الجدولين منفصلين • الباجينيشن مستقل • التقسيم بالوسيلة صح • البند التفصيلي بيظهر لكل نوع مصدر • صف قديم بدون وسيلة مابيكسرش الصفحة
+- [x] **5.17** `tests/Feature/Services/CashboxServiceTest.php` — الوسيلة بتتخزن • الافتراضي كاش • `updateFor` بتغيّرها
+- [x] **5.18** اختبار عدد الاستعلامات ثابت مع زيادة الصفوف (N+1)
+- [x] **5.19** `php artisan test --compact` + `pint` + `npm run build`
+- [x] **5.20** `docs/cashbox.md` + `USER-GUIDE.md`
+- [x] **5.21** إدخال في `AGENT_LOG.md`
 
 ---
 

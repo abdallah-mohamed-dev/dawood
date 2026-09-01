@@ -21,6 +21,7 @@ test('recording a payment updates paid/remaining and the cashbox', function () {
     $response = $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect();
@@ -33,11 +34,13 @@ test('a payment exceeding the remaining amount shows the exact remaining figure'
     $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '25000.00',
         'paid_at' => '2026-01-02',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -49,6 +52,7 @@ test('scientific-notation payment amounts are rejected as a clean validation err
     $response = $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '1e10',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -59,6 +63,7 @@ test('a payment with an unsafely large magnitude is rejected as a clean validati
     $response = $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '9999999999999999.00', // 16 digits — over ScaledIntegerCast's safe limit
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -69,11 +74,13 @@ test('editing a payment to an unsafely large magnitude is rejected as a clean va
     $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $payment = CustomerPayment::query()->sole();
 
     $response = $this->actingAs($this->admin)->put(route('payments.update', $payment), [
         'amount' => '9999999999999999.00',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -84,6 +91,7 @@ test('a zero payment amount is rejected', function () {
     $response = $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '0',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -93,6 +101,7 @@ test('deleting a payment restores the cashbox and shows no orphaned transaction'
     $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $payment = CustomerPayment::query()->sole();
 
@@ -107,11 +116,13 @@ test('a payment amount can be edited, updating the same cashbox transaction', fu
     $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $payment = CustomerPayment::query()->sole();
 
     $response = $this->actingAs($this->admin)->put(route('payments.update', $payment), [
         'amount' => '15000.00',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect(route('rooms.show', $this->room));
@@ -123,11 +134,13 @@ test('editing a payment beyond the remaining amount is rejected', function () {
     $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $payment = CustomerPayment::query()->sole();
 
     $response = $this->actingAs($this->admin)->put(route('payments.update', $payment), [
         'amount' => '40000.00',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -139,6 +152,7 @@ test('the payments registry lists a payment with its customer and room', functio
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
         'note' => 'دفعة مقدمة',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->get(route('payments.index'));
@@ -155,6 +169,7 @@ test('a payment note of exactly "0" is preserved, not silently discarded', funct
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
         'note' => '0',
+        'payment_method' => 'cash',
     ]);
 
     expect(CustomerPayment::query()->sole()->note)->toBe('0');
@@ -166,6 +181,7 @@ test('a new payment for a cancelled room is rejected', function () {
     $response = $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHas('error');
@@ -176,6 +192,7 @@ test('deleting a room with payments also removes the payments and their cashbox 
     $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
         'amount' => '10000.00',
         'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $this->actingAs($this->admin)->delete(route('rooms.destroy', $this->room));

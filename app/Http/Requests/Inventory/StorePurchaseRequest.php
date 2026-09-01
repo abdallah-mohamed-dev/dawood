@@ -4,8 +4,10 @@ namespace App\Http\Requests\Inventory;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
+use App\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePurchaseRequest extends FormRequest
 {
@@ -29,6 +31,7 @@ class StorePurchaseRequest extends FormRequest
             'quantity' => ['required', 'regex:'.QuantityCast::validationPattern()],
             'unit_cost' => ['required', 'regex:'.MoneyCast::validationPattern()],
             'purchase_date' => ['required', 'date'],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
         ];
     }
 }

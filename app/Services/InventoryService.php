@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\CashboxTransactionKind;
 use App\Enums\InventoryMovementType;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InsufficientStockException;
 use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
@@ -24,7 +25,7 @@ class InventoryService
 {
     public function __construct(private readonly CashboxService $cashbox) {}
 
-    public function purchase(Material $material, int $quantity, int $unitCost, DateTimeInterface|string $date): InventoryBatch
+    public function purchase(Material $material, int $quantity, int $unitCost, DateTimeInterface|string $date, PaymentMethod $method = PaymentMethod::Cash): InventoryBatch
     {
         if ($quantity <= 0) {
             throw new InvalidArgumentException('Purchase quantity must be greater than zero.');
@@ -43,7 +44,7 @@ class InventoryService
             throw new InvalidArgumentException('Purchase cost rounds to zero — increase the quantity or unit cost.');
         }
 
-        return DB::transaction(function () use ($material, $quantity, $unitCost, $cost, $date) {
+        return DB::transaction(function () use ($material, $quantity, $unitCost, $cost, $date, $method) {
             $batch = InventoryBatch::query()->create([
                 'material_id' => $material->id,
                 'quantity' => $quantity,
@@ -63,7 +64,7 @@ class InventoryService
                 'occurred_at' => $date,
             ]);
 
-            $this->cashbox->recordOut($batch, $cost, CashboxTransactionKind::InventoryPurchase, $date);
+            $this->cashbox->recordOut($batch, $cost, CashboxTransactionKind::InventoryPurchase, $date, method: $method);
 
             return $batch;
         });

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
+use App\Enums\PaymentMethod;
 use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
 use App\Exceptions\ExceedsRequiredQuantityException;
@@ -128,14 +129,17 @@ class RoomController extends Controller
     {
         abort_if($roomMaterial->room_id !== $room->id, 404);
 
+        // Same per-row bag the Form Request uses — see IssueRoomMaterialRequest.
+        $bag = 'issue_'.$roomMaterial->id;
+
         try {
             $quantity = QuantityCast::toScaledInt($request->string('quantity')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withErrors(['quantity' => 'قيمة الكمية غير صالحة.']);
+            return back()->withInput()->withErrors(['quantity' => 'قيمة الكمية غير صالحة.'], $bag);
         }
 
         if ($quantity <= 0) {
-            return back()->withErrors(['quantity' => 'يجب أن تكون الكمية أكبر من صفر.']);
+            return back()->withInput()->withErrors(['quantity' => 'يجب أن تكون الكمية أكبر من صفر.'], $bag);
         }
 
         try {
@@ -183,6 +187,7 @@ class RoomController extends Controller
             $amount,
             $request->date('occurred_at'),
             $request->string('description')->trim()->toString() ?: null,
+            PaymentMethod::from($request->string('payment_method')->toString()),
         );
 
         return back()->with('success', $type === RoomCostType::Labor ? 'تمت إضافة دفعة المصنعية.' : 'تمت إضافة المصروف.');

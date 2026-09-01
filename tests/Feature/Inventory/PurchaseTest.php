@@ -21,6 +21,7 @@ test('recording a purchase creates a batch and reduces the cashbox balance', fun
         'quantity' => '3',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect(route('inventory.purchases.index'));
@@ -39,6 +40,7 @@ test('the purchases index shows the material name, quantity, remaining, and unit
         'quantity' => '3',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->get(route('inventory.purchases.index'));
@@ -54,6 +56,7 @@ test('creating a purchase without a material fails validation', function () {
         'quantity' => '3',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('material_id');
@@ -67,6 +70,7 @@ test('a zero unit cost is attributed to the unit_cost field, not quantity', func
         'quantity' => '3',
         'unit_cost' => '0',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('unit_cost');
@@ -82,6 +86,7 @@ test('a zero quantity is attributed to the quantity field, not unit_cost', funct
         'quantity' => '0',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('quantity');
@@ -96,6 +101,7 @@ test('a quantity with an unsafely large magnitude is rejected as a clean validat
         'quantity' => '9999999999999999.000', // 16 digits — over ScaledIntegerCast's safe limit
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('quantity');
@@ -110,6 +116,7 @@ test('a unit_cost with an unsafely large magnitude is attributed to unit_cost, n
         'quantity' => '3',
         'unit_cost' => '9999999999999999.00', // 16 digits — over ScaledIntegerCast's safe limit
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('unit_cost');
@@ -125,6 +132,7 @@ test('creating a purchase with scientific-notation quantity is rejected as a cle
         'quantity' => '1e10',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('quantity');
@@ -139,6 +147,7 @@ test('a purchase whose cost rounds to zero is rejected with a friendly message, 
         'quantity' => '0.001',
         'unit_cost' => '0.01',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('quantity');
@@ -153,6 +162,7 @@ test('an untouched purchase can be deleted, restoring the cashbox balance', func
         'quantity' => '3',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $batch = InventoryBatch::query()->sole();
 
@@ -170,6 +180,7 @@ test('the materials index shows current stock after a purchase', function () {
         'quantity' => '3',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
@@ -184,6 +195,7 @@ test('a material with a purchase batch cannot be deleted', function () {
         'quantity' => '3',
         'unit_cost' => '100.00',
         'purchase_date' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->delete(route('inventory.materials.destroy', $material));

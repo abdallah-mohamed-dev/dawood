@@ -118,10 +118,23 @@
                 <td class="px-4 py-2"><x-quantity :amount="(int) ($stockByMaterial[$roomMaterial->material_id] ?? 0)" :unit="$roomMaterial->material->unit" /></td>
                 <td class="px-4 py-2 text-end">
                     @if (! $roomMaterial->isFullyIssued())
-                        <form method="POST" action="{{ route('rooms.materials.issue', [$room, $roomMaterial]) }}" class="inline-flex items-center gap-2">
+                        @php
+                            // Every row renders a field called `quantity`, so the
+                            // error and the old value are both scoped to the row
+                            // that actually failed — otherwise one bad entry would
+                            // print its message under every material on the page.
+                            $issueBag = 'issue_' . $roomMaterial->id;
+                            $issueFailed = $errors->getBag($issueBag)->has('quantity');
+                        @endphp
+                        <form method="POST" action="{{ route('rooms.materials.issue', [$room, $roomMaterial]) }}" class="inline-flex flex-col items-start gap-1">
                             @csrf
-                            <input type="number" step="0.001" min="0" name="quantity" placeholder="الكمية" class="w-24 rounded-md border border-border px-2 py-1 text-xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" required>
-                            <button type="submit" class="text-primary hover:underline">صرف</button>
+                            <span class="inline-flex items-center gap-2">
+                                <input type="number" step="0.001" min="0" name="quantity" value="{{ $issueFailed ? old('quantity') : '' }}" placeholder="الكمية" class="w-24 rounded-md border border-border px-2 py-1 text-xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary" required>
+                                <button type="submit" class="text-primary hover:underline">صرف</button>
+                            </span>
+                            @error('quantity', $issueBag)
+                                <span class="text-xs text-danger">{{ $message }}</span>
+                            @enderror
                         </form>
                     @endif
                     @if (! $roomMaterial->hasBeenIssued())
@@ -174,6 +187,7 @@
                 <label for="note" class="mb-1 block text-xs font-medium text-gray-700">ملاحظة</label>
                 <input id="note" type="text" name="note" class="w-48 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
             </div>
+            <x-payment-method-select id="payment_payment_method" />
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">{{ __('Add') }}</button>
         </form>
     </div>

@@ -20,6 +20,7 @@ test('recording an expense creates a cashbox outflow', function () {
         'amount' => '2000.00',
         'occurred_at' => '2026-01-01',
         'description' => 'فاتورة يناير',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect(route('expenses.index'));
@@ -32,6 +33,7 @@ test('the expenses index lists an expense with its category, description, and am
         'amount' => '2000.00',
         'occurred_at' => '2026-01-01',
         'description' => 'فاتورة يناير',
+        'payment_method' => 'cash',
     ]);
 
     $response = $this->actingAs($this->admin)->get(route('expenses.index'));
@@ -47,6 +49,7 @@ test('a zero expense amount is rejected', function () {
         'expense_category_id' => $this->category->id,
         'amount' => '0',
         'occurred_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -59,6 +62,7 @@ test('an expense description of exactly "0" is preserved, not silently discarded
         'amount' => '2000.00',
         'occurred_at' => '2026-01-01',
         'description' => '0',
+        'payment_method' => 'cash',
     ]);
 
     expect(Expense::query()->sole()->description)->toBe('0');
@@ -69,6 +73,7 @@ test('an unsafely large expense amount is rejected as a clean validation error, 
         'expense_category_id' => $this->category->id,
         'amount' => '9999999999999999.00',
         'occurred_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('amount');
@@ -80,11 +85,13 @@ test('an expense amount can be edited, updating the same cashbox transaction', f
         'expense_category_id' => $this->category->id,
         'amount' => '2000.00',
         'occurred_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $expense = Expense::query()->sole();
 
     $response = $this->actingAs($this->admin)->put(route('expenses.update', $expense), [
         'amount' => '2500.00',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect(route('expenses.index'));
@@ -96,6 +103,7 @@ test('deleting an expense restores the cashbox balance', function () {
         'expense_category_id' => $this->category->id,
         'amount' => '2000.00',
         'occurred_at' => '2026-01-01',
+        'payment_method' => 'cash',
     ]);
     $expense = Expense::query()->sole();
 

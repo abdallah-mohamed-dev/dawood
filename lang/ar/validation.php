@@ -213,6 +213,7 @@ return [
         'room_id' => 'الغرفة',
         'expense_category_id' => 'بند المصروف',
         'type' => 'النوع',
+        'payment_method' => 'طريقة الدفع',
     ],
 
 ];

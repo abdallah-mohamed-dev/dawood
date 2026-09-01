@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use App\Exceptions\PaymentExceedsRemainingException;
 use App\Exceptions\RoomCancelledException;
 use App\Http\Requests\StorePaymentRequest;
@@ -35,7 +36,7 @@ class PaymentController extends Controller
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
             $note = $request->filled('note') ? $request->string('note')->toString() : null;
-            $this->payments->create($room, $amount, $request->date('paid_at'), $note);
+            $this->payments->create($room, $amount, $request->date('paid_at'), $note, PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (PaymentExceedsRemainingException $e) {
             return back()->withInput()->withErrors([
                 'amount' => 'المبلغ أكبر من المتبقي. المتبقي الفعلي: '.MoneyCast::toDisplayString($e->remaining).' ج.م.',
@@ -58,7 +59,7 @@ class PaymentController extends Controller
     {
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
-            $this->payments->update($payment, $amount);
+            $this->payments->update($payment, $amount, PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (PaymentExceedsRemainingException $e) {
             return back()->withInput()->withErrors([
                 'amount' => 'المبلغ أكبر من المتبقي. المتبقي الفعلي: '.MoneyCast::toDisplayString($e->remaining).' ج.م.',

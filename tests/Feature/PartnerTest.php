@@ -102,6 +102,7 @@ test('recording a withdrawal creates a partner_withdrawal cashbox outflow', func
         'amount' => '2000.00',
         'occurred_at' => '2026-01-01',
         'note' => 'سحب شخصي',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect();

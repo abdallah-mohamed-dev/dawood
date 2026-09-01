@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CashboxTransactionKind;
+use App\Enums\PaymentMethod;
 use App\Models\Partner;
 use App\Models\PartnerWithdrawal;
 use DateTimeInterface;
@@ -45,13 +46,13 @@ class PartnerService
         return $this->share($partner) - $this->totalWithdrawn($partner);
     }
 
-    public function withdraw(Partner $partner, int $amount, DateTimeInterface|string $date, ?string $note = null): PartnerWithdrawal
+    public function withdraw(Partner $partner, int $amount, DateTimeInterface|string $date, ?string $note = null, PaymentMethod $method = PaymentMethod::Cash): PartnerWithdrawal
     {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Withdrawal amount must be greater than zero.');
         }
 
-        return DB::transaction(function () use ($partner, $amount, $date, $note) {
+        return DB::transaction(function () use ($partner, $amount, $date, $note, $method) {
             $withdrawal = PartnerWithdrawal::query()->create([
                 'partner_id' => $partner->id,
                 'amount' => $amount,
@@ -59,7 +60,7 @@ class PartnerService
                 'note' => $note,
             ]);
 
-            $this->cashbox->recordOut($withdrawal, $amount, CashboxTransactionKind::PartnerWithdrawal, $date);
+            $this->cashbox->recordOut($withdrawal, $amount, CashboxTransactionKind::PartnerWithdrawal, $date, method: $method);
 
             return $withdrawal;
         });

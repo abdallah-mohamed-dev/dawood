@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateExpenseRequest extends FormRequest
 {
@@ -20,6 +22,7 @@ class UpdateExpenseRequest extends FormRequest
     {
         return [
             'amount' => ['required', 'regex:'.MoneyCast::validationPattern()],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
         ];
     }
 }

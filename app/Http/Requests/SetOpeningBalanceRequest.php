@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class SetOpeningBalanceRequest extends FormRequest
 {
@@ -26,6 +28,7 @@ class SetOpeningBalanceRequest extends FormRequest
         return [
             'amount' => ['required', 'regex:'.MoneyCast::validationPattern()],
             'occurred_at' => ['required', 'date'],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
         ];
     }
 }

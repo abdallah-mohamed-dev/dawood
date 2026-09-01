@@ -3,8 +3,10 @@
 namespace App\Http\Requests;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePaymentRequest extends FormRequest
 {
@@ -22,6 +24,7 @@ class StorePaymentRequest extends FormRequest
             'amount' => ['required', 'regex:'.MoneyCast::validationPattern()],
             'paid_at' => ['required', 'date'],
             'note' => ['nullable', 'string', 'max:500'],
+            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
         ];
     }
 }

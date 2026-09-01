@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\CashboxTransactionKind;
+use App\Enums\PaymentMethod;
 use App\Enums\RoomStatus;
 use App\Exceptions\PaymentExceedsRemainingException;
 use App\Exceptions\RoomCancelledException;
@@ -22,13 +23,13 @@ class CustomerPaymentService
 {
     public function __construct(private readonly CashboxService $cashbox) {}
 
-    public function create(Room $room, int $amount, DateTimeInterface|string $date, ?string $note = null): CustomerPayment
+    public function create(Room $room, int $amount, DateTimeInterface|string $date, ?string $note = null, PaymentMethod $method = PaymentMethod::Cash): CustomerPayment
     {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Payment amount must be greater than zero.');
         }
 
-        return DB::transaction(function () use ($room, $amount, $date, $note) {
+        return DB::transaction(function () use ($room, $amount, $date, $note, $method) {
             $room = Room::query()->whereKey($room->getKey())->lockForUpdate()->firstOrFail();
 
             if ($room->status === RoomStatus::Cancelled) {
@@ -44,26 +45,26 @@ class CustomerPaymentService
                 'note' => $note,
             ]);
 
-            $this->cashbox->recordIn($payment, $amount, CashboxTransactionKind::CustomerPayment, $date);
+            $this->cashbox->recordIn($payment, $amount, CashboxTransactionKind::CustomerPayment, $date, method: $method);
 
             return $payment;
         });
     }
 
-    public function update(CustomerPayment $payment, int $amount): void
+    public function update(CustomerPayment $payment, int $amount, ?PaymentMethod $method = null): void
     {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Payment amount must be greater than zero.');
         }
 
-        DB::transaction(function () use ($payment, $amount) {
+        DB::transaction(function () use ($payment, $amount, $method) {
             $payment = CustomerPayment::query()->whereKey($payment->getKey())->lockForUpdate()->firstOrFail();
             $room = Room::query()->whereKey($payment->room_id)->lockForUpdate()->firstOrFail();
 
             $this->assertWithinRemaining($room, $amount, excludingPayment: $payment);
 
             $payment->update(['amount' => $amount]);
-            $this->cashbox->updateFor($payment, $amount);
+            $this->cashbox->updateFor($payment, $amount, $method);
         });
     }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Casts\MoneyCast;
+use App\Enums\PaymentMethod;
 use App\Http\Requests\StorePartnerRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
 use App\Http\Requests\UpdatePartnerRequest;
@@ -120,7 +121,7 @@ class PartnerController extends Controller
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
             $note = $request->filled('note') ? $request->string('note')->toString() : null;
-            $this->partners->withdraw($partner, $amount, $request->date('occurred_at'), $note);
+            $this->partners->withdraw($partner, $amount, $request->date('occurred_at'), $note, PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (InvalidArgumentException) {
             return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
         }

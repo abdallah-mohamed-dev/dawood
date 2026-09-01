@@ -11,6 +11,8 @@
 
         <x-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" :value="old('amount', $expense->amount)" required autofocus />
 
+        <x-payment-method-select :selected="$expense->cashboxTransaction?->payment_method" />
+
         <div class="flex gap-3">
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
                 {{ __('Save') }}

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
+use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StorePurchaseRequest;
 use App\Models\InventoryBatch;
@@ -67,7 +68,7 @@ class PurchaseController extends Controller
         }
 
         try {
-            $this->inventory->purchase($material, $quantity, $unitCost, $request->date('purchase_date'));
+            $this->inventory->purchase($material, $quantity, $unitCost, $request->date('purchase_date'), PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (InvalidArgumentException) {
             // Covers the one case not pre-checked above: a valid-looking
             // quantity/cost pair whose product still rounds to 0 piastres.
