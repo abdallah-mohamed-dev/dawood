@@ -28,12 +28,7 @@ class PurchaseController extends Controller
             ->latest('id')
             ->paginate(25);
 
-        return view('inventory.purchases.index', ['purchases' => $purchases]);
-    }
-
-    public function create(): View
-    {
-        return view('inventory.purchases.create', ['materials' => $this->materials()]);
+        return view('inventory.purchases.index', ['purchases' => $purchases, 'materials' => $this->materials()]);
     }
 
     public function store(StorePurchaseRequest $request): RedirectResponse

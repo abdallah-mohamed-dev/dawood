@@ -13,11 +13,13 @@
             <a href="{{ route('customers.edit', $customer) }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
                 {{ __('Edit') }}
             </a>
-            <a href="{{ route('rooms.create', ['customer_id' => $customer->id]) }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
-                إضافة غرفة
-            </a>
         </div>
     </div>
+
+    <x-quick-add :action="route('customers.rooms.store', $customer)" title="إضافة غرفة">
+        <x-quick-field name="room_type" label="نوع الغرفة" width="w-56" placeholder="مثال: غرفة نوم" required />
+        <x-quick-field name="sale_price" label="سعر البيع (ج.م)" type="number" step="0.01" min="0" width="w-40" required />
+    </x-quick-add>
 
     <x-data-table :headings="['نوع الغرفة', 'الحالة', 'سعر البيع', 'المتبقي', __('Actions')]" :rows="$rooms">
         @foreach ($rooms as $room)

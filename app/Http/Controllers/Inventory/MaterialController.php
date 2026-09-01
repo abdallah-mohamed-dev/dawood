@@ -38,11 +38,6 @@ class MaterialController extends Controller
         ]);
     }
 
-    public function create(): View
-    {
-        return view('inventory.materials.create');
-    }
-
     public function store(StoreMaterialRequest $request): RedirectResponse
     {
         Material::query()->create($request->validated());

@@ -1,10 +1,11 @@
 <x-app-layout title="العملاء">
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">العملاء</h1>
-        <a href="{{ route('customers.create') }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
-            {{ __('Add') }}
-        </a>
-    </div>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">العملاء</h1>
+
+    <x-quick-add :action="route('customers.store')" title="إضافة عميل">
+        <x-quick-field name="name" label="اسم العميل" width="w-56" required />
+        <x-quick-field name="phone" label="رقم الهاتف" width="w-40" />
+        <x-quick-field name="address" label="العنوان" width="w-64" />
+    </x-quick-add>
 
     <x-data-table :headings="['الاسم', 'رقم الهاتف', 'عدد الغرف', __('Actions')]" :rows="$customers">
         @foreach ($customers as $customer)

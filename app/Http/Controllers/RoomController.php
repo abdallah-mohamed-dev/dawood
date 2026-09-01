@@ -42,12 +42,7 @@ class RoomController extends Controller
         private readonly ProfitService $profit,
     ) {}
 
-    public function create(): View
-    {
-        return view('rooms.create', ['customers' => Customer::query()->orderBy('name')->get()]);
-    }
-
-    public function store(StoreRoomRequest $request): RedirectResponse
+    public function store(StoreRoomRequest $request, Customer $customer): RedirectResponse
     {
         try {
             $salePrice = MoneyCast::toScaledInt($request->string('sale_price')->toString());
@@ -56,7 +51,7 @@ class RoomController extends Controller
         }
 
         $room = Room::query()->create([
-            'customer_id' => $request->integer('customer_id'),
+            'customer_id' => $customer->id,
             'room_type' => $request->string('room_type')->toString(),
             'sale_price' => $salePrice,
             'status' => RoomStatus::Draft,

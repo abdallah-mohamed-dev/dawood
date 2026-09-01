@@ -41,13 +41,14 @@ Route::middleware('auth')->group(function () {
         ->name('cashbox.opening-balance.store');
 
     Route::prefix('inventory')->name('inventory.')->group(function () {
-        Route::resource('materials', MaterialController::class)->except('show');
-        Route::resource('purchases', PurchaseController::class)->only(['index', 'create', 'store', 'destroy']);
+        Route::resource('materials', MaterialController::class)->except(['show', 'create']);
+        Route::resource('purchases', PurchaseController::class)->only(['index', 'store', 'destroy']);
     });
 
-    Route::resource('customers', CustomerController::class);
+    Route::resource('customers', CustomerController::class)->except('create');
 
-    Route::resource('rooms', RoomController::class)->only(['create', 'store', 'show', 'destroy']);
+    Route::resource('rooms', RoomController::class)->only(['show', 'destroy']);
+    Route::post('/customers/{customer}/rooms', [RoomController::class, 'store'])->name('customers.rooms.store');
     Route::post('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.status.update');
     Route::post('/rooms/{room}/materials', [RoomController::class, 'storeMaterial'])->name('rooms.materials.store');
     Route::post('/rooms/{room}/materials/{roomMaterial}/issue', [RoomController::class, 'issueMaterial'])->name('rooms.materials.issue');
@@ -62,9 +63,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
     Route::prefix('expenses')->name('expenses.')->group(function () {
-        Route::resource('categories', ExpenseCategoryController::class)->except('show');
+        Route::resource('categories', ExpenseCategoryController::class)->except(['show', 'create']);
     });
-    Route::resource('expenses', ExpenseController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
 
     Route::resource('partners', PartnerController::class);
     Route::post('/partners/{partner}/withdrawals', [PartnerController::class, 'storeWithdrawal'])->name('partners.withdrawals.store');

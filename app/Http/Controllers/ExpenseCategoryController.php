@@ -21,11 +21,6 @@ class ExpenseCategoryController extends Controller
         return view('expenses.categories.index', ['categories' => $categories]);
     }
 
-    public function create(): View
-    {
-        return view('expenses.categories.create');
-    }
-
     public function store(StoreExpenseCategoryRequest $request): RedirectResponse
     {
         ExpenseCategory::query()->create($request->validated());

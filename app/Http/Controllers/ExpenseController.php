@@ -27,12 +27,7 @@ class ExpenseController extends Controller
             ->latest('id')
             ->paginate(25);
 
-        return view('expenses.index', ['expenses' => $expenses]);
-    }
-
-    public function create(): View
-    {
-        return view('expenses.create', ['categories' => $this->categories()]);
+        return view('expenses.index', ['expenses' => $expenses, 'categories' => $this->categories()]);
     }
 
     public function store(StoreExpenseRequest $request): RedirectResponse
@@ -47,7 +42,7 @@ class ExpenseController extends Controller
             return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
         }
 
-        return redirect()->route('expenses.index')->with('success', 'تم تسجيل المصروف.');
+        return back()->with('success', 'تم تسجيل المصروف.');
     }
 
     public function edit(Expense $expense): View

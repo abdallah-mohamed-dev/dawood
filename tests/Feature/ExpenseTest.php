@@ -23,7 +23,8 @@ test('recording an expense creates a cashbox outflow', function () {
         'payment_method' => 'cash',
     ]);
 
-    $response->assertRedirect(route('expenses.index'));
+    // back() to the index, which is now also the add form's page.
+    $response->assertRedirect();
     expect(app(CashboxService::class)->balance())->toBe(-200_000);
 });
 

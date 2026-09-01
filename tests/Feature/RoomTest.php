@@ -24,9 +24,8 @@ test('guests cannot access room pages', function () {
     $this->get(route('rooms.show', $room))->assertRedirect(route('login'));
 });
 
-test('a room can be created for a customer', function () {
-    $response = $this->actingAs($this->admin)->post(route('rooms.store'), [
-        'customer_id' => $this->customer->id,
+test('a room can be created from the customer page', function () {
+    $response = $this->actingAs($this->admin)->post(route('customers.rooms.store', $this->customer), [
         'room_type' => 'غرفة نوم',
         'sale_price' => '30000.00',
     ]);
@@ -38,8 +37,7 @@ test('a room can be created for a customer', function () {
 });
 
 test('creating a room with an unsafely large sale_price is rejected as a clean validation error, not a 500', function () {
-    $response = $this->actingAs($this->admin)->post(route('rooms.store'), [
-        'customer_id' => $this->customer->id,
+    $response = $this->actingAs($this->admin)->post(route('customers.rooms.store', $this->customer), [
         'room_type' => 'غرفة نوم',
         'sale_price' => '9999999999999999.00', // 16 digits — over ScaledIntegerCast's safe limit
     ]);
@@ -79,14 +77,17 @@ test('issuing an unsafely large quantity is rejected as a clean validation error
     expect($roomMaterial->fresh()->getRawOriginal('issued_quantity'))->toBe(0);
 });
 
-test('creating a room without a customer fails validation', function () {
-    $response = $this->actingAs($this->admin)->post(route('rooms.store'), [
-        'customer_id' => '',
-        'room_type' => 'غرفة نوم',
-        'sale_price' => '30000.00',
-    ]);
+test('creating a room under a customer that does not exist is a 404, not a silent insert', function () {
+    // The customer used to be a spoofable body field; it now comes from the
+    // route, so a bad one can no longer reach the insert at all.
+    $this->actingAs($this->admin)
+        ->post('/customers/999999/rooms', [
+            'room_type' => 'غرفة نوم',
+            'sale_price' => '30000.00',
+        ])
+        ->assertNotFound();
 
-    $response->assertSessionHasErrors('customer_id');
+    expect(Room::query()->count())->toBe(0);
 });
 
 test('the room show page reflects required, issued, cost, and materials cost after an issue', function () {

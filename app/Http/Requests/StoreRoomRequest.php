@@ -19,7 +19,6 @@ class StoreRoomRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['required', 'integer', 'exists:customers,id'],
             'room_type' => ['required', 'string', 'max:255'],
             'sale_price' => ['required', 'regex:'.MoneyCast::validationPattern()],
         ];

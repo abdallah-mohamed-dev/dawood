@@ -1,10 +1,9 @@
 <x-app-layout title="بنود المصروفات">
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">بنود المصروفات</h1>
-        <a href="{{ route('expenses.categories.create') }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
-            {{ __('Add') }}
-        </a>
-    </div>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">بنود المصروفات</h1>
+
+    <x-quick-add :action="route('expenses.categories.store')" title="إضافة بند">
+        <x-quick-field name="name" label="اسم البند" width="w-64" required />
+    </x-quick-add>
 
     <x-data-table :headings="['الاسم', 'عدد المصروفات', __('Actions')]" :rows="$categories">
         @foreach ($categories as $category)
