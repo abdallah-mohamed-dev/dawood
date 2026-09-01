@@ -1,7 +1,7 @@
 <x-app-layout title="الملف الشخصي">
     <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">الملف الشخصي</h1>
 
-    <div class="max-w-md space-y-6">
+    <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <h2 class="mb-4 text-lg font-semibold text-gray-900">البيانات الأساسية</h2>
 
