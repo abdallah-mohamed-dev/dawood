@@ -212,6 +212,7 @@ return [
         'paid_at' => 'تاريخ الدفعة',
         'room_id' => 'الغرفة',
         'expense_category_id' => 'بند المصروف',
+        'type' => 'النوع',
     ],
 
 ];

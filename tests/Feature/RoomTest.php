@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
 use App\Models\Customer;
 use App\Models\Material;
 use App\Models\Room;
+use App\Models\RoomCost;
 use App\Models\RoomMaterial;
 use App\Models\User;
+use App\Services\CashboxService;
 use App\Services\InventoryService;
 
 beforeEach(function () {
@@ -275,4 +278,271 @@ test('deleting a room and choosing "consumed" does not restore stock', function 
     ]);
 
     expect(app(InventoryService::class)->currentStock($material))->toBe(5_000);
+});
+
+test('a labour payment can be added from the room page and leaves the cashbox', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $response = $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'labor',
+        'description' => 'دفعة أولى للنجار',
+        'amount' => '5000.00',
+        'occurred_at' => '2026-01-05',
+    ]);
+
+    $response->assertRedirect();
+    $cost = RoomCost::query()->sole();
+    expect($cost->type)->toBe(RoomCostType::Labor);
+    expect($cost->getRawOriginal('amount'))->toBe(500_000);
+    expect(app(CashboxService::class)->totalOut())->toBe(500_000);
+});
+
+test('an extra room expense can be added from the room page', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'other',
+        'description' => 'نقل',
+        'amount' => '250.50',
+        'occurred_at' => '2026-01-05',
+    ]);
+
+    expect(RoomCost::query()->sole()->type)->toBe(RoomCostType::Other);
+});
+
+test('an invalid room cost amount is reported in its own error bag, not the payment form', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $response = $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'labor',
+        'amount' => 'abc',
+        'occurred_at' => '2026-01-05',
+    ]);
+
+    // The payment form shares the field name `amount` and lives on the same
+    // page — its (default) bag must stay clean.
+    $response->assertSessionHasErrors(['amount'], null, 'roomCost_labor');
+    $response->assertSessionDoesntHaveErrors(['amount'], null, 'default');
+    expect(RoomCost::query()->count())->toBe(0);
+});
+
+test('the other-expense form uses its own error bag too', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'other',
+        'amount' => '',
+        'occurred_at' => '2026-01-05',
+    ])->assertSessionHasErrors(['amount'], null, 'roomCost_other');
+});
+
+test('a zero room cost is rejected', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'labor',
+        'amount' => '0',
+        'occurred_at' => '2026-01-05',
+    ])->assertSessionHasErrors(['amount'], null, 'roomCost_labor');
+
+    expect(RoomCost::query()->count())->toBe(0);
+});
+
+test('a room cost cannot be deleted through another room', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $other = Room::factory()->for($this->customer)->create();
+    $cost = RoomCost::factory()->for($room)->create();
+
+    $this->actingAs($this->admin)
+        ->delete(route('rooms.costs.destroy', [$other, $cost]))
+        ->assertNotFound();
+
+    expect(RoomCost::query()->count())->toBe(1);
+});
+
+test('deleting a room cost puts the money back in the cashbox', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'labor',
+        'amount' => '5000.00',
+        'occurred_at' => '2026-01-05',
+    ]);
+    $cost = RoomCost::query()->sole();
+
+    $this->actingAs($this->admin)->delete(route('rooms.costs.destroy', [$room, $cost]));
+
+    expect(RoomCost::query()->count())->toBe(0);
+    expect(app(CashboxService::class)->totalOut())->toBe(0);
+});
+
+test('a room carrying costs cannot be deleted', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $this->actingAs($this->admin)->post(route('rooms.costs.store', $room), [
+        'type' => 'labor',
+        'amount' => '5000.00',
+        'occurred_at' => '2026-01-05',
+    ]);
+
+    $response = $this->actingAs($this->admin)->delete(route('rooms.destroy', $room));
+
+    $response->assertSessionHas('error');
+    expect(Room::query()->whereKey($room->id)->exists())->toBeTrue();
+    // The cashbox row survives with it — the money really did leave.
+    expect(app(CashboxService::class)->totalOut())->toBe(500_000);
+});
+
+test('a room can be deleted once its costs are removed', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $cost = RoomCost::factory()->for($room)->create();
+
+    $this->actingAs($this->admin)->delete(route('rooms.costs.destroy', [$room, $cost]));
+    $this->actingAs($this->admin)->delete(route('rooms.destroy', $room));
+
+    expect(Room::query()->whereKey($room->id)->exists())->toBeFalse();
+});
+
+test('the room page shows the profit breakdown', function () {
+    $room = Room::factory()->for($this->customer)->create(['sale_price' => 3_000_000]);
+    RoomCost::factory()->for($room)->create(['amount' => 500_000]);
+
+    $this->actingAs($this->admin)
+        ->get(route('rooms.show', $room))
+        ->assertOk()
+        ->assertSee('المصنعية')
+        ->assertSee('مصروفات إضافية')
+        ->assertSee('الربح المتوقع');
+});
+
+test('a completed room shows the profit card without the expected label', function () {
+    $room = Room::factory()->for($this->customer)->create([
+        'sale_price' => 3_000_000,
+        'status' => RoomStatus::Completed,
+    ]);
+
+    $this->actingAs($this->admin)
+        ->get(route('rooms.show', $room))
+        ->assertOk()
+        ->assertDontSee('الربح المتوقع');
+});
+
+test('a failed labour submission does not repopulate the extra-expense form', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    // Both sections render the same partial and share the field name
+    // `description`, so an unguarded old() would echo this value into both.
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.costs.store', $room), [
+            'type' => 'labor',
+            'description' => 'دفعة النجار الأولى',
+            'amount' => '',
+            'occurred_at' => '2026-01-05',
+        ])
+        ->getContent();
+
+    $labor = substr($html, strpos($html, 'roomCost_labor_description'), 400);
+    $other = substr($html, strpos($html, 'roomCost_other_description'), 400);
+
+    expect($labor)->toContain('دفعة النجار الأولى');
+    expect($other)->not->toContain('دفعة النجار الأولى');
+});
+
+test('a failed submission keeps the amount and date the user typed in that section only', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.costs.store', $room), [
+            'type' => 'other',
+            'description' => '',
+            'amount' => 'abc',
+            'occurred_at' => '2026-02-20',
+        ])
+        ->getContent();
+
+    $other = substr($html, strpos($html, 'roomCost_other_amount'), 400);
+    $labor = substr($html, strpos($html, 'roomCost_labor_amount'), 400);
+
+    expect($other)->toContain('value="abc"');
+    expect($labor)->toContain('value=""');
+    expect(substr($html, strpos($html, 'roomCost_other_occurred_at'), 400))->toContain('value="2026-02-20"');
+    // The untouched section keeps today's date, not the other form's date.
+    expect(substr($html, strpos($html, 'roomCost_labor_occurred_at'), 400))
+        ->toContain('value="'.now()->toDateString().'"');
+});
+
+test('a failed material submission leaves both cost forms untouched', function () {
+    $room = Room::factory()->for($this->customer)->create();
+    $material = Material::factory()->create();
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.materials.store', $room), [
+            'material_id' => $material->id,
+            'required_quantity' => 'abc',
+        ])
+        ->getContent();
+
+    expect(substr($html, strpos($html, 'roomCost_labor_amount'), 400))->toContain('value=""');
+    expect(substr($html, strpos($html, 'roomCost_other_amount'), 400))->toContain('value=""');
+    expect(substr($html, strpos($html, 'roomCost_labor_description'), 400))->toContain('value=""');
+});
+
+test('a cost validation error renders inside its own section only', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.costs.store', $room), [
+            'type' => 'other',
+            'amount' => 'abc',
+            'occurred_at' => '2026-01-05',
+        ])
+        ->getContent();
+
+    // The field name `amount` is rendered three times on this page (labour,
+    // extra expense, customer payment) — the message must appear once.
+    expect(substr_count($html, 'صيغة حقل المبلغ غير صحيحة.'))->toBe(1);
+    expect(substr($html, strpos($html, 'roomCost_other_amount'), 600))->toContain('صيغة حقل المبلغ غير صحيحة.');
+});
+
+test('the controller-level amount error also lands in the right section only', function () {
+    $room = Room::factory()->for($this->customer)->create();
+
+    // Passes the request's regex but overflows ScaledIntegerCast's safe limit,
+    // so the message comes from RoomController, not the Form Request.
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.costs.store', $room), [
+            'type' => 'labor',
+            'amount' => '9999999999999999.00',
+            'occurred_at' => '2026-01-05',
+        ])
+        ->getContent();
+
+    expect(substr_count($html, 'قيمة المبلغ غير صالحة.'))->toBe(1);
+    expect(substr($html, strpos($html, 'roomCost_labor_amount'), 600))->toContain('قيمة المبلغ غير صالحة.');
+    expect(RoomCost::query()->count())->toBe(0);
+});
+
+test('a failed customer payment does not surface an error inside the cost forms', function () {
+    $room = Room::factory()->for($this->customer)->create(['sale_price' => 100_000]);
+
+    $html = $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->followingRedirects()
+        ->post(route('rooms.payments.store', $room), [
+            'amount' => '99999.00', // more than the sale price
+            'paid_at' => '2026-01-05',
+        ])
+        ->getContent();
+
+    expect($html)->toContain('المتبقي الفعلي');
+    expect(substr($html, strpos($html, 'roomCost_labor_amount'), 600))->not->toContain('المتبقي الفعلي');
+    expect(substr($html, strpos($html, 'roomCost_other_amount'), 600))->not->toContain('المتبقي الفعلي');
 });

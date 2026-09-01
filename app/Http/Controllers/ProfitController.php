@@ -20,6 +20,8 @@ class ProfitController extends Controller
         return view('reports.profit', [
             'revenue' => $summary['revenue'],
             'costOfMaterials' => $summary['cost_of_materials'],
+            'roomCosts' => $summary['room_costs'],
+            'cancelledRoomCosts' => $summary['cancelled_room_costs'],
             'adminExpenses' => $summary['admin_expenses'],
             'netProfit' => $summary['net_profit'],
             'workInProgress' => $summary['work_in_progress'],

@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\InventoryMovementType;
+use App\Enums\RoomCostType;
+use App\Exceptions\RoomHasCostsException;
 use App\Models\CustomerPayment;
 use App\Models\InventoryMovement;
 use App\Models\Material;
@@ -8,6 +10,7 @@ use App\Models\Room;
 use App\Services\CashboxService;
 use App\Services\CustomerPaymentService;
 use App\Services\InventoryService;
+use App\Services\RoomCostService;
 use App\Services\RoomMaterialService;
 use App\Services\RoomService;
 
@@ -65,4 +68,28 @@ test('deleting a room with the "consumed" choice does not touch stock', function
     expect($this->inventory->currentStock($this->material))->toBe(8_000);
     expect(InventoryMovement::query()->where('type', InventoryMovementType::ReturnedToStock)->count())->toBe(0);
     expect(Room::query()->find($this->room->id))->toBeNull();
+});
+
+test('deleting a room that carries labour or extra costs is refused outright', function () {
+    $costs = new RoomCostService($this->cashbox);
+    $costs->create($this->room, RoomCostType::Labor, 500_000, '2026-01-05');
+
+    expect(fn () => $this->roomService->deleteRoom($this->room, false))
+        ->toThrow(RoomHasCostsException::class);
+
+    expect(Room::query()->whereKey($this->room->id)->exists())->toBeTrue();
+    // The money that left the drawer stays gone — nothing was silently refunded.
+    expect($this->cashbox->totalOut())->toBe(500_000);
+});
+
+test('the refusal happens before anything is touched, so payments and materials survive', function () {
+    $costs = new RoomCostService($this->cashbox);
+    $this->payments->create($this->room, 300_000, '2026-01-01');
+    $costs->create($this->room, RoomCostType::Other, 100_000, '2026-01-05');
+
+    expect(fn () => $this->roomService->deleteRoom($this->room, true))
+        ->toThrow(RoomHasCostsException::class);
+
+    expect(CustomerPayment::query()->count())->toBe(1);
+    expect($this->cashbox->balance())->toBe(200_000);
 });

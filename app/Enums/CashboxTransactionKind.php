@@ -9,6 +9,8 @@ enum CashboxTransactionKind: string
     case InventoryPurchase = 'inventory_purchase';
     case Expense = 'expense';
     case PartnerWithdrawal = 'partner_withdrawal';
+    case RoomLabor = 'room_labor';
+    case RoomExpense = 'room_expense';
 
     public function label(): string
     {
@@ -18,6 +20,8 @@ enum CashboxTransactionKind: string
             self::InventoryPurchase => 'شراء مخزون',
             self::Expense => 'مصروف إداري',
             self::PartnerWithdrawal => 'سحب شريك',
+            self::RoomLabor => 'مصنعية غرفة',
+            self::RoomExpense => 'مصروف غرفة',
         };
     }
 }

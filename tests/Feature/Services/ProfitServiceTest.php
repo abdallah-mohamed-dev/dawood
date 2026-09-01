@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
 use App\Models\ExpenseCategory;
 use App\Models\Material;
@@ -9,6 +10,7 @@ use App\Services\CustomerPaymentService;
 use App\Services\ExpenseService;
 use App\Services\InventoryService;
 use App\Services\ProfitService;
+use App\Services\RoomCostService;
 use App\Services\RoomMaterialService;
 
 beforeEach(function () {
@@ -103,4 +105,96 @@ test('stockValue after the Task 4 FIFO reference scenario is 8 remaining units a
     $this->roomMaterials->issue($rm, 5_000, '2026-01-03');
 
     expect($this->profit->stockValue())->toBe(96_000); // 8 @ 120 EGP = 960 EGP
+});
+
+test('costs of a completed room reduce net profit', function () {
+    $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::Completed]);
+    $costs = new RoomCostService($this->cashbox);
+    $costs->create($room, RoomCostType::Labor, 500_000, '2026-01-05');
+    $costs->create($room, RoomCostType::Other, 100_000, '2026-01-06');
+
+    expect($this->profit->roomCosts())->toBe(600_000);
+    expect($this->profit->cancelledRoomCosts())->toBe(0);
+    expect($this->profit->workInProgress())->toBe(0);
+    expect($this->profit->netProfit())->toBe(2_400_000);
+});
+
+test('costs of an in-progress room go to work in progress, not profit', function () {
+    $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::InProgress]);
+    (new RoomCostService($this->cashbox))->create($room, RoomCostType::Labor, 500_000, '2026-01-05');
+
+    expect($this->profit->roomCosts())->toBe(0);
+    expect($this->profit->cancelledRoomCosts())->toBe(0);
+    expect($this->profit->workInProgress())->toBe(500_000);
+    expect($this->profit->netProfit())->toBe(0);
+});
+
+test('costs of a cancelled room are charged to profit immediately as a loss', function () {
+    $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::Cancelled]);
+    (new RoomCostService($this->cashbox))->create($room, RoomCostType::Labor, 500_000, '2026-01-05');
+
+    expect($this->profit->revenue())->toBe(0);
+    expect($this->profit->roomCosts())->toBe(0);
+    expect($this->profit->cancelledRoomCosts())->toBe(500_000);
+    expect($this->profit->workInProgress())->toBe(0);
+    expect($this->profit->netProfit())->toBe(-500_000);
+});
+
+test('every recorded cost lands in exactly one bucket: profit, WIP, or cancelled loss', function () {
+    $costs = new RoomCostService($this->cashbox);
+
+    $completed = Room::factory()->create(['sale_price' => 1_000_000, 'status' => RoomStatus::Completed]);
+    $inProgress = Room::factory()->create(['sale_price' => 1_000_000, 'status' => RoomStatus::InProgress]);
+    $draft = Room::factory()->create(['sale_price' => 1_000_000, 'status' => RoomStatus::Draft]);
+    $cancelled = Room::factory()->create(['sale_price' => 1_000_000, 'status' => RoomStatus::Cancelled]);
+
+    $costs->create($completed, RoomCostType::Labor, 100_000, '2026-01-05');
+    $costs->create($inProgress, RoomCostType::Labor, 200_000, '2026-01-05');
+    $costs->create($draft, RoomCostType::Other, 300_000, '2026-01-05');
+    $costs->create($cancelled, RoomCostType::Other, 400_000, '2026-01-05');
+
+    $buckets = $this->profit->roomCosts() + $this->profit->workInProgress() + $this->profit->cancelledRoomCosts();
+
+    expect($buckets)->toBe(1_000_000);
+    expect($this->cashbox->totalOut())->toBe(1_000_000);
+});
+
+test('the summary matches the individual figures once room costs exist', function () {
+    $completed = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::Completed]);
+    $cancelled = Room::factory()->create(['sale_price' => 1_000_000, 'status' => RoomStatus::Cancelled]);
+    $costs = new RoomCostService($this->cashbox);
+    $costs->create($completed, RoomCostType::Labor, 500_000, '2026-01-05');
+    $costs->create($cancelled, RoomCostType::Labor, 200_000, '2026-01-05');
+
+    $summary = $this->profit->summary();
+
+    expect($summary['room_costs'])->toBe($this->profit->roomCosts());
+    expect($summary['cancelled_room_costs'])->toBe($this->profit->cancelledRoomCosts());
+    expect($summary['net_profit'])->toBe($this->profit->netProfit());
+    expect($summary['work_in_progress'])->toBe($this->profit->workInProgress());
+});
+
+test('forRoom breaks a single room down and excludes admin expenses', function () {
+    $material = Material::factory()->create();
+    $this->inventory->purchase($material, 10_000, 10_000, '2026-01-01');
+
+    $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::Completed]);
+    $rm = $this->roomMaterials->addRequirement($room, $material, 5_000);
+    $this->roomMaterials->issue($rm, 5_000, '2026-01-02'); // 50,000 piastres
+
+    $costs = new RoomCostService($this->cashbox);
+    $costs->create($room, RoomCostType::Labor, 500_000, '2026-01-05');
+    $costs->create($room, RoomCostType::Other, 100_000, '2026-01-06');
+
+    // A large admin expense that must NOT touch the room's own profit.
+    $this->expenses->create(ExpenseCategory::factory()->create(), 900_000, '2026-01-07');
+
+    $breakdown = $this->profit->forRoom($room->fresh());
+
+    expect($breakdown['sale_price'])->toBe(3_000_000);
+    expect($breakdown['materials'])->toBe(50_000);
+    expect($breakdown['labor'])->toBe(500_000);
+    expect($breakdown['other'])->toBe(100_000);
+    expect($breakdown['total_cost'])->toBe(650_000);
+    expect($breakdown['profit'])->toBe(2_350_000);
 });

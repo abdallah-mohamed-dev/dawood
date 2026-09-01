@@ -2,6 +2,7 @@
 
 use App\Enums\CashboxTransactionKind;
 use App\Enums\CashboxTransactionType;
+use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
 use App\Models\CashboxTransaction;
 use App\Models\Customer;
@@ -9,12 +10,14 @@ use App\Models\ExpenseCategory;
 use App\Models\Material;
 use App\Models\Partner;
 use App\Models\Room;
+use App\Models\RoomCost;
 use App\Services\CashboxService;
 use App\Services\CustomerPaymentService;
 use App\Services\ExpenseService;
 use App\Services\InventoryService;
 use App\Services\PartnerService;
 use App\Services\ProfitService;
+use App\Services\RoomCostService;
 use App\Services\RoomMaterialService;
 use Illuminate\Support\Facades\DB;
 
@@ -119,4 +122,52 @@ test('the full cycle from opening balance through partner withdrawal produces th
     }
 
     expect($this->cashbox->balance())->toBe($manualBalance);
+});
+
+test('a full cycle that includes labour and extra room costs keeps the cashbox and the profit report consistent', function () {
+    $costs = new RoomCostService($this->cashbox);
+
+    // Opening balance 20,000 EGP
+    $this->cashbox->setOpeningBalance(2_000_000, '2026-01-01');
+
+    // Buy 10 units @ 100 EGP = 1,000 EGP out
+    $material = Material::factory()->create();
+    $this->inventory->purchase($material, 10_000, 10_000, '2026-01-02');
+
+    $room = Room::factory()->for(Customer::factory())->create(['sale_price' => 3_000_000]);
+
+    // Issue 5 units = 500 EGP of materials
+    $roomMaterial = $this->roomMaterials->addRequirement($room, $material, 5_000);
+    $this->roomMaterials->issue($roomMaterial, 5_000, '2026-01-03');
+
+    // Two labour payments (5,000 + 3,000 EGP) and one extra expense (500 EGP)
+    $costs->create($room, RoomCostType::Labor, 500_000, '2026-01-04', 'دفعة أولى');
+    $costs->create($room, RoomCostType::Labor, 300_000, '2026-01-05', 'دفعة ثانية');
+    $costs->create($room, RoomCostType::Other, 50_000, '2026-01-06', 'نقل');
+
+    // Cash: 20,000 − 1,000 − 5,000 − 3,000 − 500 = 10,500 EGP
+    expect($this->cashbox->balance())->toBe(1_050_000);
+
+    // Still in progress: nothing is a cost yet, everything sits in WIP.
+    expect($this->profit->netProfit())->toBe(0);
+    expect($this->profit->workInProgress())->toBe(900_000); // 500 materials + 8,500 labour/other
+
+    // Customer pays 30,000 EGP in full
+    $this->payments->create($room, 3_000_000, '2026-01-07');
+    expect($this->cashbox->balance())->toBe(4_050_000);
+    expect($this->profit->netProfit())->toBe(0);
+
+    // Completing the room recognises revenue and every cost at once.
+    $room->update(['status' => RoomStatus::Completed]);
+
+    expect($this->profit->workInProgress())->toBe(0);
+    expect($this->profit->roomCosts())->toBe(850_000);
+    expect($this->profit->netProfit())->toBe(2_100_000); // 30,000 − 500 − 8,500 = 21,000 EGP
+
+    // The cashbox is unchanged by a status flip — cash and accrual stay apart.
+    expect($this->cashbox->balance())->toBe(4_050_000);
+
+    // Every room cost owns exactly one cashbox row, and none is orphaned.
+    expect(CashboxTransaction::query()->where('source_type', RoomCost::class)->count())->toBe(3);
+    expect(CashboxTransaction::query()->whereNull('source_id')->count())->toBe(1);
 });

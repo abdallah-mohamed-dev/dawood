@@ -41,11 +41,35 @@
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">سعر البيع</div>
-            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$room->sale_price" /></div>
+            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$profit['sale_price']" /></div>
         </div>
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">تكلفة الخامات</div>
-            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$room->materialsCost()" /></div>
+            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$profit['materials']" /></div>
+        </div>
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
+            <div class="text-sm text-secondary">المصنعية</div>
+            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$profit['labor']" /></div>
+        </div>
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
+            <div class="text-sm text-secondary">مصروفات أخرى</div>
+            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$profit['other']" /></div>
+        </div>
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
+            <div class="text-sm text-secondary">إجمالي التكلفة</div>
+            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$profit['total_cost']" /></div>
+        </div>
+        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
+            <div class="text-sm text-secondary">{{ $room->status->countsTowardProfit() ? 'الربح' : 'الربح المتوقع' }}</div>
+            <div class="mt-1 text-xl font-bold {{ $profit['profit'] < 0 ? 'text-danger' : 'text-success' }}">
+                <x-money :amount="$profit['profit']" />
+            </div>
+            <p class="mt-1 text-xs text-secondary">
+                لا يشمل المصروفات الإدارية.
+                @unless ($room->status->countsTowardProfit())
+                    الخامات غير المصروفة لم تُحسب بعد.
+                @endunless
+            </p>
         </div>
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">المدفوع</div>
@@ -111,6 +135,22 @@
             </tr>
         @endforeach
     </x-data-table>
+
+    @include('rooms._costs-section', [
+        'room' => $room,
+        'type' => \App\Enums\RoomCostType::Labor,
+        'title' => 'المصنعية',
+        'descriptionLabel' => 'الوصف',
+        'emptyMessage' => 'لا توجد دفعات مصنعية لهذه الغرفة.',
+    ])
+
+    @include('rooms._costs-section', [
+        'room' => $room,
+        'type' => \App\Enums\RoomCostType::Other,
+        'title' => 'مصروفات إضافية',
+        'descriptionLabel' => 'السبب',
+        'emptyMessage' => 'لا توجد مصروفات إضافية لهذه الغرفة.',
+    ])
 
     <div class="mb-6 mt-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <h2 class="mb-3 text-sm font-semibold text-gray-900">إضافة دفعة</h2>

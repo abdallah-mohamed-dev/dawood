@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/rooms/{room}/materials', [RoomController::class, 'storeMaterial'])->name('rooms.materials.store');
     Route::post('/rooms/{room}/materials/{roomMaterial}/issue', [RoomController::class, 'issueMaterial'])->name('rooms.materials.issue');
     Route::delete('/rooms/{room}/materials/{roomMaterial}', [RoomController::class, 'destroyMaterial'])->name('rooms.materials.destroy');
+    Route::post('/rooms/{room}/costs', [RoomController::class, 'storeCost'])->name('rooms.costs.store');
+    Route::delete('/rooms/{room}/costs/{cost}', [RoomController::class, 'destroyCost'])->name('rooms.costs.destroy');
 
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('/rooms/{room}/payments', [PaymentController::class, 'store'])->name('rooms.payments.store');

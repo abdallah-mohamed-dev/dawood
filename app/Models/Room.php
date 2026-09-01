@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
 use Database\Factories\RoomFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -43,6 +44,11 @@ class Room extends Model
         return $this->hasMany(CustomerPayment::class);
     }
 
+    public function roomCosts(): HasMany
+    {
+        return $this->hasMany(RoomCost::class);
+    }
+
     public function materialsCost(): int
     {
         if ($this->relationLoaded('roomMaterials')) {
@@ -50,6 +56,45 @@ class Room extends Model
         }
 
         return (int) $this->roomMaterials()->sum('cost');
+    }
+
+    public function laborCost(): int
+    {
+        return $this->costOfType(RoomCostType::Labor);
+    }
+
+    public function otherCost(): int
+    {
+        return $this->costOfType(RoomCostType::Other);
+    }
+
+    public function costsTotal(): int
+    {
+        if ($this->relationLoaded('roomCosts')) {
+            return $this->roomCosts->sum(fn (RoomCost $cost) => $cost->getRawOriginal('amount'));
+        }
+
+        return (int) $this->roomCosts()->sum('amount');
+    }
+
+    public function hasCosts(): bool
+    {
+        if ($this->relationLoaded('roomCosts')) {
+            return $this->roomCosts->isNotEmpty();
+        }
+
+        return $this->roomCosts()->exists();
+    }
+
+    private function costOfType(RoomCostType $type): int
+    {
+        if ($this->relationLoaded('roomCosts')) {
+            return $this->roomCosts
+                ->where('type', $type)
+                ->sum(fn (RoomCost $cost) => $cost->getRawOriginal('amount'));
+        }
+
+        return (int) $this->roomCosts()->where('type', $type)->sum('amount');
     }
 
     public function paidAmount(): int

@@ -22,6 +22,7 @@
 | `InventoryMovement` | حركة دخول/خروج/إرجاع لكمية من دفعة معينة |
 | `RoomMaterial` | ربط بين غرفة وخامة: الكمية المطلوبة والمصروفة والتكلفة |
 | `CustomerPayment` | دفعة من عميل مرتبطة بغرفة |
+| `RoomCost` | تكلفة مباشرة على غرفة: `labor` (مصنعية) أو `other` (مصروف إضافي) — كل صف خروج نقدي من الخزنة |
 | `ExpenseCategory` | بند مصروف إداري (مثال: كهرباء) |
 | `Expense` | مصروف إداري فعلي |
 | `CashboxTransaction` | حركة مالية واحدة في الخزنة (داخل/خارج) |
@@ -34,6 +35,7 @@
 customers
     └── rooms (customer_id)
           ├── room_materials (room_id, material_id)
+          ├── room_costs (room_id, type)
           └── customer_payments (room_id)
 
 materials
