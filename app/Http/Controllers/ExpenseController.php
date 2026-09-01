@@ -27,7 +27,11 @@ class ExpenseController extends Controller
             ->latest('id')
             ->paginate(25);
 
-        return view('expenses.index', ['expenses' => $expenses, 'categories' => $this->categories()]);
+        return view('expenses.index', [
+            'expenses' => $expenses,
+            'categories' => $this->categories(),
+            'monthlyTotals' => $this->monthlyTotals(),
+        ]);
     }
 
     public function store(StoreExpenseRequest $request): RedirectResponse
@@ -73,6 +77,23 @@ class ExpenseController extends Controller
         $this->expenses->delete($expense);
 
         return redirect()->route('expenses.index')->with('success', 'تم حذف المصروف.');
+    }
+
+    /**
+     * Total spent in each calendar month, across every expense — not just
+     * the rows on the current page. The month separators in the view read
+     * from this instead of summing the visible rows, or a month split
+     * across two pages would show a wrong (partial) total on each.
+     *
+     * @return \Illuminate\Support\Collection<string, int> keyed by "Y-m"
+     */
+    private function monthlyTotals(): \Illuminate\Support\Collection
+    {
+        return Expense::query()
+            ->selectRaw("strftime('%Y-%m', occurred_at) as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->map(fn ($total) => (int) $total);
     }
 
     /**

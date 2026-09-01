@@ -27,8 +27,34 @@
         <x-payment-method-select />
     </x-quick-add>
 
-    <x-data-table :headings="['التاريخ', 'البند', 'الوصف', 'المبلغ', __('Actions')]" :rows="$expenses">
+    @php
+        $expenseHeadings = ['التاريخ', 'البند', 'الوصف', 'المبلغ', __('Actions')];
+        $currentMonthKey = null;
+    @endphp
+
+    <x-data-table :headings="$expenseHeadings" :rows="$expenses">
         @foreach ($expenses as $expense)
+            @php $rowMonthKey = $expense->occurred_at->format('Y-m'); @endphp
+
+            {{--
+                One separator row per calendar month change. The table is
+                ordered by date descending, so a simple "did the month change
+                since the last row" check is enough — no JS, no DB change.
+                The total comes from $monthlyTotals (a query over ALL
+                expenses, computed in the controller), not from summing the
+                rows rendered here, so a month split across two pages still
+                shows its true total on each page.
+            --}}
+            @if ($rowMonthKey !== $currentMonthKey)
+                @php $currentMonthKey = $rowMonthKey; @endphp
+                <tr class="bg-bg-subtle">
+                    <td colspan="{{ count($expenseHeadings) }}" class="px-4 py-2 text-xs font-semibold text-secondary">
+                        {{ __('date.months.'.$expense->occurred_at->month) }} {{ $expense->occurred_at->year }}
+                        — إجمالي الشهر: <x-money :amount="(int) ($monthlyTotals[$rowMonthKey] ?? 0)" />
+                    </td>
+                </tr>
+            @endif
+
             <tr>
                 <td class="px-4 py-2">{{ $expense->occurred_at->format('Y-m-d') }}</td>
                 <td class="px-4 py-2">{{ $expense->category->name }}</td>
