@@ -33,7 +33,16 @@
 
     <div class="flex min-h-screen">
         @auth
-            <aside class="fixed inset-y-0 start-0 z-40 flex w-64 translate-x-full flex-col bg-sidebar text-sidebar-text shadow-xl transition-transform duration-200 peer-checked:translate-x-0 md:static md:translate-x-0">
+            {{--
+                sticky (not static) from md up: it stays in the flex row so the
+                main column sits beside it, but is pinned to the viewport with
+                h-screen instead of stretching to the full page height — a long
+                page now scrolls on its own, leaving the sidebar still.
+                The nav below keeps flex-1 + overflow-y-auto, so on a viewport
+                too short for the menu the sidebar scrolls inside itself rather
+                than squashing its items.
+            --}}
+            <aside class="fixed inset-y-0 start-0 z-40 flex w-64 translate-x-full flex-col overflow-y-auto bg-sidebar text-sidebar-text shadow-xl transition-transform duration-200 peer-checked:translate-x-0 md:sticky md:top-0 md:h-screen md:translate-x-0">
                 <div class="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 px-5">
                     <span class="flex size-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white shadow-sm">D</span>
                     <a href="{{ route('dashboard') }}" class="text-lg font-bold tracking-wide text-sidebar-text">DAWOOD</a>
@@ -50,7 +59,7 @@
                     @endforeach
                 </nav>
 
-                <div class="border-t border-white/10 p-3">
+                <div class="shrink-0 border-t border-white/10 p-3">
                     <a
                         href="{{ route('profile.edit') }}"
                         class="mb-1 block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('profile.*') ? 'bg-primary text-white shadow-sm' : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-text' }}"
