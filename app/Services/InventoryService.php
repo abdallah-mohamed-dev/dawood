@@ -10,6 +10,7 @@ use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
 use App\Models\Material;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -228,6 +229,32 @@ class InventoryService
                 $batch->getRawOriginal('remaining_quantity'),
                 $batch->getRawOriginal('unit_cost'),
             ));
+    }
+
+    /**
+     * How many purchases a filtered listing covers and what they cost in
+     * total. Lives here, not in the controller, because the total has to run
+     * through the same cost() as every other figure in the system — a
+     * selectRaw doing `quantity * unit_cost / 1000` in SQL would be a second
+     * copy of the formula, rounding differently at the edges.
+     *
+     * Takes the already-filtered query so the summary always describes
+     * exactly what the table below it shows.
+     *
+     * @param  Builder<InventoryBatch>  $query
+     * @return array{count: int, total: int}
+     */
+    public function purchasesSummary(Builder $query): array
+    {
+        $batches = (clone $query)->reorder()->get(['quantity', 'unit_cost']);
+
+        return [
+            'count' => $batches->count(),
+            'total' => $batches->sum(fn (InventoryBatch $batch) => $this->cost(
+                $batch->getRawOriginal('quantity'),
+                $batch->getRawOriginal('unit_cost'),
+            )),
+        ];
     }
 
     /**
