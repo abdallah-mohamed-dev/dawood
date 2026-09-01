@@ -149,21 +149,23 @@
         @endforeach
     </x-data-table>
 
-    @include('rooms._costs-section', [
-        'room' => $room,
-        'type' => \App\Enums\RoomCostType::Labor,
-        'title' => 'المصنعية',
-        'descriptionLabel' => 'الوصف',
-        'emptyMessage' => 'لا توجد دفعات مصنعية لهذه الغرفة.',
-    ])
+    <div class="mb-6 mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
+        @include('rooms._costs-section', [
+            'room' => $room,
+            'type' => \App\Enums\RoomCostType::Labor,
+            'title' => 'المصنعية',
+            'descriptionLabel' => 'الوصف',
+            'emptyMessage' => 'لا توجد دفعات مصنعية لهذه الغرفة.',
+        ])
 
-    @include('rooms._costs-section', [
-        'room' => $room,
-        'type' => \App\Enums\RoomCostType::Other,
-        'title' => 'مصروفات إضافية',
-        'descriptionLabel' => 'السبب',
-        'emptyMessage' => 'لا توجد مصروفات إضافية لهذه الغرفة.',
-    ])
+        @include('rooms._costs-section', [
+            'room' => $room,
+            'type' => \App\Enums\RoomCostType::Other,
+            'title' => 'مصروفات إضافية',
+            'descriptionLabel' => 'السبب',
+            'emptyMessage' => 'لا توجد مصروفات إضافية لهذه الغرفة.',
+        ])
+    </div>
 
     <div class="mb-6 mt-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <h2 class="mb-3 text-sm font-semibold text-gray-900">إضافة دفعة</h2>

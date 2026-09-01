@@ -60,19 +60,35 @@
                 </nav>
 
                 <div class="shrink-0 border-t border-white/10 p-3">
-                    <a
-                        href="{{ route('profile.edit') }}"
-                        class="mb-1 block truncate rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('profile.*') ? 'bg-primary text-white shadow-sm' : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-text' }}"
-                    >
-                        {{ auth()->user()->name }}
-                    </a>
+                    <div class="flex items-center gap-2 rounded-lg p-1 transition-colors {{ request()->routeIs('profile.*') ? 'bg-white/10' : 'hover:bg-sidebar-hover' }}">
+                        <a
+                            href="{{ route('profile.edit') }}"
+                            class="flex min-w-0 flex-1 items-center gap-2.5 rounded-md px-1.5 py-1.5"
+                            title="{{ auth()->user()->name }}"
+                        >
+                            <span class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/25 text-xs font-bold text-sidebar-text">
+                                {{ Str::of(auth()->user()->name)->substr(0, 1)->upper() }}
+                            </span>
+                            <span class="min-w-0 flex-1 text-right">
+                                <span class="block truncate text-sm font-medium text-sidebar-text">{{ auth()->user()->name }}</span>
+                                <span class="block text-xs text-sidebar-muted">الملف الشخصي</span>
+                            </span>
+                        </a>
 
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-muted transition-colors hover:bg-sidebar-hover hover:text-danger">
-                            {{ __('Logout') }}
-                        </button>
-                    </form>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button
+                                type="submit"
+                                title="{{ __('Logout') }}"
+                                aria-label="{{ __('Logout') }}"
+                                class="flex size-8 shrink-0 items-center justify-center rounded-md text-sidebar-muted transition-colors hover:bg-danger/20 hover:text-danger"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </aside>
         @endauth

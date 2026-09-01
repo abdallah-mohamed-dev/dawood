@@ -28,26 +28,31 @@
         $lastMonth = ['from' => now()->subMonthNoOverflow()->startOfMonth()->toDateString(), 'to' => now()->subMonthNoOverflow()->endOfMonth()->toDateString()];
     @endphp
 
-    <form method="GET" action="{{ route('inventory.purchases.index') }}" class="mb-4 rounded-xl border border-border bg-surface p-4 shadow-sm">
+    <form method="GET" action="{{ route('inventory.purchases.index') }}" class="mb-6 border-b border-border pb-4">
         <div class="flex flex-wrap items-end gap-3">
             <div>
-                <label for="q" class="mb-1 block text-xs font-medium text-gray-700">اسم المادة</label>
-                <input id="q" type="search" name="q" value="{{ $filters['q'] }}" placeholder="ابحث باسم المادة" class="w-48 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="q" class="mb-1 block text-xs font-medium text-secondary">اسم المادة</label>
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M18 10.5a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+                    </svg>
+                    <input id="q" type="search" name="q" value="{{ $filters['q'] }}" placeholder="ابحث باسم المادة" class="w-48 rounded-full border border-transparent bg-bg-subtle py-2 ps-9 pe-3 text-sm text-gray-900 transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+                </div>
             </div>
 
             <div>
-                <label for="from" class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
-                <input id="from" type="date" name="from" value="{{ $filters['from'] }}" class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="from" class="mb-1 block text-xs font-medium text-secondary">من تاريخ</label>
+                <input id="from" type="date" name="from" value="{{ $filters['from'] }}" class="w-40 rounded-full border border-transparent bg-bg-subtle px-3 py-2 text-sm text-gray-900 transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             </div>
 
             <div>
-                <label for="to" class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
-                <input id="to" type="date" name="to" value="{{ $filters['to'] }}" class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="to" class="mb-1 block text-xs font-medium text-secondary">إلى تاريخ</label>
+                <input id="to" type="date" name="to" value="{{ $filters['to'] }}" class="w-40 rounded-full border border-transparent bg-bg-subtle px-3 py-2 text-sm text-gray-900 transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             </div>
 
             <div>
-                <label for="status" class="mb-1 block text-xs font-medium text-gray-700">حالة الدفعة</label>
-                <select id="status" name="status" class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="status" class="mb-1 block text-xs font-medium text-secondary">حالة الدفعة</label>
+                <select id="status" name="status" class="w-40 rounded-full border border-transparent bg-bg-subtle px-3 py-2 text-sm text-gray-900 transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
                     <option value="">الكل</option>
                     <option value="available" @selected($filters['status'] === 'available')>لم يُصرف منها</option>
                     <option value="partial" @selected($filters['status'] === 'partial')>مصروفة جزئيًا</option>
@@ -55,20 +60,20 @@
                 </select>
             </div>
 
-            <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
+            <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
                 {{ __('Search') }}
             </button>
 
             @if ($hasFilters)
-                <a href="{{ route('inventory.purchases.index') }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
+                <a href="{{ route('inventory.purchases.index') }}" class="text-sm text-secondary hover:text-danger hover:underline">
                     إلغاء الفلاتر
                 </a>
             @endif
         </div>
 
         <div class="mt-3 flex flex-wrap gap-2 text-xs">
-            <a href="{{ route('inventory.purchases.index', $thisMonth) }}" class="rounded-md border border-border px-3 py-1 text-gray-700 hover:bg-bg">الشهر ده</a>
-            <a href="{{ route('inventory.purchases.index', $lastMonth) }}" class="rounded-md border border-border px-3 py-1 text-gray-700 hover:bg-bg">الشهر اللي فات</a>
+            <a href="{{ route('inventory.purchases.index', $thisMonth) }}" class="rounded-full bg-bg-subtle px-3 py-1 text-gray-700 hover:bg-border">الشهر ده</a>
+            <a href="{{ route('inventory.purchases.index', $lastMonth) }}" class="rounded-full bg-bg-subtle px-3 py-1 text-gray-700 hover:bg-border">الشهر اللي فات</a>
         </div>
     </form>
 
