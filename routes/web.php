@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CashboxController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ExpenseCategoryController;
@@ -72,4 +73,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/partners/{partner}/withdrawals/{withdrawal}', [PartnerController::class, 'destroyWithdrawal'])->name('partners.withdrawals.destroy');
 
     Route::get('/reports/profit', [ProfitController::class, 'index'])->name('reports.profit');
+
+    Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
+    Route::get('/backup/database', [BackupController::class, 'downloadDatabase'])->name('backup.database');
+    Route::get('/backup/csv', [BackupController::class, 'downloadCsvArchive'])->name('backup.csv');
 });

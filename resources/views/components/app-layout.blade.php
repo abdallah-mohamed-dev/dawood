@@ -11,6 +11,7 @@
         ['route' => 'cashbox.index', 'active' => 'cashbox.*', 'label' => 'الخزنة'],
         ['route' => 'partners.index', 'active' => 'partners.*', 'label' => 'الشركاء'],
         ['route' => 'reports.profit', 'active' => 'reports.profit', 'label' => 'تقرير الربح'],
+        ['route' => 'backup.index', 'active' => 'backup.*', 'label' => 'النسخ الاحتياطي'],
     ];
 @endphp
 

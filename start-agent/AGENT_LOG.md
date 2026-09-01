@@ -429,3 +429,45 @@
 
 **الحالة:** الاختبارات لسه **327/327 ناجحة** (تغيير في التوثيق بس، مفيش لمس للكود). commit منفصل.
 ---
+
+---
+### 2026-09-01 — Claude (Sonnet 5، عبر Claude Code / VS Code extension)
+
+**التاسك:** `specs/010-صفحة-الباكب-نسخة-قاعدة-البيانات.md` — أول تاسك في الدفعة الثالثة (النسخ الاحتياطي والتصدير، `specs/TASKS.md`).
+
+**اللي اتعمل:** صفحة `/backup` جديدة (`BackupController@index`) + مسار `/backup/database` (`BackupController@downloadDatabase`) بيرجّع نسخة كاملة من `database/database.sqlite` عبر `response()->download()` باسم فيه التاريخ والوقت. القاعدة SQLite فملف واحد بالكامل — الباكب الكامل = نسخ الملف نفسه، بدون أي منطق تصدير أو استعلامات. عنصر جديد في الشريط الجانبي "النسخ الاحتياطي". قسم 12 جديد في `USER-GUIDE.md`.
+
+**الاختبارات:** `tests/Feature/BackupTest.php` (4 اختبارات: منع الزائر عن الصفحتين، ظهور رابط التحميل، تحميل فعلي بـheader `attachment` وامتداد `.sqlite`). الحالة: 327/327 → **331/331 ناجحة**. Pint نظيف، `npm run build` ناجح.
+
+**بعده على طول:** التاسك 11 (تصدير CSV شامل لكل الجداول) في نفس الجلسة — القرارات المعمارية للدفعة كلها موثقة مسبقًا في `specs/TASKS.md`.
+
+---
+### 2026-09-01 — Claude (Sonnet 5، عبر Claude Code / VS Code extension)
+
+**التاسك:** `specs/011-تصدير-csv-شامل.md` — تاسك 11 من الدفعة الثالثة.
+
+**اللي اتعمل:** `BackupController::downloadCsvArchive()` — بيمشي على 13 موديل (customers, rooms, materials, inventory_batches, inventory_movements, room_materials, room_costs, customer_payments, expenses, expense_categories, cashbox_transactions, partners, partner_withdrawals)، يكتب كل واحد CSV خام (هيدر = أسماء الأعمدة من `Schema::getColumnListing`) في ملف مؤقت عبر `cursor()`، يجمّعهم في `ZipArchive` واحد، وبيحذف الملفات المؤقتة والـzip بعد الإرسال (`deleteFileAfterSend`). مسار `/backup/csv` وكارت تاني في نفس صفحة الباكب.
+
+**الاختبارات:** إضافة سطرين لـ`tests/Feature/BackupTest.php` (منع الزائر + تحميل ناجح مع فحص فعلي لمحتويات الـzip بـ`ZipArchive`). 331/331 → **333/333 ناجحة**. Pint نظيف، `npm run build` ناجح.
+
+**التاسكات المتبقية في الدفعة (12، 13، 14):** تصدير CSV منفصل لكل قسم (العملاء+الغرف، المخزون+المشتريات، الحسابات) — القرارات موثقة في `specs/TASKS.md`، جاهزة للتنفيذ في أي جلسة جديدة.
+
+---
+### 2026-09-01 — Claude (Sonnet 5، عبر Claude Code / VS Code extension)
+
+**فيكس فوري:** `/backup/csv` كان بيرمي `ErrorException: tempnam(): file created in the system's temporary directory` عند التجربة الفعلية على السيرفر المحلي (Windows) رغم إن كل الاختبارات كانت ناجحة — الاختبارات بتشتغل in-process فمابتلاقيش نفس سلوك `tempnam()`/`sys_get_temp_dir()` بتاع Windows الحقيقي (PHP بيرجع notice بيتحول لاستثناء لما الـdir الممرر مش مطابق تمامًا للمسار اللي PHP بيعتبره "الرسمي").
+
+**الحل:** استبدال `tempnam(sys_get_temp_dir(), ...)` بمجلد مؤقت جوه `storage/app/backup-tmp` (`File::ensureDirectoryExists()` + `uniqid()` لتوليد الاسم) — مسار تحت تحكم Laravel بالكامل بدل الاعتماد على سلوك نظام التشغيل. `storage/app/*` متجاهَل في git أصلاً (`storage/app/.gitignore`) فمفيش حاجة إضافية للـ`.gitignore`.
+
+**الاختبار:** 333/333 لسه ناجحة، Pint نظيف. **مُلاحَظ:** الاختبارات الآلية معملتش catch لهذا الباج لأنها بتشتغل in-process — درس للمستقبل إن أي منطق بيلمس ملفات مؤقتة على مستوى نظام التشغيل يستاهل تجربة فعلية على `php artisan serve` مش بس `php artisan test`.
+
+---
+### 2026-09-01 — Claude (Sonnet 5، عبر Claude Code / VS Code extension)
+
+**تصحيح: الفيكس السابق كان ناقص.** بعد حل مشكلة `tempnam()`، ظهر إيرور تاني حقيقي عند التجربة الفعلية: `Object of class App\Enums\RoomStatus could not be converted to string` — لأن `getAttribute($column)` كان بيرجّع القيمة **بعد الـcast** (enum object لعمود `status`)، و`fputcsv` مش قادر يحوّلها لنص. الاختبار الأول ماكانش لقطها لأنه عمل `Customer` بس من غير `Room` (اللي فيه العمود المكاست الوحيد وقتها)، فـ`rooms.csv` كان فاضي غير الهيدر.
+
+**الحل:** استخدام `$record->getRawOriginal($column)` بدل `getAttribute($column)` — بيرجّع القيمة الخام من القاعدة (نص/رقم) قبل أي cast، وده أصلاً الأنسب لتصدير "خام" للأرشفة. عدّلت `tests/Feature/BackupTest.php` عشان يعمل `Room` فعلي ويتأكد إن `rooms.csv` فيه `status` بقيمته الخام (`draft`) — كده الاختبار بقى بيغطي فعليًا العمود اللي كان بيكسر.
+
+**درس:** أي موديل فيه enum/money/quantity cast لازم يتغطى صراحة في اختبار أي كود تصدير عام يمشي على كل الموديلات — مش كفاية تجربة موديل واحد بسيط زي `Customer`.
+
+**الحالة النهائية:** 333/333 ناجحة، Pint نظيف، `npm run build` ناجح. اتأكد المستخدم بعدها إن `/backup/csv` شغال فعليًا.
