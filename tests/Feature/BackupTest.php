@@ -3,6 +3,7 @@
 use App\Models\Customer;
 use App\Models\Room;
 use App\Models\User;
+use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
     $this->admin = User::factory()->create();
@@ -48,7 +49,8 @@ test('an admin can download a csv archive containing every table', function () {
         ->toContain('attachment')
         ->toContain('.zip');
 
-    $zipPath = tempnam(sys_get_temp_dir(), 'backup-test-').'.zip';
+    $zipPath = storage_path('app/backup-tmp/'.uniqid('backup-test-').'.zip');
+    File::ensureDirectoryExists(dirname($zipPath));
     file_put_contents($zipPath, $response->streamedContent());
 
     $zip = new ZipArchive;
