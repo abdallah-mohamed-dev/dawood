@@ -9,7 +9,6 @@ use App\Models\CustomerPayment;
 use App\Models\Debt;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
-use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
 use App\Models\Material;
 use App\Models\MaterialType;
@@ -32,7 +31,6 @@ class BackupController extends Controller
         Customer::class,
         Room::class,
         Material::class,
-        InventoryBatch::class,
         InventoryMovement::class,
         RoomMaterial::class,
         RoomCost::class,

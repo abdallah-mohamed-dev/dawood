@@ -11,6 +11,7 @@ enum CashboxTransactionKind: string
     case PartnerWithdrawal = 'partner_withdrawal';
     case RoomLabor = 'room_labor';
     case RoomExpense = 'room_expense';
+    case MaterialSale = 'material_sale';
 
     public function label(): string
     {
@@ -22,6 +23,7 @@ enum CashboxTransactionKind: string
             self::PartnerWithdrawal => 'سحب شريك',
             self::RoomLabor => 'مصنعية غرفة',
             self::RoomExpense => 'مصروف غرفة',
+            self::MaterialSale => 'بيع خامة',
         };
     }
 }

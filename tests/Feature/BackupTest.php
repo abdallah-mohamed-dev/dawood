@@ -84,7 +84,7 @@ test('the csv archive has one file for every exported table', function () {
     $zip = new ZipArchive;
     $zip->open($zipPath);
 
-    $tables = ['customers', 'rooms', 'materials', 'inventory_batches', 'inventory_movements', 'room_materials', 'room_costs', 'customer_payments', 'expenses', 'expense_categories', 'cashbox_transactions', 'partners', 'partner_withdrawals', 'debts', 'material_types', 'settings', 'activity_logs'];
+    $tables = ['customers', 'rooms', 'materials', 'inventory_movements', 'room_materials', 'room_costs', 'customer_payments', 'expenses', 'expense_categories', 'cashbox_transactions', 'partners', 'partner_withdrawals', 'debts', 'material_types', 'settings', 'activity_logs'];
 
     foreach ($tables as $table) {
         expect($zip->locateName($table.'.csv'))->not->toBeFalse("missing {$table}.csv");

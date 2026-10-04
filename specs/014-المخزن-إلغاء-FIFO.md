@@ -55,17 +55,17 @@
 > ⚠️ **SQLite:** كل `dropForeign` / `dropIndex` / `dropColumn` في **`Schema::table` منفصلة**. راجع `PITFALLS.md`.
 > الترتيب تحت **إلزامي** — نقل حركات الخزنة لازم يحصل **قبل** حذف جدول الدفعات.
 
-- [ ] **14.1.1** Migration `add_stock_columns_to_materials_table`:
+- [x] **14.1.1** Migration `add_stock_columns_to_materials_table`:
   ```php
   $table->bigInteger('quantity')->default(0)->after('unit');      // ×1000
   $table->bigInteger('unit_price')->default(0)->after('quantity'); // قروش
   ```
 
-- [ ] **14.1.2** نفس الـmigration (أو واحدة بعدها) — **تعبئة من الدفعات**:
+- [x] **14.1.2** نفس الـmigration (أو واحدة بعدها) — **تعبئة من الدفعات**:
   - `quantity` = `SUM(remaining_quantity)` لكل دفعات المادة
   - `unit_price` = `unit_cost` بتاع **أحدث** دفعة (بـ`purchase_date` ثم `id`)، و`0` لو مفيش دفعات
 
-- [ ] **14.1.3** Migration `repoint_inventory_cashbox_sources` — **الخطوة دي بتحمي رصيد الخزنة**:
+- [x] **14.1.3** Migration `repoint_inventory_cashbox_sources` — **الخطوة دي بتحمي رصيد الخزنة**:
   حركات الخزنة بتاعة الشراء مصدرها `App\Models\InventoryBatch`. الجدول ده هيتحذف، فلازم تتنقل الأول.
   - لكل دفعة: هات حركة المخزون `in` بتاعتها (`inventory_movements.batch_id = batch.id AND type = 'in'`)
   - حدّث `cashbox_transactions` اللي `source_type = 'App\Models\InventoryBatch'` و`source_id = batch.id` →
@@ -73,24 +73,24 @@
   - **ممنوع تحذف أي صف خزنة. ممنوع تغيّر أي مبلغ.**
   - لو دفعة مالهاش حركة `in` (مفروض مستحيل) — سيب صف الخزنة زي ما هو واكتب ده في سجل الانحرافات
 
-- [ ] **14.1.4** Migration `drop_batch_id_from_inventory_movements` — بالترتيب ده في `Schema::table` منفصلة:
+- [x] **14.1.4** Migration `drop_batch_id_from_inventory_movements` — بالترتيب ده في `Schema::table` منفصلة:
   1. `dropForeign(['batch_id'])`
   2. `dropIndex(['batch_id'])`
   3. `dropColumn('batch_id')`
 
-- [ ] **14.1.5** Migration `drop_inventory_batches_table` — `Schema::dropIfExists('inventory_batches')`
+- [x] **14.1.5** Migration `drop_inventory_batches_table` — `Schema::dropIfExists('inventory_batches')`
 
-- [ ] **14.1.6** حذف الملفات: `app/Models/InventoryBatch.php`، `database/factories/InventoryBatchFactory.php`
+- [x] **14.1.6** حذف الملفات: `app/Models/InventoryBatch.php`، `database/factories/InventoryBatchFactory.php`
 
-- [ ] **14.1.7** `app/Enums/InventoryMovementType.php` — ضيف `case Sold = 'sold';` بـ`label()` = **`'بيع'`**
+- [x] **14.1.7** `app/Enums/InventoryMovementType.php` — ضيف `case Sold = 'sold';` بـ`label()` = **`'بيع'`**
 
-- [ ] **14.1.8** `app/Enums/CashboxTransactionKind.php` — ضيف `case MaterialSale = 'material_sale';` بـ`label()` = **`'بيع خامة'`**
+- [x] **14.1.8** `app/Enums/CashboxTransactionKind.php` — ضيف `case MaterialSale = 'material_sale';` بـ`label()` = **`'بيع خامة'`**
 
-- [ ] **14.1.9** `app/Http/Controllers/BackupController.php` — شيل `InventoryBatch::class` من `EXPORTABLE_MODELS`
+- [x] **14.1.9** `app/Http/Controllers/BackupController.php` — شيل `InventoryBatch::class` من `EXPORTABLE_MODELS`
 
 ### الاختبارات
 
-- [ ] **14.1.10** `tests/Feature/Inventory/InventoryMigrationTest.php`:
+- [x] **14.1.10** `tests/Feature/Inventory/InventoryMigrationTest.php`:
   - بعد الـmigrations، كمية المادة = مجموع المتبقي من دفعاتها (رقم مرجعي محسوب يدويًا)
   - سعر المادة = سعر أحدث دفعة
   - **رصيد الخزنة قبل الـmigration = رصيد الخزنة بعدها** ← أهم اختبار في التاسك ده
@@ -311,6 +311,9 @@
 
 | التاريخ | اللي اتغير | السبب |
 |---|---|---|
+| 2026-10-04 | مرجع رصيد الخزنة في 14.1.10 = **‎-90000‎** مش ‎+90000‎ | الفكستشر كله `out` (30000 + 60000) فـ`SUM(in) − SUM(out)` = ‎0 − 90000‎. اتأكد مع المستخدم: ممنوع إضافة صف رصيد افتتاحي، والرقم ‎-90000‎ قبل وبعد (والـout نفسه 90000 قبل وبعد). |
+| 2026-10-04 | `110200` بيرمي استثناء ويوقف لو فضل أي صف خزنة مصدره `InventoryBatch` | ده المتسوب له يوقف `110300`/`110400` بدل ما ينقل المصدر لحركة `in` مش موجودة. المسار ده **مش مغطّى باختبار** — الفكستشر المفروض مفيهوش دفعة بلا حركة `in`. |
+| 2026-10-04 | 98 اختبار بيفشل بعد 14.1 (منهم 8 في `InventoryMigrationTest` ناجحة) | كلهم `Class "App\Models\InventoryBatch" not found` من `InventoryService` و`InventoryMovementFactory` واختبارات قديمة — شغل 14.2/14.6. |
 
 ## النتيجة النهائية
 
