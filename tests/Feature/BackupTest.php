@@ -72,3 +72,24 @@ test('an admin can download a csv archive containing every table', function () {
     $zip->close();
     unlink($zipPath);
 });
+
+test('the csv archive has one file for every exported table', function () {
+    $response = $this->actingAs($this->admin)->get(route('backup.csv'));
+    $response->assertOk();
+
+    $zipPath = storage_path('app/backup-tmp/'.uniqid('backup-test-').'.zip');
+    File::ensureDirectoryExists(dirname($zipPath));
+    file_put_contents($zipPath, $response->streamedContent());
+
+    $zip = new ZipArchive;
+    $zip->open($zipPath);
+
+    $tables = ['customers', 'rooms', 'materials', 'inventory_batches', 'inventory_movements', 'room_materials', 'room_costs', 'customer_payments', 'expenses', 'expense_categories', 'cashbox_transactions', 'partners', 'partner_withdrawals', 'debts', 'material_types', 'settings', 'activity_logs'];
+
+    foreach ($tables as $table) {
+        expect($zip->locateName($table.'.csv'))->not->toBeFalse("missing {$table}.csv");
+    }
+
+    $zip->close();
+    unlink($zipPath);
+});

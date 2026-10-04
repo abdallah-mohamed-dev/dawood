@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\PartnerWithdrawalFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class PartnerWithdrawal extends Model
 {
     /** @use HasFactory<PartnerWithdrawalFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'سحب شريك';
+
+    public function activityLabel(): string
+    {
+        return ($this->partner?->name ?? '—').' — '.MoneyCast::toDisplayString((int) ($this->attributes['amount'] ?? 0));
+    }
 
     /**
      * @return array<string, string>

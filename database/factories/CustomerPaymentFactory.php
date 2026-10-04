@@ -22,6 +22,8 @@ class CustomerPaymentFactory extends Factory
             'room_id' => Room::factory(),
             'amount' => $this->faker->numberBetween(10_000, 500_000),
             'paid_at' => now()->toDateString(),
+            // Next free number, same rule as CustomerPaymentService::create().
+            'receipt_number' => (int) CustomerPayment::query()->max('receipt_number') + 1,
             'note' => null,
         ];
     }

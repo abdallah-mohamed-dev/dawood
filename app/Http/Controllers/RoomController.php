@@ -97,7 +97,7 @@ class RoomController extends Controller
             'status' => ['required', Rule::enum(RoomStatus::class)],
         ]);
 
-        $room->update(['status' => $validated['status']]);
+        $this->roomService->changeStatus($room, RoomStatus::from($validated['status']));
 
         return back()->with('success', 'تم تحديث حالة الغرفة.');
     }
@@ -140,7 +140,7 @@ class RoomController extends Controller
         try {
             $this->roomMaterialService->issue($roomMaterial, $quantity, now()->toDateString());
         } catch (InsufficientStockException) {
-            return back()->with('error', 'الكمية المتاحة في المخزون غير كافية لصرف هذه الكمية.');
+            return back()->with('error', 'الكمية المتاحة في المخزن غير كافية لصرف هذه الكمية.');
         } catch (ExceedsRequiredQuantityException) {
             return back()->with('error', 'لا يمكن صرف كمية أكبر من المطلوب.');
         }

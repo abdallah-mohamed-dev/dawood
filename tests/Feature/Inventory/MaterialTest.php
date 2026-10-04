@@ -2,6 +2,7 @@
 
 use App\Models\ExpenseCategory;
 use App\Models\Material;
+use App\Models\MaterialType;
 use App\Models\User;
 use App\Services\InventoryService;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ test('adding a material shows it listed with its unit', function () {
     $this->actingAs($this->admin)->post(route('inventory.materials.store'), [
         'name' => 'لوح MDF',
         'unit' => 'لوح',
+        'material_type_id' => MaterialType::query()->where('name', 'خامة')->value('id'),
     ])->assertRedirect(route('inventory.materials.index'));
 
     $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
@@ -65,6 +67,7 @@ test('a material can be edited', function () {
     $this->actingAs($this->admin)->put(route('inventory.materials.update', $material), [
         'name' => 'اسم محدث',
         'unit' => 'متر',
+        'material_type_id' => $material->material_type_id,
     ])->assertRedirect(route('inventory.materials.index'));
 
     $material->refresh();
@@ -78,6 +81,7 @@ test('updating a material to its own current name does not fail uniqueness valid
     $response = $this->actingAs($this->admin)->put(route('inventory.materials.update', $material), [
         'name' => 'لوح MDF',
         'unit' => $material->unit,
+        'material_type_id' => $material->material_type_id,
     ]);
 
     $response->assertSessionDoesntHaveErrors();
@@ -90,17 +94,18 @@ test('renaming a material to another existing material name fails validation', f
     $response = $this->actingAs($this->admin)->put(route('inventory.materials.update', $material), [
         'name' => 'لوح MDF',
         'unit' => $material->unit,
+        'material_type_id' => $material->material_type_id,
     ]);
 
     $response->assertSessionHasErrors('name');
     expect($material->fresh()->name)->toBe('خشب زان');
 });
 
-test('the materials page and its nav link are labelled المخزون, not المواد', function () {
+test('the materials page and its nav link are labelled المخزن, not المواد', function () {
     $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
 
     $response->assertOk()
-        ->assertSee('المخزون')
+        ->assertSee('المخزن')
         ->assertDontSee('المواد');
 });
 

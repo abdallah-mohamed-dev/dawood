@@ -1,5 +1,5 @@
-<x-app-layout title="مشتريات المخزون">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">مشتريات المخزون</h1>
+<x-app-layout title="مشتريات المخزن">
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">مشتريات المخزن</h1>
 
     <x-quick-add :action="route('inventory.purchases.store')" title="تسجيل عملية شراء">
         <div>

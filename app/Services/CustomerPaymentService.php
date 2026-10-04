@@ -38,10 +38,14 @@ class CustomerPaymentService
 
             $this->assertWithinRemaining($room, $amount);
 
+            // max+1 rather than count+1: a deleted payment's number is never reused.
+            $nextReceipt = (int) CustomerPayment::query()->lockForUpdate()->max('receipt_number') + 1;
+
             $payment = CustomerPayment::query()->create([
                 'room_id' => $room->id,
                 'amount' => $amount,
                 'paid_at' => $date,
+                'receipt_number' => $nextReceipt,
                 'note' => $note,
             ]);
 
@@ -51,19 +55,20 @@ class CustomerPaymentService
         });
     }
 
-    public function update(CustomerPayment $payment, int $amount, ?PaymentMethod $method = null): void
+    public function update(CustomerPayment $payment, int $amount, ?PaymentMethod $method = null, ?string $note = null): void
     {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Payment amount must be greater than zero.');
         }
 
-        DB::transaction(function () use ($payment, $amount, $method) {
+        DB::transaction(function () use ($payment, $amount, $method, $note) {
             $payment = CustomerPayment::query()->whereKey($payment->getKey())->lockForUpdate()->firstOrFail();
             $room = Room::query()->whereKey($payment->room_id)->lockForUpdate()->firstOrFail();
 
             $this->assertWithinRemaining($room, $amount, excludingPayment: $payment);
 
-            $payment->update(['amount' => $amount]);
+            // receipt_number is deliberately not touched here.
+            $payment->update(['amount' => $amount, 'note' => $note]);
             $this->cashbox->updateFor($payment, $amount, $method);
         });
     }

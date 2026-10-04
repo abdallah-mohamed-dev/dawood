@@ -6,6 +6,8 @@
 
         <x-field name="name" label="الاسم" :value="old('name')" required autofocus />
 
+        <x-field name="email" type="email" label="البريد الإلكتروني (اختياري)" :value="old('email')" />
+
         <div>
             <label for="percentage" class="mb-1 block text-sm font-medium text-gray-700">النسبة المئوية (%)</label>
             <input

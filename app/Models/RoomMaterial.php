@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\RoomMaterialFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RoomMaterial extends Model
 {
     /** @use HasFactory<RoomMaterialFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'خامة غرفة';
+
+    public function activityLabel(): string
+    {
+        return ($this->material?->name ?? '—').' — '.($this->room?->room_type ?? '—');
+    }
 
     /**
      * @return array<string, string>

@@ -23,6 +23,7 @@ class UpdatePaymentRequest extends FormRequest
         return [
             'amount' => ['required', 'regex:'.MoneyCast::validationPattern()],
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
+            'note' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

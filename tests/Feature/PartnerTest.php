@@ -165,3 +165,46 @@ test('the partners index shows the computed figures for each partner', function 
         ->assertSee('20.00%')
         ->assertSee('5,000.00 ج.م'); // share of a 25,000 EGP net profit at 20%
 });
+
+test('a partner can be added without an email', function () {
+    $this->actingAs($this->admin)->post(route('partners.store'), [
+        'name' => 'شريك بدون إيميل',
+        'percentage' => '10',
+    ])->assertRedirect(route('partners.index'));
+
+    expect(Partner::query()->where('name', 'شريك بدون إيميل')->value('email'))->toBeNull();
+});
+
+test('a partner added with a valid email keeps it and shows it on the list', function () {
+    $this->actingAs($this->admin)->post(route('partners.store'), [
+        'name' => 'شريك بإيميل',
+        'email' => 'partner@example.com',
+        'percentage' => '10',
+    ])->assertRedirect(route('partners.index'));
+
+    expect(Partner::query()->where('name', 'شريك بإيميل')->value('email'))->toBe('partner@example.com');
+
+    $this->actingAs($this->admin)->get(route('partners.index'))->assertSee('partner@example.com');
+});
+
+test('a malformed email is rejected with an Arabic message', function () {
+    $this->actingAs($this->admin)->post(route('partners.store'), [
+        'name' => 'شريك',
+        'email' => 'not-an-email',
+        'percentage' => '10',
+    ])->assertSessionHasErrors(['email' => 'يجب أن يكون حقل البريد الإلكتروني بريدًا إلكترونيًا صحيحًا.']);
+
+    expect(Partner::query()->count())->toBe(0);
+});
+
+test('editing a partner email saves the new value', function () {
+    $partner = Partner::factory()->create(['email' => 'old@example.com', 'percentage' => 1000]);
+
+    $this->actingAs($this->admin)->put(route('partners.update', $partner), [
+        'name' => $partner->name,
+        'email' => 'new@example.com',
+        'percentage' => '10',
+    ])->assertRedirect();
+
+    expect($partner->fresh()->email)->toBe('new@example.com');
+});

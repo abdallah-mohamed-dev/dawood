@@ -4,6 +4,7 @@ use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\Material;
+use App\Models\MaterialType;
 use App\Models\Room;
 use App\Models\User;
 
@@ -42,6 +43,7 @@ test('a material is added from the index without leaving it', function () {
     $this->actingAs($this->admin)->post(route('inventory.materials.store'), [
         'name' => 'خشب زان',
         'unit' => 'لوح',
+        'material_type_id' => MaterialType::query()->where('name', 'خامة')->value('id'),
     ])->assertRedirect(route('inventory.materials.index'));
 
     expect(Material::query()->sole()->name)->toBe('خشب زان');

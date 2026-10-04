@@ -19,6 +19,7 @@ class PartnerFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
+            'email' => $this->faker->optional()->safeEmail(),
             // A plausible 10%–30% share, encoded × 100 like money (1000–3000).
             'percentage' => $this->faker->numberBetween(1000, 3000),
         ];

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\ExpenseFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,14 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
 class Expense extends Model
 {
     /** @use HasFactory<ExpenseFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'مصروف';
+
+    public function activityLabel(): string
+    {
+        return $this->category?->name ?? '—';
+    }
 
     /**
      * @return array<string, string>

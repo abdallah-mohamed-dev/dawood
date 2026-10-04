@@ -31,6 +31,7 @@ class StoreMaterialRequest extends FormRequest
                 Rule::unique('materials', 'name'),
             ],
             'unit' => ['required', 'string', 'max:50'],
+            'material_type_id' => ['required', 'exists:material_types,id'],
         ];
     }
 }

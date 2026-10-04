@@ -1,9 +1,10 @@
 <x-app-layout title="مدفوعات العملاء">
     <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">مدفوعات العملاء</h1>
 
-    <x-data-table :headings="['التاريخ', 'العميل', 'الغرفة', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$payments">
+    <x-data-table :headings="['رقم الإيصال', 'التاريخ', 'العميل', 'الغرفة', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$payments">
         @foreach ($payments as $payment)
             <tr>
+                <td class="px-4 py-2 font-mono">{{ $payment->formattedReceiptNumber() }}</td>
                 <td class="px-4 py-2">{{ $payment->paid_at->format('Y-m-d') }}</td>
                 <td class="px-4 py-2">
                     <a href="{{ route('customers.show', $payment->room->customer) }}" class="text-primary hover:underline">

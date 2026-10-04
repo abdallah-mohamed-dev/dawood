@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
 use App\Enums\InventoryMovementType;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\InventoryMovementFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +17,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class InventoryMovement extends Model
 {
     /** @use HasFactory<InventoryMovementFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'حركة مخزون';
+
+    public function activityLabel(): string
+    {
+        return $this->material?->name ?? '—';
+    }
 
     /**
      * @return array<string, string>

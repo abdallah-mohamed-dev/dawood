@@ -18,12 +18,13 @@
         </div>
     @endif
 
-    <x-data-table :headings="['الاسم', 'النسبة', 'النصيب', 'السحوبات', 'المتبقي', __('Actions')]" :rows="$rows">
+    <x-data-table :headings="['الاسم', 'البريد الإلكتروني', 'النسبة', 'النصيب', 'السحوبات', 'المتبقي', __('Actions')]" :rows="$rows">
         @foreach ($rows as $row)
             <tr>
                 <td class="px-4 py-2">
                     <a href="{{ route('partners.show', $row['partner']) }}" class="text-primary hover:underline">{{ $row['partner']->name }}</a>
                 </td>
+                <td class="px-4 py-2">{{ $row['partner']->email ?? '—' }}</td>
                 <td class="px-4 py-2">{{ number_format($row['partner']->percentage / 100, 2) }}%</td>
                 <td class="px-4 py-2"><x-money :amount="$row['share']" /></td>
                 <td class="px-4 py-2"><x-money :amount="$row['withdrawn']" /></td>

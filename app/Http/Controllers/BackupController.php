@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\CashboxTransaction;
 use App\Models\Customer;
 use App\Models\CustomerPayment;
+use App\Models\Debt;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
 use App\Models\Material;
+use App\Models\MaterialType;
 use App\Models\Partner;
 use App\Models\PartnerWithdrawal;
 use App\Models\Room;
 use App\Models\RoomCost;
 use App\Models\RoomMaterial;
+use App\Models\Setting;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -38,6 +42,10 @@ class BackupController extends Controller
         CashboxTransaction::class,
         Partner::class,
         PartnerWithdrawal::class,
+        Debt::class,
+        MaterialType::class,
+        Setting::class,
+        ActivityLog::class,
     ];
 
     public function index(): View

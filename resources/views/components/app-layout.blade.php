@@ -2,9 +2,8 @@
 
 @php
     $navItems = [
-        ['route' => 'dashboard', 'active' => 'dashboard', 'label' => 'لوحة التحكم'],
         ['route' => 'customers.index', 'active' => 'customers.*', 'label' => 'العملاء'],
-        ['route' => 'inventory.materials.index', 'active' => 'inventory.materials.*', 'label' => 'المخزون'],
+        ['route' => 'inventory.materials.index', 'active' => 'inventory.materials.*', 'label' => 'المخزن'],
         ['route' => 'inventory.purchases.index', 'active' => 'inventory.purchases.*', 'label' => 'المشتريات'],
         ['route' => 'payments.index', 'active' => 'payments.*', 'label' => 'المدفوعات'],
         ['route' => 'expenses.index', 'active' => 'expenses.*', 'label' => 'المصروفات'],
@@ -61,6 +60,13 @@
                 </nav>
 
                 <div class="shrink-0 border-t border-white/10 p-3">
+                    <a
+                        href="{{ route('settings.index') }}"
+                        class="mb-1 block rounded-lg px-3 py-2 text-sm font-medium transition-colors {{ request()->routeIs('settings.*') ? 'bg-primary text-white shadow-sm' : 'text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-text' }}"
+                    >
+                        الإعدادات
+                    </a>
+
                     <div class="flex items-center gap-2 rounded-lg p-1 transition-colors {{ request()->routeIs('profile.*') ? 'bg-white/10' : 'hover:bg-sidebar-hover' }}">
                         <a
                             href="{{ route('profile.edit') }}"

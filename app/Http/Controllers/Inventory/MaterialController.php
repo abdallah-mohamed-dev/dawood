@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventory\StoreMaterialRequest;
 use App\Http\Requests\Inventory\UpdateMaterialRequest;
 use App\Models\Material;
+use App\Models\MaterialType;
 use App\Services\InventoryService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
@@ -25,6 +26,7 @@ class MaterialController extends Controller
         // an active search alive on page two.
         $materials = Material::query()
             ->when($search !== '', fn ($query) => $query->where('name', 'like', '%'.$search.'%'))
+            ->with('materialType')
             ->orderBy('name')
             ->paginate(50)
             ->withQueryString();
@@ -35,6 +37,7 @@ class MaterialController extends Controller
             // warehouse to render 50 rows gets worse as the table grows.
             'stockByMaterial' => $this->inventory->stockByMaterialIds($materials->pluck('id')->all()),
             'search' => $search,
+            'materialTypes' => MaterialType::query()->orderBy('position')->get(),
         ]);
     }
 
@@ -47,7 +50,10 @@ class MaterialController extends Controller
 
     public function edit(Material $material): View
     {
-        return view('inventory.materials.edit', ['material' => $material]);
+        return view('inventory.materials.edit', [
+            'material' => $material,
+            'materialTypes' => MaterialType::query()->orderBy('position')->get(),
+        ]);
     }
 
     public function update(UpdateMaterialRequest $request, Material $material): RedirectResponse

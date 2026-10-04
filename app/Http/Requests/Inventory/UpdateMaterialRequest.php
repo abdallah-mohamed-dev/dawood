@@ -31,6 +31,7 @@ class UpdateMaterialRequest extends FormRequest
                 Rule::unique('materials', 'name')->ignore($this->route('material')),
             ],
             'unit' => ['required', 'string', 'max:50'],
+            'material_type_id' => ['required', 'exists:material_types,id'],
         ];
     }
 }

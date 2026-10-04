@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\MoneyCast;
 use App\Enums\RoomCostType;
 use App\Enums\RoomStatus;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\RoomFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,11 +13,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['customer_id', 'room_type', 'sale_price', 'status'])]
+#[Fillable(['customer_id', 'room_type', 'sale_price', 'status', 'completed_at'])]
 class Room extends Model
 {
     /** @use HasFactory<RoomFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'غرفة';
+
+    public function activityLabel(): string
+    {
+        return $this->room_type.' — '.($this->customer?->name ?? '—');
+    }
 
     /**
      * @return array<string, string>
@@ -26,6 +34,7 @@ class Room extends Model
         return [
             'sale_price' => MoneyCast::class,
             'status' => RoomStatus::class,
+            'completed_at' => 'date',
         ];
     }
 

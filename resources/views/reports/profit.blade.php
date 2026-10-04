@@ -51,7 +51,7 @@
             <div class="mt-1 text-xs text-secondary">خامات وتكاليف غرف لم تكتمل بعد — أصل، ليست تكلفة.</div>
         </div>
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">قيمة المخزون غير المصروف</div>
+            <div class="text-sm text-secondary">قيمة المخزن غير المصروف</div>
             <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$stockValue" /></div>
             <div class="mt-1 text-xs text-secondary">خامات مشتراة ولم تُصرف بعد — أصل، ليست تكلفة.</div>
         </div>

@@ -59,7 +59,8 @@ class PaymentController extends Controller
     {
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
-            $this->payments->update($payment, $amount, PaymentMethod::from($request->string('payment_method')->toString()));
+            $note = $request->filled('note') ? $request->string('note')->toString() : null;
+            $this->payments->update($payment, $amount, PaymentMethod::from($request->string('payment_method')->toString()), $note);
         } catch (PaymentExceedsRemainingException $e) {
             return back()->withInput()->withErrors([
                 'amount' => 'المبلغ أكبر من المتبقي. المتبقي الفعلي: '.MoneyCast::toDisplayString($e->remaining).' ج.م.',

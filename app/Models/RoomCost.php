@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Enums\RoomCostType;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\RoomCostFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,7 +21,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class RoomCost extends Model
 {
     /** @use HasFactory<RoomCostFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'تكلفة غرفة';
+
+    public function activityLabel(): string
+    {
+        return ($this->type?->label() ?? '—').' — '.($this->room?->room_type ?? '—');
+    }
 
     /**
      * @return array<string, string>

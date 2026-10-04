@@ -9,6 +9,7 @@ use App\Enums\PaymentMethod;
 use App\Http\Requests\SetOpeningBalanceRequest;
 use App\Models\CashboxTransaction;
 use App\Models\CustomerPayment;
+use App\Models\Debt;
 use App\Models\Expense;
 use App\Models\InventoryBatch;
 use App\Models\PartnerWithdrawal;
@@ -17,6 +18,7 @@ use App\Services\CashboxService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -36,9 +38,12 @@ class CashboxController extends Controller
             'incoming' => $this->page(CashboxTransactionType::In, 'in_page'),
             'outgoing' => $this->page(CashboxTransactionType::Out, 'out_page'),
             'balance' => $summary['balance'],
+            'debtsOutstanding' => (int) Debt::query()->where('is_paid', false)->sum('amount'),
             'totalIn' => $summary['total_in'],
             'totalOut' => $summary['total_out'],
             'breakdown' => $this->cashbox->breakdownByMethod(),
+            'incomingMonthlyTotals' => $this->incomingMonthlyTotals(),
+            'outgoingMonthlyTotals' => $this->outgoingMonthlyTotals(),
             'methods' => PaymentMethod::cases(),
             'openingBalance' => $openingBalance,
         ]);
@@ -70,6 +75,36 @@ class CashboxController extends Controller
             ->latest('id')
             ->paginate(25, ['*'], $pageName)
             ->withQueryString();
+    }
+
+    /**
+     * Month totals over ALL incoming rows, not just the page on screen — the
+     * separator row must show the true total even when a month spans pages.
+     * Same shape as ExpenseController::monthlyTotals().
+     *
+     * @return Collection<string, int>
+     */
+    private function incomingMonthlyTotals(): Collection
+    {
+        return CashboxTransaction::query()
+            ->where('type', CashboxTransactionType::In)
+            ->selectRaw("strftime('%Y-%m', occurred_at) as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->map(fn ($total) => (int) $total);
+    }
+
+    /**
+     * @return Collection<string, int>
+     */
+    private function outgoingMonthlyTotals(): Collection
+    {
+        return CashboxTransaction::query()
+            ->where('type', CashboxTransactionType::Out)
+            ->selectRaw("strftime('%Y-%m', occurred_at) as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->map(fn ($total) => (int) $total);
     }
 
     public function storeOpeningBalance(SetOpeningBalanceRequest $request): RedirectResponse

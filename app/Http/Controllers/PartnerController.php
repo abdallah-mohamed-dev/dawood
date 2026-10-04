@@ -59,6 +59,7 @@ class PartnerController extends Controller
 
         Partner::query()->create([
             'name' => $request->string('name')->toString(),
+            'email' => $request->filled('email') ? $request->string('email')->toString() : null,
             'percentage' => $percentage,
         ]);
 
@@ -95,6 +96,7 @@ class PartnerController extends Controller
 
         $partner->update([
             'name' => $request->string('name')->toString(),
+            'email' => $request->filled('email') ? $request->string('email')->toString() : null,
             'percentage' => $percentage,
         ]);
 

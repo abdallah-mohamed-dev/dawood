@@ -6,6 +6,7 @@ use App\Casts\MoneyCast;
 use App\Enums\CashboxTransactionKind;
 use App\Enums\CashboxTransactionType;
 use App\Enums\PaymentMethod;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\CashboxTransactionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,7 +23,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class CashboxTransaction extends Model
 {
     /** @use HasFactory<CashboxTransactionFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'حركة خزنة';
+
+    public function activityLabel(): string
+    {
+        return $this->detailedLabel();
+    }
 
     /**
      * @return array<string, string>

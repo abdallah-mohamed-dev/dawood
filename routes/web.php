@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CashboxController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\Inventory\MaterialController;
@@ -13,6 +15,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -74,7 +77,18 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reports/profit', [ProfitController::class, 'index'])->name('reports.profit');
 
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
     Route::get('/backup/database', [BackupController::class, 'downloadDatabase'])->name('backup.database');
+    Route::put('/settings/material-types/{materialType}', [SettingsController::class, 'updateMaterialType'])->name('settings.material-types.update');
+
+    Route::resource('debts', DebtController::class)->except(['show', 'create']);
+    Route::post('/debts/{debt}/toggle-paid', [DebtController::class, 'togglePaid'])->name('debts.toggle-paid');
+
+    Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');
+    Route::get('/logs/export', [ActivityLogController::class, 'export'])->name('logs.export');
+    Route::delete('/logs', [ActivityLogController::class, 'purge'])->name('logs.purge');
+
     Route::get('/backup/csv', [BackupController::class, 'downloadCsvArchive'])->name('backup.csv');
 });

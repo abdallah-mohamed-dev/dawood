@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\RoomStatus;
 use App\Exceptions\RoomHasCostsException;
 use App\Models\Room;
 use Illuminate\Support\Facades\DB;
@@ -19,6 +20,17 @@ class RoomService
         private readonly InventoryService $inventory,
         private readonly CustomerPaymentService $payments,
     ) {}
+
+    /**
+     * completed_at is only meaningful while the room is completed. Leaving
+     * the completed state clears it; completing again stamps the new date.
+     */
+    public function changeStatus(Room $room, RoomStatus $status): void
+    {
+        $room->status = $status;
+        $room->completed_at = $status === RoomStatus::Completed ? now()->toDateString() : null;
+        $room->save();
+    }
 
     public function deleteRoom(Room $room, bool $returnMaterials): void
     {

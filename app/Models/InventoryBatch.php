@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
+use App\Models\Concerns\LogsActivity;
 use Database\Factories\InventoryBatchFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class InventoryBatch extends Model
 {
     /** @use HasFactory<InventoryBatchFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
+
+    protected static string $activityTypeLabel = 'دفعة مخزون';
+
+    public function activityLabel(): string
+    {
+        return $this->material?->name ?? '—';
+    }
 
     /**
      * @return array<string, string>

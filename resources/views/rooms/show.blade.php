@@ -10,6 +10,9 @@
                 العميل:
                 <a href="{{ route('customers.show', $room->customer) }}" class="text-primary hover:underline">{{ $room->customer->name }}</a>
             </p>
+            @if ($room->completed_at)
+                <p class="mt-1 text-sm text-secondary">تاريخ الاكتمال: {{ $room->completed_at->format('Y-m-d') }}</p>
+            @endif
         </div>
 
         <div class="flex items-center gap-3">
@@ -108,7 +111,7 @@
         </form>
     </div>
 
-    <x-data-table :headings="['المادة', 'المطلوب', 'المصروف', 'التكلفة', 'المخزون الحالي', __('Actions')]" :rows="$room->roomMaterials">
+    <x-data-table :headings="['المادة', 'المطلوب', 'المصروف', 'التكلفة', 'المخزن الحالي', __('Actions')]" :rows="$room->roomMaterials">
         @foreach ($room->roomMaterials as $roomMaterial)
             <tr>
                 <td class="px-4 py-2">{{ $roomMaterial->material->name }}</td>
@@ -194,9 +197,10 @@
         </form>
     </div>
 
-    <x-data-table :headings="['التاريخ', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$room->customerPayments">
+    <x-data-table :headings="['رقم الإيصال', 'التاريخ', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$room->customerPayments">
         @foreach ($room->customerPayments as $payment)
             <tr>
+                <td class="px-4 py-2 font-mono">{{ $payment->formattedReceiptNumber() }}</td>
                 <td class="px-4 py-2">{{ $payment->paid_at->format('Y-m-d') }}</td>
                 <td class="px-4 py-2 text-secondary">{{ $payment->note ?? '—' }}</td>
                 <td class="px-4 py-2"><x-money :amount="$payment->amount" /></td>
@@ -232,7 +236,7 @@
                 <div class="mb-4 space-y-2">
                     <label class="flex items-start gap-2 text-sm">
                         <input type="radio" name="return_materials" value="1" required class="mt-1">
-                        <span>إرجاع الخامات المصروفة للمخزون</span>
+                        <span>إرجاع الخامات المصروفة للمخزن</span>
                     </label>
                     <label class="flex items-start gap-2 text-sm">
                         <input type="radio" name="return_materials" value="0" required class="mt-1">

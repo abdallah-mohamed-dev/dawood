@@ -23,6 +23,7 @@ class UpdatePartnerRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
             'percentage' => [
                 'required',
                 'regex:'.MoneyCast::validationPattern(),

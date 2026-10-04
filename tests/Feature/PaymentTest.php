@@ -200,3 +200,132 @@ test('deleting a room with payments also removes the payments and their cashbox 
     expect(CustomerPayment::query()->count())->toBe(0);
     expect(app(CashboxService::class)->balance())->toBe(0);
 });
+
+test('receipt numbers run 1, 2, 3 in the order payments are recorded', function () {
+    foreach (['1000.00', '2000.00', '3000.00'] as $amount) {
+        $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+            'amount' => $amount,
+            'paid_at' => '2026-01-01',
+            'payment_method' => 'cash',
+        ]);
+    }
+
+    expect(CustomerPayment::query()->orderBy('id')->pluck('receipt_number')->all())->toBe([1, 2, 3]);
+});
+
+test('a deleted payment\'s receipt number is never reused', function () {
+    foreach (['1000.00', '2000.00', '3000.00'] as $amount) {
+        $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+            'amount' => $amount,
+            'paid_at' => '2026-01-01',
+            'payment_method' => 'cash',
+        ]);
+    }
+
+    $second = CustomerPayment::query()->where('receipt_number', 2)->sole();
+    $this->actingAs($this->admin)->delete(route('payments.destroy', $second));
+
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-02',
+        'payment_method' => 'cash',
+    ]);
+
+    expect(CustomerPayment::query()->orderBy('id')->pluck('receipt_number')->all())->toBe([1, 3, 4]);
+});
+
+test('the receipt number shows zero-padded to five digits on the room page', function () {
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
+    ]);
+
+    $this->actingAs($this->admin)
+        ->get(route('rooms.show', $this->room))
+        ->assertSeeHtml('<td class="px-4 py-2 font-mono">00001</td>');
+});
+
+test('editing a payment amount does not change its receipt number', function () {
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
+    ]);
+    $payment = CustomerPayment::query()->sole();
+
+    $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+        'amount' => '1500.00',
+        'payment_method' => 'cash',
+    ]);
+
+    expect($payment->fresh()->receipt_number)->toBe(1);
+});
+
+test('editing a payment note saves it', function () {
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
+    ]);
+    $payment = CustomerPayment::query()->sole();
+
+    $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+        'amount' => '1000.00',
+        'payment_method' => 'cash',
+        'note' => 'دفعة مقدم',
+    ])->assertRedirect(route('rooms.show', $this->room));
+
+    expect($payment->fresh()->note)->toBe('دفعة مقدم');
+});
+
+test('emptying the note saves it as null', function () {
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
+        'note' => 'ملاحظة قديمة',
+    ]);
+    $payment = CustomerPayment::query()->sole();
+
+    $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+        'amount' => '1000.00',
+        'payment_method' => 'cash',
+        'note' => '',
+    ]);
+
+    expect($payment->fresh()->note)->toBeNull();
+});
+
+test('a note longer than 500 characters is rejected with an Arabic message', function () {
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
+    ]);
+    $payment = CustomerPayment::query()->sole();
+
+    $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+        'amount' => '1000.00',
+        'payment_method' => 'cash',
+        'note' => str_repeat('أ', 501),
+    ])->assertSessionHasErrors(['note' => 'يجب ألا يتجاوز طول حقل ملاحظة 500 حرفًا.']);
+});
+
+test('editing the amount and note together updates the cashbox too', function () {
+    $this->actingAs($this->admin)->post(route('rooms.payments.store', $this->room), [
+        'amount' => '1000.00',
+        'paid_at' => '2026-01-01',
+        'payment_method' => 'cash',
+    ]);
+    $payment = CustomerPayment::query()->sole();
+
+    $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+        'amount' => '2500.00',
+        'payment_method' => 'cash',
+        'note' => 'تعديل المبلغ والملاحظة',
+    ])->assertRedirect();
+
+    expect($payment->fresh()->note)->toBe('تعديل المبلغ والملاحظة')
+        ->and(app(CashboxService::class)->balance())->toBe(250_000);
+});
