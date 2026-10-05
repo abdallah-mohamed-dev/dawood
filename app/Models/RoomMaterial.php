@@ -55,4 +55,26 @@ class RoomMaterial extends Model
     {
         return $this->getRawOriginal('issued_quantity') >= $this->getRawOriginal('required_quantity');
     }
+
+    /**
+     * What is still to be issued from stock — the single definition of
+     * "outstanding" the room page and the purchases page both read.
+     */
+    public function outstandingQuantity(): int
+    {
+        return max(0, $this->getRawOriginal('required_quantity') - $this->getRawOriginal('issued_quantity'));
+    }
+
+    /**
+     * How much has to be bought on top of what is already in stock.
+     */
+    public function shortageQuantity(int $stockAvailable): int
+    {
+        return max(0, $this->outstandingQuantity() - $stockAvailable);
+    }
+
+    public function isShort(int $stockAvailable): bool
+    {
+        return $this->shortageQuantity($stockAvailable) > 0;
+    }
 }

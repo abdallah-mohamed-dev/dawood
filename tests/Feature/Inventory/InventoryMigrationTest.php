@@ -19,7 +19,10 @@ beforeEach(function () {
     $this->materialA = Material::factory()->create(['name' => 'خامة A']);
     $this->materialB = Material::factory()->create(['name' => 'خامة B']);
 
-    $rollbackCode = Artisan::call('migrate:rollback', ['--step' => 5]);
+    // Roll back everything from spec 014.1 onward. Later migrations (added
+    // after 014) sit on top of these, so they are counted too.
+    $steps = DB::table('migrations')->where('migration', '>=', '2026_10_04_110000_add_stock_columns_to_materials_table')->count();
+    $rollbackCode = Artisan::call('migrate:rollback', ['--step' => $steps]);
     expect($rollbackCode)->toBe(0, 'migrate:rollback failed: '.Artisan::output());
 
     $this->batchA1 = DB::table('inventory_batches')->insertGetId([

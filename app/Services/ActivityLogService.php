@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
 use App\Models\ActivityLog;
+use App\Models\CapitalItem;
 use App\Models\CashboxTransaction;
 use App\Models\Customer;
 use App\Models\CustomerPayment;
 use App\Models\Debt;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
-use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
 use App\Models\Material;
 use App\Models\MaterialType;
@@ -20,6 +20,8 @@ use App\Models\PartnerWithdrawal;
 use App\Models\Room;
 use App\Models\RoomCost;
 use App\Models\RoomMaterial;
+use App\Models\Season;
+use App\Models\SeasonPartnerShare;
 use App\Models\User;
 use BackedEnum;
 use Carbon\Carbon;
@@ -44,7 +46,6 @@ class ActivityLogService
         RoomCost::class,
         CustomerPayment::class,
         Material::class,
-        InventoryBatch::class,
         InventoryMovement::class,
         Expense::class,
         ExpenseCategory::class,
@@ -54,6 +55,9 @@ class ActivityLogService
         User::class,
         Debt::class,
         MaterialType::class,
+        CapitalItem::class,
+        Season::class,
+        SeasonPartnerShare::class,
     ];
 
     public static function eventLabel(string $event): string

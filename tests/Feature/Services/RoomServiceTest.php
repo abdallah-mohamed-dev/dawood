@@ -40,9 +40,9 @@ test('deleting a room also removes its payments and their cashbox transactions',
     expect($this->cashbox->balance())->toBe(0);
 });
 
-test('deleting a room with the "return" choice returns materials to their original batches', function () {
-    $batchA = $this->inventory->purchase($this->material, 3_000, 10_000, '2026-01-01');
-    $batchB = $this->inventory->purchase($this->material, 10_000, 12_000, '2026-01-02');
+test('deleting a room with the "return" choice puts the issued materials back on the shelf', function () {
+    $this->inventory->addStock($this->material, 3_000, 10_000, '2026-01-01');
+    $this->inventory->addStock($this->material, 10_000, 12_000, '2026-01-02');
     $rm = $this->roomMaterials->addRequirement($this->room, $this->material, 5_000);
     $this->roomMaterials->issue($rm, 5_000, '2026-01-03');
 
@@ -51,15 +51,14 @@ test('deleting a room with the "return" choice returns materials to their origin
     $this->roomService->deleteRoom($this->room, true);
 
     expect($this->inventory->currentStock($this->material))->toBe(13_000);
-    expect($batchA->fresh()->getRawOriginal('remaining_quantity'))->toBe(3_000);
-    expect($batchB->fresh()->getRawOriginal('remaining_quantity'))->toBe(10_000);
-    expect(InventoryMovement::query()->where('type', InventoryMovementType::ReturnedToStock)->count())->toBe(2);
+    expect(InventoryMovement::query()->where('type', InventoryMovementType::ReturnedToStock)->count())->toBe(1);
+    expect(InventoryMovement::query()->where('type', InventoryMovementType::Out)->count())->toBe(1);
     expect(Room::query()->find($this->room->id))->toBeNull();
 });
 
 test('deleting a room with the "consumed" choice does not touch stock', function () {
-    $this->inventory->purchase($this->material, 3_000, 10_000, '2026-01-01');
-    $this->inventory->purchase($this->material, 10_000, 12_000, '2026-01-02');
+    $this->inventory->addStock($this->material, 3_000, 10_000, '2026-01-01');
+    $this->inventory->addStock($this->material, 10_000, 12_000, '2026-01-02');
     $rm = $this->roomMaterials->addRequirement($this->room, $this->material, 5_000);
     $this->roomMaterials->issue($rm, 5_000, '2026-01-03');
 

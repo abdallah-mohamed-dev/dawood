@@ -18,6 +18,11 @@ class PartnerWithdrawal extends Model
 
     protected static string $activityTypeLabel = 'سحب شريك';
 
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
+    }
+
     public function activityLabel(): string
     {
         return ($this->partner?->name ?? '—').' — '.MoneyCast::toDisplayString((int) ($this->attributes['amount'] ?? 0));

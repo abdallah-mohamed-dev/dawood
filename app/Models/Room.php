@@ -13,13 +13,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['customer_id', 'room_type', 'sale_price', 'status', 'completed_at'])]
+#[Fillable(['customer_id', 'room_type', 'sale_price', 'status', 'completed_at', 'estimated_materials', 'estimated_accessories', 'estimated_labor', 'estimated_other', 'priced_at', 'expected_duration_days', 'started_at'])]
 class Room extends Model
 {
     /** @use HasFactory<RoomFactory> */
     use HasFactory, LogsActivity;
 
     protected static string $activityTypeLabel = 'غرفة';
+
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
+    }
 
     public function activityLabel(): string
     {
@@ -35,6 +40,13 @@ class Room extends Model
             'sale_price' => MoneyCast::class,
             'status' => RoomStatus::class,
             'completed_at' => 'date',
+            'started_at' => 'date',
+            'priced_at' => 'date',
+            'expected_duration_days' => 'integer',
+            'estimated_materials' => MoneyCast::class,
+            'estimated_accessories' => MoneyCast::class,
+            'estimated_labor' => MoneyCast::class,
+            'estimated_other' => MoneyCast::class,
         ];
     }
 
@@ -56,6 +68,24 @@ class Room extends Model
     public function roomCosts(): HasMany
     {
         return $this->hasMany(RoomCost::class);
+    }
+
+    /**
+     * Cost of this room's materials grouped by material type — [type_id => cost].
+     * Reads the loaded relation; loads it once if it is not loaded yet.
+     *
+     * @return array<int, int>
+     */
+    public function materialsCostByType(): array
+    {
+        $roomMaterials = $this->relationLoaded('roomMaterials')
+            ? $this->roomMaterials
+            : $this->roomMaterials()->with('material')->get();
+
+        return $roomMaterials
+            ->groupBy(fn (RoomMaterial $roomMaterial) => $roomMaterial->material->material_type_id)
+            ->map(fn ($group) => (int) $group->sum(fn (RoomMaterial $roomMaterial) => $roomMaterial->getRawOriginal('cost')))
+            ->all();
     }
 
     public function materialsCost(): int

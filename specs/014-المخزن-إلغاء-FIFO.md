@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **الحالة** | معتمد — جاهز للتنفيذ |
+| **الحالة** | قيد التنفيذ (ن-4 لم يُنفَّذ — قرار المستخدم) |
 | **اتكتب في** | 2026-10-04 |
 | **اتقفل في** | — |
 | **بيغيّر منطق أعمال؟** | **نعم — ده بيغيّر قلب نظام التكلفة** → بند `USER-GUIDE.md` إلزامي |
@@ -111,51 +111,51 @@
 
 ### الدوال
 
-- [ ] **14.2.1** `addStock(Material $material, int $quantity, int $unitPrice, DateTimeInterface|string $date, PaymentMethod $method): InventoryMovement`
+- [x] **14.2.1** `addStock(Material $material, int $quantity, int $unitPrice, DateTimeInterface|string $date, PaymentMethod $method): InventoryMovement`
   - `$quantity <= 0` → `InvalidArgumentException`
   - `$unitPrice <= 0` → `InvalidArgumentException`
   - `$cost = $this->cost($quantity, $unitPrice)`; لو `<= 0` → `InvalidArgumentException` برسالة إن التكلفة بتقرّب لصفر *(نفس حماية `purchase()` القديمة — سيبها)*
   - جوه الترانزاكشن: اقفل المادة → **`unit_price = $unitPrice`** (السعر الجديد بيبقى السعر الحالي) → `quantity += $quantity` → أنشئ حركة `In` بالكمية والتكلفة → `cashbox->recordOut($movement, $cost, InventoryPurchase, $date, method: $method)`
 
-- [ ] **14.2.2** `reduceStock(Material $material, int $quantity, DateTimeInterface|string $date, PaymentMethod $method): InventoryMovement`
+- [x] **14.2.2** `reduceStock(Material $material, int $quantity, DateTimeInterface|string $date, PaymentMethod $method): InventoryMovement`
   - `$quantity <= 0` → `InvalidArgumentException`
   - جوه الترانزاكشن: اقفل المادة → لو `quantity` المتاحة أقل من المطلوب → `InsufficientStockException`
   - `$amount = $this->cost($quantity, $material->unit_price)`; لو `<= 0` → `InvalidArgumentException`
   - `quantity -= $quantity` → حركة `Sold` → **`cashbox->recordIn($movement, $amount, MaterialSale, $date, method: $method)`**
   - ⚠️ **ممنوع تلمس `ProfitService`.** البيع ده فلوس داخلة بس، مش إيراد.
 
-- [ ] **14.2.3** `changePrice(Material $material, int $unitPrice): void`
+- [x] **14.2.3** `changePrice(Material $material, int $unitPrice): void`
   - `$unitPrice <= 0` → `InvalidArgumentException`
   - تحديث `unit_price` بس. **ولا حركة مخزون، ولا حركة خزنة، ولا أي أثر مالي.** التغيير بيتسجل تلقائي في سجل العمليات (من الدفعة 013).
 
-- [ ] **14.2.4** `issue(Material $material, int $quantity, Model $related, DateTimeInterface|string $date): array`
+- [x] **14.2.4** `issue(Material $material, int $quantity, Model $related, DateTimeInterface|string $date): array`
   - التوقيع يفضل زي ما هو بس المرجَّع يبقى `['cost' => int]` بس — **`allocations` تتشال**
   - جوه الترانزاكشن: اقفل المادة → لو المتاح أقل من المطلوب → `InsufficientStockException` (بنفس الباراميترات الحالية)
   - `$cost = $this->cost($quantity, $material->unit_price)` → `quantity -= $quantity` → حركة `Out` بالتكلفة دي ومربوطة بـ`$related`
   - **ولا حركة خزنة** — الفلوس خرجت وقت الإضافة، والصرف نقل داخلي من أصل لأصل
 
-- [ ] **14.2.5** `returnIssued(Model $related): void`
+- [x] **14.2.5** `returnIssued(Model $related): void`
   - لكل حركة `Out` مربوطة بـ`$related`: اقفل المادة → `quantity += movement.quantity` → أنشئ حركة `ReturnedToStock` **بنفس كمية وتكلفة الحركة الأصلية**
   - الحركات الأصلية `Out` **ما بتتحذفش** (سجل)
   - **ولا حركة خزنة**
 
-- [ ] **14.2.6** `currentStock(Material $material): int` → `$material->getRawOriginal('quantity')`
+- [x] **14.2.6** `currentStock(Material $material): int` → `$material->getRawOriginal('quantity')`
 
-- [ ] **14.2.7** `stockByMaterialIds(?array $materialIds = null): Collection` → من `materials` مباشرة (`pluck('quantity', 'id')`)، مع `whereIn` لما تتبعت IDs
+- [x] **14.2.7** `stockByMaterialIds(?array $materialIds = null): Collection` → من `materials` مباشرة (`pluck('quantity', 'id')`)، مع `whereIn` لما تتبعت IDs
 
-- [ ] **14.2.8** `stockValue(): int` → مجموع `cost(quantity, unit_price)` لكل مادة كميتها > 0
+- [x] **14.2.8** `stockValue(): int` → مجموع `cost(quantity, unit_price)` لكل مادة كميتها > 0
 
-- [ ] **14.2.9** `stockValueByType(): array` — **جديد**. يرجّع:
+- [x] **14.2.9** `stockValueByType(): array` — **جديد**. يرجّع:
   ```php
   ['by_type' => [<material_type_id> => ['label' => string, 'value' => int], ...], 'total' => int]
   ```
   كل نوع وقيمته، + الإجمالي. **الإجمالي = مجموع الأنواع بالظبط** (نفس دالة `cost()`، مفيش جمع تاني بطريقة مختلفة).
 
-- [ ] **14.2.10** **احذف** `deletePurchase()` و`purchasesSummary()` — مالهمش معنى من غير دفعات
+- [x] **14.2.10** **احذف** `deletePurchase()` و`purchasesSummary()` — مالهمش معنى من غير دفعات
 
 ### الاختبارات
 
-- [ ] **14.2.11** `tests/Feature/Services/InventoryServiceTest.php` — اتكتب من أول وجديد:
+- [x] **14.2.11** `tests/Feature/Services/InventoryServiceTest.php` — اتكتب من أول وجديد:
   - `addStock` بيزوّد الكمية، بيحدّث السعر، وبيخصم من الخزنة **(رقم مرجعي: 5 × 550.00 ج.م = 275000 قرش)**
   - `addStock` بسعر مختلف عن الحالي بيخلي السعر الجديد هو الحالي
   - `addStock` بكمية أو سعر ≤ 0 → استثناء
@@ -178,13 +178,13 @@
 
 # التاسك 14.3 — تبسيط `RoomMaterialService`
 
-- [ ] **14.3.1** `issue()` — `$result['cost']` زي ما هو. **شيل أي استخدام لـ`allocations`.**
-- [ ] **14.3.2** راجع إن `room_materials.cost` لسه بيتراكم صح عبر أكتر من صرف
-- [ ] **14.3.3** باقي الدوال زي ما هي — **التاسك ده مش بيغيّر قواعد الغرفة** (التعديل بعد الصرف جاي في `specs/016`)
+- [x] **14.3.1** `issue()` — `$result['cost']` زي ما هو. **شيل أي استخدام لـ`allocations`.**
+- [x] **14.3.2** راجع إن `room_materials.cost` لسه بيتراكم صح عبر أكتر من صرف
+- [x] **14.3.3** باقي الدوال زي ما هي — **التاسك ده مش بيغيّر قواعد الغرفة** (التعديل بعد الصرف جاي في `specs/016`)
 
 ### الاختبارات
 
-- [ ] **14.3.4** في `tests/Feature/Services/RoomMaterialServiceTest.php`:
+- [x] **14.3.4** في `tests/Feature/Services/RoomMaterialServiceTest.php`:
   - صرف على مرتين بأسعار مختلفة بين المرتين → `cost` = مجموع التكلفتين **كل واحدة بسعر وقتها** (رقم مرجعي محسوب يدويًا)
   - صرف أكتر من المطلوب → الاستثناء الموجود زي ما هو
 
@@ -196,24 +196,24 @@
 
 ### 14.4.1 كروت الإجماليات
 
-- [ ] **14.4.1** أعلى الصفحة: **تلات كروت** — قيمة الخامات · قيمة الاكسسوارات · الإجمالي المجمّع. من `stockValueByType()`.
+- [x] **14.4.1** أعلى الصفحة: **تلات كروت** — قيمة الخامات · قيمة الاكسسوارات · الإجمالي المجمّع. من `stockValueByType()`.
   لو فيه نوع تالت بعدين، الكروت تتولد من الـloop تلقائيًا (متعملهاش hard-code بنوعين).
 
 ### 14.4.2 فلتر النوع
 
-- [ ] **14.4.2** فلتر "النوع" جنب البحث الموجود — الكل / خامة / اكسسوار (من جدول `material_types`)
-- [ ] **14.4.3** الفلتر والبحث بيشتغلوا مع بعض، ومع الباجينيشن
-- [ ] **14.4.4** الكروت **بتعكس الكل دايمًا، مش المفلتر** — وتحتها سطر صغير يقول كده بالعربي
+- [x] **14.4.2** فلتر "النوع" جنب البحث الموجود — الكل / خامة / اكسسوار (من جدول `material_types`)
+- [x] **14.4.3** الفلتر والبحث بيشتغلوا مع بعض، ومع الباجينيشن
+- [x] **14.4.4** الكروت **بتعكس الكل دايمًا، مش المفلتر** — وتحتها سطر صغير يقول كده بالعربي
 
 ### 14.4.3 أعمدة الجدول
 
-- [ ] **14.4.5** الأعمدة: الاسم · النوع · الكمية الحالية · سعر الوحدة · **القيمة** (الكمية × السعر) · إجراءات
-- [ ] **14.4.6** استخدم `<x-money>` و`<x-quantity>` — **ممنوع تنسيق أرقام يدوي**
+- [x] **14.4.5** الأعمدة: الاسم · النوع · الكمية الحالية · سعر الوحدة · **القيمة** (الكمية × السعر) · إجراءات
+- [x] **14.4.6** استخدم `<x-money>` و`<x-quantity>` — **ممنوع تنسيق أرقام يدوي**
 
 ### 14.4.4 فورم التعديل
 
-- [ ] **14.4.7** `resources/views/inventory/materials/edit.blade.php` — الحقول: الاسم · النوع · **سعر الوحدة** · **الكمية**
-- [ ] **14.4.8** `MaterialController::update` — **ده أهم كونترولر في الدفعة. المنطق بالظبط:**
+- [x] **14.4.7** `resources/views/inventory/materials/edit.blade.php` — الحقول: الاسم · النوع · **سعر الوحدة** · **الكمية**
+- [x] **14.4.8** `MaterialController::update` — **ده أهم كونترولر في الدفعة. المنطق بالظبط:**
   1. حوّل السعر والكمية بـ`toScaledInt` كل واحد في `try/catch` منفصل برسالته العربية
   2. حدّث الاسم والنوع عاديًا
   3. **لو السعر اتغيّر** → `changePrice()` **الأول**
@@ -222,13 +222,13 @@
      - `$delta < 0` → `reduceStock($material, -$delta, today, المدفوع بيه)`
      - `$delta === 0` → مفيش حاجة
   5. **الترتيب ده إلزامي:** السعر الجديد هو اللي بتتحاسب بيه الزيادة أو النقص، مش القديم.
-- [ ] **14.4.9** الفورم فيه `<x-payment-method-select>` — الزيادة والنقص بيحركوا فلوس فلازم طريقة الدفع
-- [ ] **14.4.10** الفورم يعرض تنبيه عربي واضح بيشرح إن تغيير الكمية هيحرّك فلوس من/إلى الخزنة
-- [ ] **14.4.11** فورم الإضافة السريعة للمادة الجديدة: الاسم · النوع · **سعر الوحدة** · **الكمية المبدئية** (اختيارية). لو الكمية المبدئية > 0 → `addStock` بعد الإنشاء في نفس الطلب.
+- [x] **14.4.9** الفورم فيه `<x-payment-method-select>` — الزيادة والنقص بيحركوا فلوس فلازم طريقة الدفع
+- [x] **14.4.10** الفورم يعرض تنبيه عربي واضح بيشرح إن تغيير الكمية هيحرّك فلوس من/إلى الخزنة
+- [x] **14.4.11** فورم الإضافة السريعة للمادة الجديدة: الاسم · النوع · **سعر الوحدة** · **الكمية المبدئية** (اختيارية). لو الكمية المبدئية > 0 → `addStock` بعد الإنشاء في نفس الطلب.
 
 ### 14.4.5 التحقق
 
-- [ ] **14.4.12** `StoreMaterialRequest` / `UpdateMaterialRequest`:
+- [x] **14.4.12** `StoreMaterialRequest` / `UpdateMaterialRequest`:
   - `unit_price` → `required` + `regex:MoneyCast::validationPattern()` + أكبر من صفر
   - `quantity` → `required` + `regex:QuantityCast::validationPattern()` + **مش سالبة** (الصفر مسموح)
   - `payment_method` → `required` + `Rule::enum(PaymentMethod::class)` *(في التعديل بس، والإضافة لو فيه كمية مبدئية)*
@@ -236,11 +236,11 @@
 
 ### 14.4.6 حذف المادة
 
-- [ ] **14.4.13** حذف مادة ليها كمية في المخزن أو اتصرفت لغرفة **ممنوع** برسالة عربية واضحة. راجع السلوك الموجود وحافظ عليه.
+- [x] **14.4.13** حذف مادة ليها كمية في المخزن أو اتصرفت لغرفة **ممنوع** برسالة عربية واضحة. راجع السلوك الموجود وحافظ عليه.
 
 ### الاختبارات
 
-- [ ] **14.4.14** `tests/Feature/Inventory/MaterialStockTest.php`:
+- [x] **14.4.14** `tests/Feature/Inventory/MaterialStockTest.php`:
   - زيادة الكمية من فورم التعديل بتخصم من الخزنة برقم مرجعي
   - تنقيص الكمية بيزوّد الخزنة برقم مرجعي
   - **تغيير السعر والكمية في نفس الحفظ → الزيادة بتتحاسب بالسعر الجديد** ← اختبار إلزامي، برقم مرجعي
@@ -259,18 +259,18 @@
 
 **الهدف:** المستخدم يشوف كل حركة دخلت أو خرجت من المخزن. ده طلب صريح ("logs كامل للمخزن").
 
-- [ ] **14.5.1** `app/Http/Controllers/Inventory/MovementController.php` — `index(): View`
+- [x] **14.5.1** `app/Http/Controllers/Inventory/MovementController.php` — `index(): View`
   فلاتر: المادة (`q` بالاسم) · النوع (وارد/صادر/مرتجع/بيع) · من تاريخ · إلى تاريخ. `paginate(25)` مع `with('material')`.
-- [ ] **14.5.2** الراوت: `Route::get('movements', [MovementController::class, 'index'])->name('movements.index');` جوه مجموعة `inventory`
-- [ ] **14.5.3** `resources/views/inventory/movements/index.blade.php` — شريط الفلاتر **بنسخ نمط `inventory/purchases/index.blade.php` الحالي** قبل ما يتحذف
+- [x] **14.5.2** الراوت: `Route::get('movements', [MovementController::class, 'index'])->name('movements.index');` جوه مجموعة `inventory`
+- [x] **14.5.3** `resources/views/inventory/movements/index.blade.php` — شريط الفلاتر **بنسخ نمط `inventory/purchases/index.blade.php` الحالي** قبل ما يتحذف
   الأعمدة: التاريخ · المادة · نوع الحركة · الكمية · التكلفة · الجهة (اسم الغرفة لو الحركة مربوطة بغرفة، وإلا `—`)
-- [ ] **14.5.4** **فواصل الشهور** بنفس نمط `expenses/index.blade.php` بالحرف
-- [ ] **14.5.5** لينك "سجل الحركة" من صفحة المخزن
-- [ ] **14.5.6** لينك مفلتر على المادة من كل صف في جدول المخزن
+- [x] **14.5.4** **فواصل الشهور** بنفس نمط `expenses/index.blade.php` بالحرف
+- [x] **14.5.5** لينك "سجل الحركة" من صفحة المخزن
+- [x] **14.5.6** لينك مفلتر على المادة من كل صف في جدول المخزن
 
 ### الاختبارات
 
-- [ ] **14.5.7** `tests/Feature/Inventory/MovementLogTest.php`:
+- [x] **14.5.7** `tests/Feature/Inventory/MovementLogTest.php`:
   - إضافة كمية بتظهر كحركة "وارد" بالكمية والتكلفة الصح
   - الصرف لغرفة بيظهر كـ"صادر" ومعاه اسم الغرفة
   - الإرجاع بيظهر كـ"مرتجع"
@@ -284,26 +284,26 @@
 
 **الهدف:** الصفحة القديمة كانت مبنية على الدفعات اللي اتحذفت. بتتشال دلوقتي، وبترجع كصفحة "الناقص" في `specs/018`.
 
-- [ ] **14.6.1** احذف: `app/Http/Controllers/Inventory/PurchaseController.php`، `resources/views/inventory/purchases/` كامل، `app/Http/Requests/Inventory/StorePurchaseRequest.php` (لو موجود)
-- [ ] **14.6.2** `routes/web.php` — شيل مسار `purchases` وimport الكونترولر
-- [ ] **14.6.3** `resources/views/components/app-layout.blade.php` — شيل عنصر "المشتريات" من `$navItems` **مؤقتًا**، وحط مكانه "سجل المخزن" (`inventory.movements.index`)
-- [ ] **14.6.4** احذف `tests/Feature/Inventory/PurchaseTest.php` وأي اختبار تاني على الصفحة دي
-- [ ] **14.6.5** ⚠️ **اكتب في `AGENT_LOG.md` إن "المشتريات" اتشالت من القايمة مؤقتًا وهترجع في `specs/018`** — عشان محدش يفتكرها ضاعت
+- [x] **14.6.1** احذف: `app/Http/Controllers/Inventory/PurchaseController.php`، `resources/views/inventory/purchases/` كامل، `app/Http/Requests/Inventory/StorePurchaseRequest.php` (لو موجود)
+- [x] **14.6.2** `routes/web.php` — شيل مسار `purchases` وimport الكونترولر
+- [x] **14.6.3** `resources/views/components/app-layout.blade.php` — شيل عنصر "المشتريات" من `$navItems` **مؤقتًا**، وحط مكانه "سجل المخزن" (`inventory.movements.index`)
+- [x] **14.6.4** احذف `tests/Feature/Inventory/PurchaseTest.php` وأي اختبار تاني على الصفحة دي
+- [x] **14.6.5** ⚠️ **اكتب في `AGENT_LOG.md` إن "المشتريات" اتشالت من القايمة مؤقتًا وهترجع في `specs/018`** — عشان محدش يفتكرها ضاعت
 
 ---
 
 ## التحقق النهائي
 
-- [ ] **ن-1** `php artisan test --compact` — كل الاختبارات ناجحة
-- [ ] **ن-2** `vendor/bin/pint --dirty --format agent` نظيف
-- [ ] **ن-3** `npm run build` ناجح
+- [x] **ن-1** `php artisan test --compact` — كل الاختبارات ناجحة
+- [x] **ن-2** `vendor/bin/pint --dirty --format agent` نظيف
+- [x] **ن-3** `npm run build` ناجح
 - [ ] **ن-4** `php artisan migrate:fresh --seed` شغالة من الصفر
-- [ ] **ن-5** **بحث شامل:** `grep -rn "InventoryBatch\|batch_id\|FIFO\|purchasesSummary\|deletePurchase" app/ resources/ tests/ docs/` — لازم يرجع **صفر** نتايج في `app/` و`resources/` و`tests/`
-- [ ] **ن-6** تحديث `docs/inventory.md` و`docs/inventory-costing.md` — **دول بيوصفوا نظام FIFO اللي اتشال بالكامل. اتكتبوا من أول وجديد.**
-- [ ] **ن-7** تحديث `docs/profit-calculation.md` — `stockValue` بقت (الكمية × السعر الحالي)، ونوّه إن **بيع الخامة مش إيراد**
-- [ ] **ن-8** تحديث `docs/cashbox.md` — البند الجديد "بيع خامة"
-- [ ] **ن-9** **تحديث `USER-GUIDE.md`** بلغة المستخدم: المخزن بقى كمية وسعر واحد، الزيادة بتخصم والنقص بيزوّد، تغيير السعر ما بيحركش فلوس، واللي اتصرف تكلفته اتثبتت
-- [ ] **ن-10** إدخال في `start-agent/AGENT_LOG.md` + تحديث فهرس `specs/README.md`
+- [x] **ن-5** **بحث شامل:** `grep -rn "InventoryBatch\|batch_id\|FIFO\|purchasesSummary\|deletePurchase" app/ resources/ tests/ docs/` — لازم يرجع **صفر** نتايج في `app/` و`resources/` و`tests/`
+- [x] **ن-6** تحديث `docs/inventory.md` و`docs/inventory-costing.md` — **دول بيوصفوا نظام FIFO اللي اتشال بالكامل. اتكتبوا من أول وجديد.**
+- [x] **ن-7** تحديث `docs/profit-calculation.md` — `stockValue` بقت (الكمية × السعر الحالي)، ونوّه إن **بيع الخامة مش إيراد**
+- [x] **ن-8** تحديث `docs/cashbox.md` — البند الجديد "بيع خامة"
+- [x] **ن-9** **تحديث `USER-GUIDE.md`** بلغة المستخدم: المخزن بقى كمية وسعر واحد، الزيادة بتخصم والنقص بيزوّد، تغيير السعر ما بيحركش فلوس، واللي اتصرف تكلفته اتثبتت
+- [x] **ن-10** إدخال في `start-agent/AGENT_LOG.md` + تحديث فهرس `specs/README.md`
 
 ---
 
@@ -314,6 +314,12 @@
 | 2026-10-04 | مرجع رصيد الخزنة في 14.1.10 = **‎-90000‎** مش ‎+90000‎ | الفكستشر كله `out` (30000 + 60000) فـ`SUM(in) − SUM(out)` = ‎0 − 90000‎. اتأكد مع المستخدم: ممنوع إضافة صف رصيد افتتاحي، والرقم ‎-90000‎ قبل وبعد (والـout نفسه 90000 قبل وبعد). |
 | 2026-10-04 | `110200` بيرمي استثناء ويوقف لو فضل أي صف خزنة مصدره `InventoryBatch` | ده المتسوب له يوقف `110300`/`110400` بدل ما ينقل المصدر لحركة `in` مش موجودة. المسار ده **مش مغطّى باختبار** — الفكستشر المفروض مفيهوش دفعة بلا حركة `in`. |
 | 2026-10-04 | 98 اختبار بيفشل بعد 14.1 (منهم 8 في `InventoryMigrationTest` ناجحة) | كلهم `Class "App\Models\InventoryBatch" not found` من `InventoryService` و`InventoryMovementFactory` واختبارات قديمة — شغل 14.2/14.6. |
+| 2026-10-05 | **14.4/14.5**: صفحة المخزن وسجل الحركة اتعملوا. اختبارين اتشالوا: "صرف أكتر من المتاح" و"رولباك السعر" (الفورم مش بيقدر يطلب نقص أكبر من الموجود، فالحالة مش ممكنة). رسايل الحقول المطلوبة بقت عربية. اختبار "0.00" اتعالج بـ`not_regex`. | قرار المستخدم بعد مراجعة الاختبارات |
+| 2026-10-04 | **14.6.3**: عنصر المشتريات اتشال من `$navItems` **من غير** بديل "سجل المخزن" | الرابط `inventory.movements.index` لسه مش موجود (ده 14.5، مش متنفّذ في الدفعة دي) — لو حطّيناه كانت الصفحة هترمي 500. الحدف بس، والبديل هيتضاف مع 14.5. |
+| 2026-10-04 | **خارج الـspec:** شيلنا اختصار "المشتريات" من `resources/views/dashboard.blade.php` وحوّلناه لـ"المخزن" | نفس السبب: الاختصار كان بيبسّط لـراوت مش موجود بعد الحذف. |
+| 2026-10-04 | `currentStock()` بقت تقرا من قاعدة البيانات بدل `getRawOriginal()` بتاعة النسخة اللي في الـmemory | أي نسخة `Material` محمّلة قبل `addStock`/`issue` كانت هترجع كمية قديمة (0 في الاختبارات)، والاختبارات بتقرا الرصيد من نفس النسخة دي. |
+| 2026-10-04 | **ن-5:** الـgrep رجع 7 نتايج، كلها في `tests/Feature/Inventory/InventoryMigrationTest.php` بس | الملف ده اختبار 14.1 نفسه — لازمه يسمّي `batch_id` و`App\Models\InventoryBatch` عشان يثبت إنهم اتشالوا. اتقفلت مع المستخدم: الملف ده **مستثنى** من الـgrep، والباقي صفر. |
+| 2026-10-04 | أرقام مرجعية اتغيرت مع السعر الواحد: دورة كاملة 54,000 → 60,000 تكلفةmaterials، وصافي 2,746,000 → 2,740,000، ونصيب الشريك 549,200 → 548,000 | الصرف 5 وحدات بـ12ج بدل 3@10ج+2@12ج. اتأكد مع المستخدم: الأرقام المتغيرة تتحدّث والباقي يفضل زي ما هو. |
 
 ## النتيجة النهائية
 

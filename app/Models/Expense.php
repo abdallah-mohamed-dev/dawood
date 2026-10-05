@@ -19,6 +19,11 @@ class Expense extends Model
 
     protected static string $activityTypeLabel = 'مصروف';
 
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
+    }
+
     public function activityLabel(): string
     {
         return $this->category?->name ?? '—';

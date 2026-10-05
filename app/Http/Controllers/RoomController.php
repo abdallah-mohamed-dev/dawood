@@ -10,24 +10,33 @@ use App\Enums\RoomStatus;
 use App\Exceptions\ExceedsRequiredQuantityException;
 use App\Exceptions\InsufficientStockException;
 use App\Exceptions\RoomHasCostsException;
+use App\Exceptions\RoomLockedException;
 use App\Http\Requests\DestroyRoomRequest;
 use App\Http\Requests\IssueRoomMaterialRequest;
+use App\Http\Requests\SaveRoomPricingRequest;
 use App\Http\Requests\StoreRoomCostRequest;
 use App\Http\Requests\StoreRoomMaterialRequest;
 use App\Http\Requests\StoreRoomRequest;
+use App\Http\Requests\UpdateRoomMaterialRequest;
+use App\Models\ActivityLog;
 use App\Models\Customer;
+use App\Models\CustomerPayment;
 use App\Models\Material;
+use App\Models\MaterialType;
 use App\Models\Room;
 use App\Models\RoomCost;
 use App\Models\RoomMaterial;
+use App\Models\Season;
 use App\Services\InventoryService;
 use App\Services\ProfitService;
 use App\Services\RoomCostService;
 use App\Services\RoomMaterialService;
+use App\Services\RoomPricingService;
 use App\Services\RoomService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -40,7 +49,50 @@ class RoomController extends Controller
         private readonly RoomCostService $roomCostService,
         private readonly InventoryService $inventory,
         private readonly ProfitService $profit,
+        private readonly RoomPricingService $pricing,
     ) {}
+
+    public function index(Request $request): View
+    {
+        $filters = [
+            'q' => trim($request->string('q')->toString()),
+            'status' => trim($request->string('status')->toString()),
+            'customer_id' => $request->integer('customer_id'),
+            'from' => trim($request->string('from')->toString()),
+            'to' => trim($request->string('to')->toString()),
+            // 'open' by default: sealed rooms are history, shown only when asked for.
+            'season' => trim($request->string('season', 'open')->toString()),
+        ];
+
+        $matching = Room::query()
+            ->when($filters['q'] !== '', fn ($query) => $query->where(fn ($inner) => $inner
+                ->where('room_type', 'like', '%'.$filters['q'].'%')
+                ->orWhereHas('customer', fn ($customer) => $customer->where('name', 'like', '%'.$filters['q'].'%'))))
+            ->when(RoomStatus::tryFrom($filters['status']) !== null, fn ($query) => $query->where('status', $filters['status']))
+            ->when($filters['customer_id'] > 0, fn ($query) => $query->where('customer_id', $filters['customer_id']))
+            ->when($filters['from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['from']))
+            ->when($filters['to'] !== '', fn ($query) => $query->whereDate('created_at', '<=', $filters['to']))
+            ->when($filters['season'] === 'open', fn ($query) => $query->whereNull('season_id'))
+            ->when(ctype_digit($filters['season']), fn ($query) => $query->where('season_id', (int) $filters['season']));
+
+        // Paid total comes from one grouped subquery, not paidAmount() per row —
+        // that would be one extra query for every room on the page.
+        $rooms = (clone $matching)
+            ->with('customer')
+            ->withSum('customerPayments as paid_total', 'amount')
+            ->latest('id')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('rooms.index', [
+            'rooms' => $rooms,
+            'filters' => $filters,
+            'filtersActive' => $filters['q'] !== '' || $filters['status'] !== '' || $filters['customer_id'] > 0 || $filters['from'] !== '' || $filters['to'] !== '' || $filters['season'] !== 'open',
+            'seasons' => Season::query()->orderByDesc('number')->get(),
+            'statuses' => RoomStatus::cases(),
+            'customers' => Customer::query()->orderBy('name')->get(),
+        ]);
+    }
 
     public function store(StoreRoomRequest $request, Customer $customer): RedirectResponse
     {
@@ -64,7 +116,7 @@ class RoomController extends Controller
     {
         $room->load([
             'customer',
-            'roomMaterials.material',
+            'roomMaterials.material.materialType',
             'customerPayments' => fn ($query) => $query->latest('paid_at')->latest('id'),
             'roomCosts' => fn ($query) => $query->latest('occurred_at')->latest('id'),
         ]);
@@ -74,6 +126,10 @@ class RoomController extends Controller
             'profit' => $this->profit->forRoom($room),
             'stockByMaterial' => $this->inventory->stockByMaterialIds($room->roomMaterials->pluck('material_id')->all()),
             'availableMaterials' => Material::query()->orderBy('name')->get(),
+            'materialTypes' => MaterialType::query()->orderBy('position')->get(),
+            'pricing' => $this->profit->pricingComparison($room),
+            'duration' => $this->profit->durationComparison($room),
+            'activityLogs' => $this->roomActivity($room),
             'statuses' => RoomStatus::cases(),
         ]);
     }
@@ -102,6 +158,66 @@ class RoomController extends Controller
         return back()->with('success', 'تم تحديث حالة الغرفة.');
     }
 
+    /**
+     * The room's own history plus its materials, costs and payments — one
+     * query on subject type and id, not one per entity.
+     *
+     * @return Collection<int, ActivityLog>
+     */
+    private function roomActivity(Room $room): Collection
+    {
+        $subjects = [
+            [Room::class, [$room->id]],
+            [RoomMaterial::class, $room->roomMaterials->pluck('id')->all()],
+            [RoomCost::class, $room->roomCosts->pluck('id')->all()],
+            [CustomerPayment::class, $room->customerPayments->pluck('id')->all()],
+        ];
+
+        return ActivityLog::query()
+            ->where(function ($query) use ($subjects) {
+                foreach ($subjects as [$type, $ids]) {
+                    if ($ids === []) {
+                        continue;
+                    }
+
+                    $query->orWhere(fn ($inner) => $inner->where('subject_type', $type)->whereIn('subject_id', $ids));
+                }
+            })
+            ->with('user')
+            ->latest('created_at')
+            ->latest('id')
+            ->limit(20)
+            ->get();
+    }
+
+    public function savePricing(SaveRoomPricingRequest $request, Room $room): RedirectResponse
+    {
+        // One try/catch per amount, so a bad value is reported on its own field.
+        $amounts = [];
+
+        foreach (['materials' => 'estimated_materials', 'accessories' => 'estimated_accessories', 'labor' => 'estimated_labor', 'other' => 'estimated_other'] as $key => $field) {
+            try {
+                $amounts[$key] = $request->filled($field) ? MoneyCast::toScaledInt($request->string($field)->toString()) : null;
+            } catch (InvalidArgumentException) {
+                return back()->withInput()->withErrors([$field => 'قيمة التقدير غير صالحة.']);
+            }
+        }
+
+        try {
+            $this->pricing->save(
+                $room,
+                $amounts,
+                $request->filled('expected_duration_days') ? $request->integer('expected_duration_days') : null,
+            );
+        } catch (RoomLockedException) {
+            return back()->with('error', 'الغرفة مكتملة، التسعير مقفول.');
+        } catch (InvalidArgumentException $exception) {
+            return back()->withInput()->withErrors(['estimated_materials' => $exception->getMessage()]);
+        }
+
+        return back()->with('success', 'تم حفظ التسعير.');
+    }
+
     public function storeMaterial(StoreRoomMaterialRequest $request, Room $room): RedirectResponse
     {
         $material = Material::query()->findOrFail($request->integer('material_id'));
@@ -111,6 +227,8 @@ class RoomController extends Controller
             $this->roomMaterialService->addRequirement($room, $material, $quantity);
         } catch (InvalidArgumentException) {
             return back()->withInput()->withErrors(['required_quantity' => 'قيمة الكمية غير صالحة.']);
+        } catch (RoomLockedException) {
+            return back()->with('error', 'هذه الغرفة مكتملة ومقفولة، ما ينفعش تتعدل خاماتها.');
         } catch (QueryException) {
             // Defense in depth alongside StoreRoomMaterialRequest's unique
             // check — closes the check-then-insert race on a double submit.
@@ -143,6 +261,8 @@ class RoomController extends Controller
             return back()->with('error', 'الكمية المتاحة في المخزن غير كافية لصرف هذه الكمية.');
         } catch (ExceedsRequiredQuantityException) {
             return back()->with('error', 'لا يمكن صرف كمية أكبر من المطلوب.');
+        } catch (RoomLockedException) {
+            return back()->with('error', 'هذه الغرفة مكتملة ومقفولة، ما ينفعش تتعدل خاماتها.');
         }
 
         return back()->with('success', 'تم صرف الكمية.');
@@ -154,11 +274,36 @@ class RoomController extends Controller
 
         try {
             $this->roomMaterialService->removeRequirement($roomMaterial);
-        } catch (InvalidArgumentException) {
-            return back()->with('error', 'لا يمكن حذف احتياج تم الصرف منه بالفعل.');
+        } catch (RoomLockedException) {
+            return back()->with('error', 'هذه الغرفة مكتملة ومقفولة، ما ينفعش تتعدل خاماتها.');
         }
 
         return back()->with('success', 'تم حذف الاحتياج.');
+    }
+
+    public function updateMaterial(UpdateRoomMaterialRequest $request, Room $room, RoomMaterial $roomMaterial): RedirectResponse
+    {
+        abort_if($roomMaterial->room_id !== $room->id, 404);
+
+        try {
+            $quantity = QuantityCast::toScaledInt($request->string('required_quantity')->toString());
+        } catch (InvalidArgumentException) {
+            return back()->withInput()->withErrors(['required_quantity' => 'قيمة الكمية غير صالحة.'], 'edit_'.$roomMaterial->id);
+        }
+
+        try {
+            $this->roomMaterialService->updateRequirement($roomMaterial, $quantity);
+        } catch (ExceedsRequiredQuantityException $exception) {
+            return back()->withInput()->withErrors([
+                'required_quantity' => 'الخامة دي اتصرف منها '.QuantityCast::toDisplayString($exception->attempted).' بالفعل، ومينفعش المطلوب يبقى أقل من كده.',
+            ], 'edit_'.$roomMaterial->id);
+        } catch (RoomLockedException) {
+            return back()->with('error', 'هذه الغرفة مكتملة ومقفولة، ما ينفعش تتعدل خاماتها.');
+        } catch (InvalidArgumentException) {
+            return back()->withInput()->withErrors(['required_quantity' => 'الكمية لازم تكون أكبر من صفر.'], 'edit_'.$roomMaterial->id);
+        }
+
+        return back()->with('success', 'تم تعديل الاحتياج.');
     }
 
     public function storeCost(StoreRoomCostRequest $request, Room $room): RedirectResponse

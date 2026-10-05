@@ -11,13 +11,15 @@ use App\Models\CashboxTransaction;
 use App\Models\CustomerPayment;
 use App\Models\Debt;
 use App\Models\Expense;
-use App\Models\InventoryBatch;
+use App\Models\InventoryMovement;
 use App\Models\PartnerWithdrawal;
 use App\Models\RoomCost;
 use App\Services\CashboxService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -26,8 +28,15 @@ class CashboxController extends Controller
 {
     public function __construct(private readonly CashboxService $cashbox) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
+        $filters = [
+            'kind' => trim($request->string('kind')->toString()),
+            'payment_method' => trim($request->string('payment_method')->toString()),
+            'from' => trim($request->string('from')->toString()),
+            'to' => trim($request->string('to')->toString()),
+        ];
+
         $openingBalance = CashboxTransaction::query()
             ->where('kind', CashboxTransactionKind::OpeningBalance)
             ->first();
@@ -35,15 +44,17 @@ class CashboxController extends Controller
         $summary = $this->cashbox->summary();
 
         return view('cashbox.index', [
-            'incoming' => $this->page(CashboxTransactionType::In, 'in_page'),
-            'outgoing' => $this->page(CashboxTransactionType::Out, 'out_page'),
+            'incoming' => $this->page(CashboxTransactionType::In, 'in_page', $filters),
+            'outgoing' => $this->page(CashboxTransactionType::Out, 'out_page', $filters),
+            'filters' => $filters,
+            'kinds' => CashboxTransactionKind::cases(),
             'balance' => $summary['balance'],
             'debtsOutstanding' => (int) Debt::query()->where('is_paid', false)->sum('amount'),
             'totalIn' => $summary['total_in'],
             'totalOut' => $summary['total_out'],
             'breakdown' => $this->cashbox->breakdownByMethod(),
-            'incomingMonthlyTotals' => $this->incomingMonthlyTotals(),
-            'outgoingMonthlyTotals' => $this->outgoingMonthlyTotals(),
+            'incomingMonthlyTotals' => $this->monthlyTotals(CashboxTransactionType::In, $filters),
+            'outgoingMonthlyTotals' => $this->monthlyTotals(CashboxTransactionType::Out, $filters),
             'methods' => PaymentMethod::cases(),
             'openingBalance' => $openingBalance,
         ]);
@@ -60,14 +71,13 @@ class CashboxController extends Controller
      *
      * @return LengthAwarePaginator<int, CashboxTransaction>
      */
-    private function page(CashboxTransactionType $type, string $pageName): LengthAwarePaginator
+    private function page(CashboxTransactionType $type, string $pageName, array $filters): LengthAwarePaginator
     {
-        return CashboxTransaction::query()
-            ->where('type', $type)
+        return $this->applyFilters(CashboxTransaction::query()->where('type', $type), $filters)
             ->with(['source' => fn (MorphTo $morphTo) => $morphTo->morphWith([
                 Expense::class => ['category'],
                 CustomerPayment::class => ['room.customer'],
-                InventoryBatch::class => ['material'],
+                InventoryMovement::class => ['material'],
                 PartnerWithdrawal::class => ['partner'],
                 RoomCost::class => ['room'],
             ])])
@@ -84,10 +94,14 @@ class CashboxController extends Controller
      *
      * @return Collection<string, int>
      */
-    private function incomingMonthlyTotals(): Collection
+    /**
+     * Totals per month over every row the filters match, not just one page.
+     *
+     * @param  array<string, string>  $filters
+     */
+    private function monthlyTotals(CashboxTransactionType $type, array $filters): Collection
     {
-        return CashboxTransaction::query()
-            ->where('type', CashboxTransactionType::In)
+        return $this->applyFilters(CashboxTransaction::query()->where('type', $type), $filters)
             ->selectRaw("strftime('%Y-%m', occurred_at) as month, SUM(amount) as total")
             ->groupBy('month')
             ->pluck('total', 'month')
@@ -95,16 +109,15 @@ class CashboxController extends Controller
     }
 
     /**
-     * @return Collection<string, int>
+     * @param  array<string, string>  $filters
      */
-    private function outgoingMonthlyTotals(): Collection
+    private function applyFilters(Builder $query, array $filters): Builder
     {
-        return CashboxTransaction::query()
-            ->where('type', CashboxTransactionType::Out)
-            ->selectRaw("strftime('%Y-%m', occurred_at) as month, SUM(amount) as total")
-            ->groupBy('month')
-            ->pluck('total', 'month')
-            ->map(fn ($total) => (int) $total);
+        return $query
+            ->when($filters['kind'] !== '', fn (Builder $q) => $q->where('kind', $filters['kind']))
+            ->when($filters['payment_method'] !== '', fn (Builder $q) => $q->where('payment_method', $filters['payment_method']))
+            ->when($filters['from'] !== '', fn (Builder $q) => $q->whereDate('occurred_at', '>=', $filters['from']))
+            ->when($filters['to'] !== '', fn (Builder $q) => $q->whereDate('occurred_at', '<=', $filters['to']));
     }
 
     public function storeOpeningBalance(SetOpeningBalanceRequest $request): RedirectResponse

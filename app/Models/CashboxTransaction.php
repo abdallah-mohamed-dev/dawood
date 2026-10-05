@@ -75,7 +75,7 @@ class CashboxTransaction extends Model
             CustomerPayment::class => $source->room?->customer?->name
                 ? $source->room->customer->name.' — '.$source->room->room_type
                 : $this->kind->label(),
-            InventoryBatch::class => $source->material?->name ?? $this->kind->label(),
+            InventoryMovement::class => $source->material?->name ?? $this->kind->label(),
             PartnerWithdrawal::class => $source->partner?->name ?? $this->kind->label(),
             RoomCost::class => $source->type->label().' — '.($source->room?->room_type ?? ''),
             default => $this->kind->label(),

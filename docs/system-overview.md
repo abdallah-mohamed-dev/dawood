@@ -18,7 +18,7 @@
 | `Customer` | عميل الورشة |
 | `Room` | غرفة/طلب أثاث تابع لعميل |
 | `Material` | خامة/مادة محددة (مثال: لوح MDF) — الاسم فريد على مستوى النظام |
-| `InventoryBatch` | دفعة شراء واحدة من خامة معينة، بسعر وحدة ثابت |
+| `InventoryMovement` | حركة وارد/صادر/مرتجع/بيع لخامة. مفيش دفعات |
 | `InventoryMovement` | حركة دخول/خروج/إرجاع لكمية من دفعة معينة |
 | `RoomMaterial` | ربط بين غرفة وخامة: الكمية المطلوبة والمصروفة والتكلفة |
 | `CustomerPayment` | دفعة من عميل مرتبطة بغرفة |
@@ -39,7 +39,6 @@ customers
           └── customer_payments (room_id)
 
 materials
-    └── inventory_batches (material_id)
                 └── inventory_movements (batch_id, material_id, related: room_materials عند الصرف)
 
 expense_categories
@@ -49,7 +48,7 @@ partners
     └── partner_withdrawals (partner_id)
 
 cashbox_transactions
-    └── polymorphic (source_type, source_id) → customer_payments | inventory_batches (الشراء)
+    └── polymorphic (source_type, source_id) → customer_payments | inventory_movements (الوارد)
                                                | expenses | partner_withdrawals | null (رصيد افتتاحي)
 ```
 

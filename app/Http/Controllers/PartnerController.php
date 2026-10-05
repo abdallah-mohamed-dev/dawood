@@ -13,6 +13,7 @@ use App\Services\PartnerService;
 use App\Services\ProfitService;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
@@ -31,6 +32,7 @@ class PartnerController extends Controller
 
         $rows = $partners->getCollection()->map(fn (Partner $partner) => [
             'partner' => $partner,
+            'carried_in' => $this->partners->carriedIn($partner),
             'share' => $this->partners->share($partner),
             'withdrawn' => $this->partners->totalWithdrawn($partner),
             'remaining' => $this->partners->remaining($partner),
@@ -66,17 +68,29 @@ class PartnerController extends Controller
         return redirect()->route('partners.index')->with('success', 'تم إضافة الشريك.');
     }
 
-    public function show(Partner $partner): View
+    public function show(Partner $partner, Request $request): View
     {
-        $withdrawals = $partner->withdrawals()->latest('occurred_at')->latest('id')->get();
+        $from = trim($request->string('from')->toString());
+        $to = trim($request->string('to')->toString());
+
+        // The filter narrows the withdrawals list only; the share cards stay on the full picture.
+        $withdrawals = $partner->withdrawals()
+            ->when($from !== '', fn ($query) => $query->whereDate('occurred_at', '>=', $from))
+            ->when($to !== '', fn ($query) => $query->whereDate('occurred_at', '<=', $to))
+            ->latest('occurred_at')
+            ->latest('id')
+            ->get();
 
         return view('partners.show', [
             'partner' => $partner,
+            'carriedIn' => $this->partners->carriedIn($partner),
             'share' => $this->partners->share($partner),
             'withdrawn' => $this->partners->totalWithdrawn($partner),
             'remaining' => $this->partners->remaining($partner),
             'netProfit' => $this->profit->netProfit(),
             'withdrawals' => $withdrawals,
+            'from' => $from,
+            'to' => $to,
             'percentageDisplay' => number_format($partner->percentage / 100, 2),
         ]);
     }

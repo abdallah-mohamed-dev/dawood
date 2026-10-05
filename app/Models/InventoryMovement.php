@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['material_id', 'batch_id', 'type', 'quantity', 'cost', 'related_type', 'related_id', 'occurred_at'])]
+#[Fillable(['material_id', 'type', 'quantity', 'cost', 'related_type', 'related_id', 'occurred_at'])]
 class InventoryMovement extends Model
 {
     /** @use HasFactory<InventoryMovementFactory> */
@@ -42,11 +42,6 @@ class InventoryMovement extends Model
     public function material(): BelongsTo
     {
         return $this->belongsTo(Material::class);
-    }
-
-    public function batch(): BelongsTo
-    {
-        return $this->belongsTo(InventoryBatch::class, 'batch_id');
     }
 
     public function related(): MorphTo

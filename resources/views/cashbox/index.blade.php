@@ -1,7 +1,34 @@
 <x-app-layout title="الخزنة">
     <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">الخزنة</h1>
 
-    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <form method="GET" action="{{ route('cashbox.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
+        <select name="kind" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="">كل البنود</option>
+            @foreach ($kinds as $kind)
+                <option value="{{ $kind->value }}" @selected($filters['kind'] === $kind->value)>{{ $kind->label() }}</option>
+            @endforeach
+        </select>
+        <select name="payment_method" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <option value="">كل الطرق</option>
+            @foreach ($methods as $method)
+                <option value="{{ $method->value }}" @selected($filters['payment_method'] === $method->value)>{{ $method->label() }}</option>
+            @endforeach
+        </select>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
+            <input type="date" name="from" value="{{ $filters['from'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
+            <input type="date" name="to" value="{{ $filters['to'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+        </div>
+        <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
+        <a href="{{ route('cashbox.index') }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء الفلاتر</a>
+        <p class="w-full text-xs text-secondary">الفلتر بيأثر على الجدولين والإجماليات الشهرية بس. الكروت فوق بتفضل للكل.</p>
+    </form>
+
+
+    <div class="mb-6 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">الرصيد الحالي</div>
             <div class="mt-1 text-2xl font-bold {{ $balance < 0 ? 'text-danger' : 'text-gray-900' }}">
@@ -16,14 +43,14 @@
             <div class="text-sm text-secondary">إجمالي الخارج</div>
             <div class="mt-1 text-2xl font-bold text-danger"><x-money :amount="$totalOut" /></div>
         </div>
+        {{-- Fourth card, deliberately different: dashed warning border, tinted background.
+             Debts are a register, not money in the box, so it reads apart from the three above. --}}
+        <a href="{{ route('debts.index') }}" class="block rounded-xl border-2 border-dashed border-warning/50 bg-warning/5 p-4 transition-colors hover:bg-warning/10">
+            <div class="text-sm font-medium text-warning">إجمالي الديون القائمة</div>
+            <div class="mt-1 text-2xl font-bold text-gray-900"><x-money :amount="$debtsOutstanding" /></div>
+            <p class="mt-2 text-xs text-secondary">الديون للتسجيل والتذكير فقط ولا تدخل في رصيد الخزنة.</p>
+        </a>
     </div>
-
-    {{-- The whole box links to the debts page. Debts are not part of the balance above. --}}
-    <a href="{{ route('debts.index') }}" class="mb-6 block rounded-xl border border-border bg-surface p-4 shadow-sm transition-colors hover:bg-bg-subtle">
-        <div class="text-sm text-secondary">إجمالي الديون القائمة</div>
-        <div class="mt-1 text-2xl font-bold text-gray-900"><x-money :amount="$debtsOutstanding" /></div>
-        <p class="mt-2 text-xs text-secondary">الديون للتسجيل والتذكير فقط ولا تدخل في رصيد الخزنة.</p>
-    </a>
 
     <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <h2 class="mb-3 text-sm font-semibold text-gray-900">الرصيد الافتتاحي</h2>

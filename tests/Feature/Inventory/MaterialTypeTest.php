@@ -42,6 +42,7 @@ test('a material saved with a type shows that type on the stock page', function 
             'name' => 'مفصلات',
             'unit' => 'قطعة',
             'material_type_id' => $this->accessory->id,
+            'unit_price' => '18.00',
         ])
         ->assertRedirect(route('inventory.materials.index'));
 

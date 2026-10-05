@@ -3,18 +3,22 @@
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BackupController;
+use App\Http\Controllers\CapitalItemController;
 use App\Http\Controllers\CashboxController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\Inventory\MaterialController;
-use App\Http\Controllers\Inventory\PurchaseController;
+use App\Http\Controllers\Inventory\MovementController;
+use App\Http\Controllers\Inventory\ShortageController;
+use App\Http\Controllers\LaborReportController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\SeasonController;
 use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,22 +45,35 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
 
     Route::get('/cashbox', [CashboxController::class, 'index'])->name('cashbox.index');
+
+    Route::get('/reports/labor', [LaborReportController::class, 'index'])->name('reports.labor');
+
+    Route::get('/seasons', [SeasonController::class, 'index'])->name('seasons.index');
+    Route::get('/seasons/preview', [SeasonController::class, 'preview'])->name('seasons.preview');
+    Route::post('/seasons/close', [SeasonController::class, 'close'])->name('seasons.close');
+    Route::post('/seasons/{season}/reopen', [SeasonController::class, 'reopen'])->name('seasons.reopen');
     Route::post('/cashbox/opening-balance', [CashboxController::class, 'storeOpeningBalance'])
         ->name('cashbox.opening-balance.store');
 
     Route::prefix('inventory')->name('inventory.')->group(function () {
         Route::resource('materials', MaterialController::class)->except(['show', 'create']);
-        Route::resource('purchases', PurchaseController::class)->only(['index', 'store', 'destroy']);
+        // Read-only audit log — written by InventoryService, never by a form.
+        Route::get('movements', [MovementController::class, 'index'])->name('movements.index');
+        Route::get('shortages', [ShortageController::class, 'index'])->name('shortages.index');
+        Route::get('shortages/{room}/print', [ShortageController::class, 'print'])->name('shortages.print');
     });
 
     Route::resource('customers', CustomerController::class)->except('create');
+    Route::resource('capital-items', CapitalItemController::class)->except(['show', 'create'])->names('capital');
 
-    Route::resource('rooms', RoomController::class)->only(['show', 'destroy']);
+    Route::resource('rooms', RoomController::class)->only(['index', 'show', 'destroy']);
     Route::post('/customers/{customer}/rooms', [RoomController::class, 'store'])->name('customers.rooms.store');
     Route::post('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.status.update');
+    Route::post('/rooms/{room}/pricing', [RoomController::class, 'savePricing'])->name('rooms.pricing.save');
     Route::post('/rooms/{room}/materials', [RoomController::class, 'storeMaterial'])->name('rooms.materials.store');
     Route::post('/rooms/{room}/materials/{roomMaterial}/issue', [RoomController::class, 'issueMaterial'])->name('rooms.materials.issue');
     Route::delete('/rooms/{room}/materials/{roomMaterial}', [RoomController::class, 'destroyMaterial'])->name('rooms.materials.destroy');
+    Route::patch('/rooms/{room}/materials/{roomMaterial}', [RoomController::class, 'updateMaterial'])->name('rooms.materials.update');
     Route::post('/rooms/{room}/costs', [RoomController::class, 'storeCost'])->name('rooms.costs.store');
     Route::delete('/rooms/{room}/costs/{cost}', [RoomController::class, 'destroyCost'])->name('rooms.costs.destroy');
 
@@ -82,6 +99,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/backup', [BackupController::class, 'index'])->name('backup.index');
     Route::get('/backup/database', [BackupController::class, 'downloadDatabase'])->name('backup.database');
     Route::put('/settings/material-types/{materialType}', [SettingsController::class, 'updateMaterialType'])->name('settings.material-types.update');
+    Route::put('/settings/reminders', [SettingsController::class, 'updateReminders'])->name('settings.reminders.update');
 
     Route::resource('debts', DebtController::class)->except(['show', 'create']);
     Route::post('/debts/{debt}/toggle-paid', [DebtController::class, 'togglePaid'])->name('debts.toggle-paid');

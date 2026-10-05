@@ -24,7 +24,6 @@ test('no create route survives for the converted pages', function (string $name)
     'inventory.materials.create',
     'customers.create',
     'expenses.categories.create',
-    'inventory.purchases.create',
     'expenses.create',
     'rooms.create',
 ]);
@@ -35,7 +34,6 @@ test('the add form is rendered on the index page itself', function (string $rout
     ['inventory.materials.index', 'إضافة مادة'],
     ['customers.index', 'إضافة عميل'],
     ['expenses.categories.index', 'إضافة بند'],
-    ['inventory.purchases.index', 'تسجيل عملية شراء'],
     ['expenses.index', 'تسجيل مصروف'],
 ]);
 
@@ -44,6 +42,7 @@ test('a material is added from the index without leaving it', function () {
         'name' => 'خشب زان',
         'unit' => 'لوح',
         'material_type_id' => MaterialType::query()->where('name', 'خامة')->value('id'),
+        'unit_price' => '95.00',
     ])->assertRedirect(route('inventory.materials.index'));
 
     expect(Material::query()->sole()->name)->toBe('خشب زان');
@@ -63,18 +62,6 @@ test('an expense category is added from the index', function () {
     $this->actingAs($this->admin)->post(route('expenses.categories.store'), ['name' => 'كهرباء']);
 
     expect(ExpenseCategory::query()->sole()->name)->toBe('كهرباء');
-});
-
-test('a purchase is recorded from the index', function () {
-    $material = Material::factory()->create();
-
-    $this->actingAs($this->admin)->post(route('inventory.purchases.store'), [
-        'material_id' => $material->id,
-        'quantity' => '10',
-        'unit_cost' => '100.00',
-        'purchase_date' => '2026-01-01',
-        'payment_method' => 'cash',
-    ])->assertRedirect(route('inventory.purchases.index'));
 });
 
 test('a failed submission comes back to the index with the values still filled in', function () {
@@ -138,6 +125,5 @@ test('each index page carries exactly one add form, so the default error bag sta
     'inventory.materials.index',
     'customers.index',
     'expenses.categories.index',
-    'inventory.purchases.index',
     'expenses.index',
 ]);

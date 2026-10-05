@@ -4,12 +4,15 @@
     $navItems = [
         ['route' => 'customers.index', 'active' => 'customers.*', 'label' => 'العملاء'],
         ['route' => 'inventory.materials.index', 'active' => 'inventory.materials.*', 'label' => 'المخزن'],
-        ['route' => 'inventory.purchases.index', 'active' => 'inventory.purchases.*', 'label' => 'المشتريات'],
+        ['route' => 'rooms.index', 'active' => 'rooms.*', 'label' => 'الغرف'],
+        ['route' => 'inventory.shortages.index', 'active' => 'inventory.shortages.*', 'label' => 'المشتريات'],
         ['route' => 'payments.index', 'active' => 'payments.*', 'label' => 'المدفوعات'],
-        ['route' => 'expenses.index', 'active' => 'expenses.*', 'label' => 'المصروفات'],
+        ['route' => 'expenses.index', 'active' => 'expenses.*', 'label' => 'المصروفات الإدارية'],
         ['route' => 'cashbox.index', 'active' => 'cashbox.*', 'label' => 'الخزنة'],
+        ['route' => 'reports.profit', 'active' => 'reports.profit', 'label' => 'تقارير الربح'],
+        ['route' => 'seasons.index', 'active' => 'seasons.*', 'label' => 'المواسم'],
         ['route' => 'partners.index', 'active' => 'partners.*', 'label' => 'الشركاء'],
-        ['route' => 'reports.profit', 'active' => 'reports.profit', 'label' => 'تقرير الربح'],
+        ['route' => 'capital.index', 'active' => 'capital.*', 'label' => 'رأس المال'],
         ['route' => 'backup.index', 'active' => 'backup.*', 'label' => 'النسخ الاحتياطي'],
     ];
 @endphp
@@ -113,6 +116,22 @@
             @endauth
 
             <main class="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
+                @if (! empty($reminders))
+                    <div x-data="reminderBanner()" x-show="! dismissed" class="mb-6 space-y-2">
+                        @foreach ($reminders as $reminder)
+                            <div @class([
+                                'flex flex-wrap items-center justify-between gap-2 rounded-lg border px-4 py-3 text-sm',
+                                'border-warning/30 bg-warning/10 text-warning' => $reminder['kind'] === 'season',
+                                'border-primary/30 bg-primary/5 text-gray-800' => $reminder['kind'] === 'backup',
+                            ])>
+                                <span>{{ $reminder['message'] }}</span>
+                                <a href="{{ $reminder['url'] }}" class="font-medium underline">افتح</a>
+                            </div>
+                        @endforeach
+                        <button type="button" @click="dismiss()" class="text-xs text-secondary hover:underline">تجاهل لليوم</button>
+                    </div>
+                @endif
+
                 @if (session('success'))
                     <div class="mb-4 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm font-medium text-success shadow-sm">
                         {{ session('success') }}

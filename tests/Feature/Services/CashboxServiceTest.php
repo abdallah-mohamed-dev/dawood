@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Services\CashboxService;
 
 // CashboxService takes any Eloquent model as the polymorphic "source" of a
-// transaction. Real source models (CustomerPayment, InventoryBatch, Expense,
+// transaction. Real source models (CustomerPayment, InventoryMovement, Expense,
 // PartnerWithdrawal) don't exist yet — the cashbox is intentionally built
 // before them (docs/tasks.md). User stands in as "any model" here; the
 // relationship is purely polymorphic and does not care about the type.

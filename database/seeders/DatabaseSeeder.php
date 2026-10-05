@@ -18,5 +18,10 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             MaterialTypeSeeder::class,
         ]);
+
+        // Local development only — never on a real database.
+        if (app()->environment('local')) {
+            $this->call(DemoDataSeeder::class);
+        }
     }
 }

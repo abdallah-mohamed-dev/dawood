@@ -23,6 +23,12 @@ class CustomerPaymentService
 {
     public function __construct(private readonly CashboxService $cashbox) {}
 
+    /*
+     * Deliberate exception to the season lock (specs/012 ق-5): create, update and
+     * delete below are allowed on a room from a closed season. Customer payments
+     * never touch profit — the revenue was counted when the room completed — so a
+     * payment recorded now only moves the cashbox. This is how old debts get collected.
+     */
     public function create(Room $room, int $amount, DateTimeInterface|string $date, ?string $note = null, PaymentMethod $method = PaymentMethod::Cash): CustomerPayment
     {
         if ($amount <= 0) {

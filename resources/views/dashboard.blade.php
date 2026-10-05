@@ -1,7 +1,7 @@
 @php
     $shortcuts = [
         ['route' => 'customers.index', 'label' => 'العملاء', 'hint' => 'إدارة العملاء والغرف'],
-        ['route' => 'inventory.purchases.index', 'label' => 'المشتريات', 'hint' => 'تسجيل شراء الخامات'],
+        ['route' => 'inventory.materials.index', 'label' => 'المخزن', 'hint' => 'الخامات والكميات'],
         ['route' => 'payments.index', 'label' => 'المدفوعات', 'hint' => 'دفعات العملاء'],
         ['route' => 'expenses.index', 'label' => 'المصروفات', 'hint' => 'المصروفات الإدارية'],
         ['route' => 'cashbox.index', 'label' => 'الخزنة', 'hint' => 'الرصيد والحركات'],

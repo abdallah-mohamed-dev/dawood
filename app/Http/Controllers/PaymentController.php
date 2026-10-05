@@ -11,7 +11,9 @@ use App\Http\Requests\UpdatePaymentRequest;
 use App\Models\CustomerPayment;
 use App\Models\Room;
 use App\Services\CustomerPaymentService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use RuntimeException;
@@ -20,15 +22,44 @@ class PaymentController extends Controller
 {
     public function __construct(private readonly CustomerPaymentService $payments) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $payments = CustomerPayment::query()
+        $search = trim($request->string('q')->toString());
+        $from = trim($request->string('from')->toString());
+        $to = trim($request->string('to')->toString());
+
+        // Receipt numbers are stored as integers, so "00012" and "12" are the same search.
+        $receipt = ctype_digit($search) ? (int) ltrim($search, '0') : null;
+
+        $applyFilters = fn (Builder $query) => $query
+            ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
+                ->whereHas('room', fn (Builder $room) => $room->where('room_type', 'like', '%'.$search.'%')
+                    ->orWhereHas('customer', fn (Builder $customer) => $customer->where('name', 'like', '%'.$search.'%')))
+                ->when($receipt !== null, fn (Builder $r) => $r->orWhere('receipt_number', $receipt))))
+            ->when($from !== '', fn (Builder $q) => $q->whereDate('paid_at', '>=', $from))
+            ->when($to !== '', fn (Builder $q) => $q->whereDate('paid_at', '<=', $to));
+
+        $payments = $applyFilters(CustomerPayment::query())
             ->with('room.customer')
             ->latest('paid_at')
             ->latest('id')
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
-        return view('payments.index', ['payments' => $payments]);
+        // Totals over every filtered row, not just the visible page.
+        $monthlyTotals = $applyFilters(CustomerPayment::query())
+            ->selectRaw("strftime('%Y-%m', paid_at) as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month')
+            ->map(fn ($total) => (int) $total);
+
+        return view('payments.index', [
+            'payments' => $payments,
+            'monthlyTotals' => $monthlyTotals,
+            'search' => $search,
+            'from' => $from,
+            'to' => $to,
+        ]);
     }
 
     public function store(StorePaymentRequest $request, Room $room): RedirectResponse

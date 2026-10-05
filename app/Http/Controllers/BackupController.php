@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\CapitalItem;
 use App\Models\CashboxTransaction;
 use App\Models\Customer;
 use App\Models\CustomerPayment;
@@ -17,7 +18,10 @@ use App\Models\PartnerWithdrawal;
 use App\Models\Room;
 use App\Models\RoomCost;
 use App\Models\RoomMaterial;
+use App\Models\Season;
+use App\Models\SeasonPartnerShare;
 use App\Models\Setting;
+use App\Services\SettingsService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -26,6 +30,8 @@ use ZipArchive;
 
 class BackupController extends Controller
 {
+    public function __construct(private readonly SettingsService $settings) {}
+
     /** @var array<class-string> */
     private const EXPORTABLE_MODELS = [
         Customer::class,
@@ -40,6 +46,9 @@ class BackupController extends Controller
         CashboxTransaction::class,
         Partner::class,
         PartnerWithdrawal::class,
+        CapitalItem::class,
+        Season::class,
+        SeasonPartnerShare::class,
         Debt::class,
         MaterialType::class,
         Setting::class,
@@ -53,6 +62,8 @@ class BackupController extends Controller
 
     public function downloadDatabase(): BinaryFileResponse
     {
+        $this->settings->set('last_backup_at', now()->toDateString());
+
         return response()->download(
             database_path('database.sqlite'),
             'dawood-backup-'.now()->format('Y-m-d-His').'.sqlite',
@@ -61,6 +72,8 @@ class BackupController extends Controller
 
     public function downloadCsvArchive(): BinaryFileResponse
     {
+        $this->settings->set('last_backup_at', now()->toDateString());
+
         $tempDir = storage_path('app/backup-tmp');
         File::ensureDirectoryExists($tempDir);
 

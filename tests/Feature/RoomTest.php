@@ -92,7 +92,7 @@ test('creating a room under a customer that does not exist is a 404, not a silen
 
 test('the room show page reflects required, issued, cost, and materials cost after an issue', function () {
     $material = Material::factory()->create(['name' => 'لوح MDF']);
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create(['sale_price' => 3_000_000]);
 
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
@@ -115,7 +115,7 @@ test('the room show page reflects required, issued, cost, and materials cost aft
 
 test('issuing more than available stock shows a friendly error and changes nothing', function () {
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 3_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 3_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create();
 
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
@@ -135,7 +135,7 @@ test('issuing more than available stock shows a friendly error and changes nothi
 
 test('issuing more than required is rejected with a friendly error', function () {
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create();
 
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
@@ -153,7 +153,7 @@ test('issuing more than required is rejected with a friendly error', function ()
 
 test('issuing a zero quantity is rejected with a message about the quantity, not the required limit', function () {
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create();
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
         'material_id' => $material->id,
@@ -232,7 +232,7 @@ test('a room with no issued materials can be deleted directly', function () {
 
 test('deleting a room with issued materials requires the return_materials choice', function () {
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create();
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
         'material_id' => $material->id,
@@ -249,7 +249,7 @@ test('deleting a room with issued materials requires the return_materials choice
 
 test('deleting a room and choosing to return materials restores stock', function () {
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create();
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
         'material_id' => $material->id,
@@ -268,7 +268,7 @@ test('deleting a room and choosing to return materials restores stock', function
 
 test('deleting a room and choosing "consumed" does not restore stock', function () {
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $room = Room::factory()->for($this->customer)->create();
     $this->actingAs($this->admin)->post(route('rooms.materials.store', $room), [
         'material_id' => $material->id,
@@ -569,8 +569,8 @@ test('an invalid issue quantity reports under its own material row only', functi
 
     $first = Material::factory()->create(['name' => 'خشب زان']);
     $second = Material::factory()->create(['name' => 'مسامير']);
-    $inventory->purchase($first, 10_000, 10_000, '2026-01-01');
-    $inventory->purchase($second, 10_000, 10_000, '2026-01-01');
+    $inventory->addStock($first, 10_000, 10_000, '2026-01-01');
+    $inventory->addStock($second, 10_000, 10_000, '2026-01-01');
 
     $firstRow = RoomMaterial::factory()->for($room)->for($first)->create(['required_quantity' => 5_000]);
     RoomMaterial::factory()->for($room)->for($second)->create(['required_quantity' => 5_000]);
@@ -590,7 +590,7 @@ test('an invalid issue quantity reports under its own material row only', functi
 test('a zero issue quantity is reported instead of silently reloading', function () {
     $room = Room::factory()->for($this->customer)->create();
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $row = RoomMaterial::factory()->for($room)->for($material)->create(['required_quantity' => 5_000]);
 
     $html = $this->actingAs($this->admin)
@@ -606,7 +606,7 @@ test('a zero issue quantity is reported instead of silently reloading', function
 test('an issue error does not leak into the cost or payment forms', function () {
     $room = Room::factory()->for($this->customer)->create();
     $material = Material::factory()->create();
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-01');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-01');
     $row = RoomMaterial::factory()->for($room)->for($material)->create(['required_quantity' => 5_000]);
 
     $html = $this->actingAs($this->admin)

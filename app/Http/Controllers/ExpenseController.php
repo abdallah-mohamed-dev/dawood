@@ -9,8 +9,10 @@ use App\Http\Requests\UpdateExpenseRequest;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use App\Services\ExpenseService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use InvalidArgumentException;
 use RuntimeException;
@@ -19,18 +21,34 @@ class ExpenseController extends Controller
 {
     public function __construct(private readonly ExpenseService $expenses) {}
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $expenses = Expense::query()
+        $search = trim($request->string('q')->toString());
+        $categoryId = $request->integer('expense_category_id');
+        $from = trim($request->string('from')->toString());
+        $to = trim($request->string('to')->toString());
+
+        $applyFilters = fn (Builder $query) => $query
+            ->when($search !== '', fn (Builder $q) => $q->where('description', 'like', '%'.$search.'%'))
+            ->when($categoryId > 0, fn (Builder $q) => $q->where('expense_category_id', $categoryId))
+            ->when($from !== '', fn (Builder $q) => $q->whereDate('occurred_at', '>=', $from))
+            ->when($to !== '', fn (Builder $q) => $q->whereDate('occurred_at', '<=', $to));
+
+        $expenses = $applyFilters(Expense::query())
             ->with('category')
             ->latest('occurred_at')
             ->latest('id')
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
         return view('expenses.index', [
             'expenses' => $expenses,
             'categories' => $this->categories(),
-            'monthlyTotals' => $this->monthlyTotals(),
+            'monthlyTotals' => $this->monthlyTotals($applyFilters),
+            'search' => $search,
+            'selectedCategoryId' => $categoryId,
+            'from' => $from,
+            'to' => $to,
         ]);
     }
 
@@ -87,9 +105,9 @@ class ExpenseController extends Controller
      *
      * @return \Illuminate\Support\Collection<string, int> keyed by "Y-m"
      */
-    private function monthlyTotals(): \Illuminate\Support\Collection
+    private function monthlyTotals(\Closure $applyFilters): \Illuminate\Support\Collection
     {
-        return Expense::query()
+        return $applyFilters(Expense::query())
             ->selectRaw("strftime('%Y-%m', occurred_at) as month, SUM(amount) as total")
             ->groupBy('month')
             ->pluck('total', 'month')

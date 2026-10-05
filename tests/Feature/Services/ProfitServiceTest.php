@@ -24,7 +24,7 @@ beforeEach(function () {
 
 test('the reference scenario from docs/tasks.md: an in-progress room with issued materials and an expense', function () {
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 10_000, 10_000, '2026-01-01'); // 10 @ 100 EGP
+    $this->inventory->addStock($material, 10_000, 10_000, '2026-01-01'); // 10 @ 100 EGP
 
     $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::InProgress]); // 30,000 EGP
     $rm = $this->roomMaterials->addRequirement($room, $material, 5_000);
@@ -42,10 +42,10 @@ test('the reference scenario from docs/tasks.md: an in-progress room with issued
 
 test('completing the room moves revenue and cost into the profit calculation, out of WIP', function () {
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 10_000, 12_000, '2026-01-01'); // 10 @ 120 EGP → matches the 540 EGP reference cost when combined below
+    $this->inventory->addStock($material, 10_000, 12_000, '2026-01-01'); // 10 @ 120 EGP
 
     $material2 = Material::factory()->create();
-    $this->inventory->purchase($material2, 3_000, 10_000, '2026-01-01'); // 3 @ 100 EGP
+    $this->inventory->addStock($material2, 3_000, 10_000, '2026-01-01'); // 3 @ 100 EGP
 
     $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::InProgress]);
     $rm1 = $this->roomMaterials->addRequirement($room, $material2, 3_000);
@@ -82,7 +82,7 @@ test('netProfit does not change when a customer payment is added or deleted', fu
 
 test('a cancelled room contributes neither revenue nor cost', function () {
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 5_000, 10_000, '2026-01-01');
+    $this->inventory->addStock($material, 5_000, 10_000, '2026-01-01');
 
     $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::InProgress]);
     $rm = $this->roomMaterials->addRequirement($room, $material, 5_000);
@@ -95,10 +95,10 @@ test('a cancelled room contributes neither revenue nor cost', function () {
     expect($this->profit->workInProgress())->toBe(0); // cancelled is neither draft/in_progress nor completed
 });
 
-test('stockValue after the Task 4 FIFO reference scenario is 8 remaining units at 120 EGP', function () {
+test('stockValue after the reference scenario is 8 remaining units at the current price of 120 EGP', function () {
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 3_000, 10_000, '2026-01-01'); // 3 @ 100 EGP
-    $this->inventory->purchase($material, 10_000, 12_000, '2026-01-02'); // 10 @ 120 EGP
+    $this->inventory->addStock($material, 3_000, 10_000, '2026-01-01'); // 3 @ 100 EGP
+    $this->inventory->addStock($material, 10_000, 12_000, '2026-01-02'); // 10 @ 120 EGP
 
     $room = Room::factory()->create();
     $rm = $this->roomMaterials->addRequirement($room, $material, 5_000);
@@ -176,11 +176,12 @@ test('the summary matches the individual figures once room costs exist', functio
 
 test('forRoom breaks a single room down and excludes admin expenses', function () {
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 10_000, 10_000, '2026-01-01');
+    $this->inventory->addStock($material, 10_000, 10_000, '2026-01-01');
 
-    $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::Completed]);
+    $room = Room::factory()->create(['sale_price' => 3_000_000, 'status' => RoomStatus::InProgress]);
     $rm = $this->roomMaterials->addRequirement($room, $material, 5_000);
     $this->roomMaterials->issue($rm, 5_000, '2026-01-02'); // 50,000 piastres
+    $room->update(['status' => RoomStatus::Completed]);
 
     $costs = new RoomCostService($this->cashbox);
     $costs->create($room, RoomCostType::Labor, 500_000, '2026-01-05');

@@ -26,4 +26,9 @@ class Partner extends Model
     {
         return $this->hasMany(PartnerWithdrawal::class);
     }
+
+    public function partnerShares(): HasMany
+    {
+        return $this->hasMany(SeasonPartnerShare::class);
+    }
 }

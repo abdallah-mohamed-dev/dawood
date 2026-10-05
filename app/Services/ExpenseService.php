@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\CashboxTransactionKind;
 use App\Enums\PaymentMethod;
+use App\Exceptions\SeasonClosedException;
 use App\Models\Expense;
 use App\Models\ExpenseCategory;
 use DateTimeInterface;
@@ -41,6 +42,10 @@ class ExpenseService
 
     public function update(Expense $expense, int $amount, ?PaymentMethod $method = null): void
     {
+        if (app(SeasonService::class)->isLocked($expense)) {
+            throw new SeasonClosedException;
+        }
+
         if ($amount <= 0) {
             throw new InvalidArgumentException('Expense amount must be greater than zero.');
         }
@@ -55,6 +60,10 @@ class ExpenseService
 
     public function delete(Expense $expense): void
     {
+        if (app(SeasonService::class)->isLocked($expense)) {
+            throw new SeasonClosedException;
+        }
+
         DB::transaction(function () use ($expense) {
             $this->cashbox->removeFor($expense);
             $expense->delete();

@@ -6,57 +6,67 @@ use App\Enums\CashboxTransactionKind;
 use App\Enums\InventoryMovementType;
 use App\Enums\PaymentMethod;
 use App\Exceptions\InsufficientStockException;
-use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
 use App\Models\Material;
+use App\Models\MaterialType;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
- * Owns purchasing, FIFO issuing, and the batch/movement bookkeeping that
- * backs it — see docs/inventory-costing.md. All quantities/costs passed in
- * and out are raw scaled integers (QuantityCast ×1000 / MoneyCast ×100),
- * never floats.
+ * Owns the stock level and the single unit price of every material, plus the
+ * movement log behind both — see docs/inventory-costing.md. A material has one
+ * quantity and one price; there are no batches and no price layers, so every
+ * quantity × price product in the system goes through cost() below.
+ *
+ * All quantities/costs passed in and out are raw scaled integers
+ * (QuantityCast ×1000 / MoneyCast ×100), never floats.
  */
 class InventoryService
 {
+    /**
+     * Key used by stockValueByType() for materials saved without a type.
+     */
+    private const NO_TYPE_KEY = 'none';
+
     public function __construct(private readonly CashboxService $cashbox) {}
 
-    public function purchase(Material $material, int $quantity, int $unitCost, DateTimeInterface|string $date, PaymentMethod $method = PaymentMethod::Cash): InventoryBatch
+    /**
+     * Put stock into a material and pay for it. The price given becomes the
+     * material's price from now on — there is only ever one — so adding stock
+     * at a new price re-prices what is already in the warehouse too.
+     */
+    public function addStock(Material $material, int $quantity, int $unitPrice, DateTimeInterface|string $date, PaymentMethod $method = PaymentMethod::Cash): InventoryMovement
     {
         if ($quantity <= 0) {
-            throw new InvalidArgumentException('Purchase quantity must be greater than zero.');
+            throw new InvalidArgumentException('Add quantity must be greater than zero.');
         }
 
-        if ($unitCost <= 0) {
-            throw new InvalidArgumentException('Unit cost must be greater than zero.');
+        if ($unitPrice <= 0) {
+            throw new InvalidArgumentException('Unit price must be greater than zero.');
         }
 
-        // A tiny quantity at a tiny unit cost (e.g. 0.001 × 0.01) can round
-        // down to exactly 0 piastres — CashboxService rejects a 0 amount, so
-        // this must be caught here with a clear message rather than letting
-        // that rejection surface confusingly from inside the transaction.
-        $cost = $this->cost($quantity, $unitCost);
+        // A tiny quantity at a tiny price (e.g. 0.001 × 0.01) can round down to
+        // exactly 0 piastres — CashboxService rejects a 0 amount, so this must
+        // be caught here with a clear message rather than letting that rejection
+        // surface confusingly from inside the transaction.
+        $cost = $this->cost($quantity, $unitPrice);
         if ($cost <= 0) {
-            throw new InvalidArgumentException('Purchase cost rounds to zero — increase the quantity or unit cost.');
+            throw new InvalidArgumentException('التكلفة بتقرّب لصفر — زوّد الكمية أو سعر الوحدة.');
         }
 
-        return DB::transaction(function () use ($material, $quantity, $unitCost, $cost, $date, $method) {
-            $batch = InventoryBatch::query()->create([
-                'material_id' => $material->id,
-                'quantity' => $quantity,
-                'remaining_quantity' => $quantity,
-                'unit_cost' => $unitCost,
-                'purchase_date' => $date,
+        return DB::transaction(function () use ($material, $quantity, $unitPrice, $cost, $date, $method) {
+            $material = $this->lockMaterial($material);
+
+            $material->update([
+                'unit_price' => $unitPrice,
+                'quantity' => $material->getRawOriginal('quantity') + $quantity,
             ]);
 
-            InventoryMovement::query()->create([
+            $movement = InventoryMovement::query()->create([
                 'material_id' => $material->id,
-                'batch_id' => $batch->id,
                 'type' => InventoryMovementType::In,
                 'quantity' => $quantity,
                 'cost' => $cost,
@@ -65,42 +75,77 @@ class InventoryService
                 'occurred_at' => $date,
             ]);
 
-            $this->cashbox->recordOut($batch, $cost, CashboxTransactionKind::InventoryPurchase, $date, method: $method);
+            $this->cashbox->recordOut($movement, $cost, CashboxTransactionKind::InventoryPurchase, $date, method: $method);
 
-            return $batch;
+            return $movement;
         });
     }
 
-    public function currentStock(Material $material): int
-    {
-        return (int) InventoryBatch::query()
-            ->where('material_id', $material->id)
-            ->sum('remaining_quantity');
-    }
-
     /**
-     * Current stock for several materials in one grouped query — the
-     * single implementation behind every "stock per material" listing
-     * (materials index, a room's material requirements) instead of each
-     * controller hand-rolling the same SUM/GROUP BY. Pass null for every
-     * material in the catalog.
-     *
-     * @param  array<int>|null  $materialIds
-     * @return Collection<int, int>
+     * Take stock out of a material and hand the money back — the material left
+     * the shop, so the cashbox comes in. Not revenue: never touches
+     * ProfitService.
      */
-    public function stockByMaterialIds(?array $materialIds = null): Collection
+    public function reduceStock(Material $material, int $quantity, DateTimeInterface|string $date, PaymentMethod $method = PaymentMethod::Cash): InventoryMovement
     {
-        return InventoryBatch::query()
-            ->when($materialIds !== null, fn ($query) => $query->whereIn('material_id', $materialIds))
-            ->selectRaw('material_id, SUM(remaining_quantity) as total')
-            ->groupBy('material_id')
-            ->pluck('total', 'material_id');
+        if ($quantity <= 0) {
+            throw new InvalidArgumentException('Reduce quantity must be greater than zero.');
+        }
+
+        return DB::transaction(function () use ($material, $quantity, $date, $method) {
+            $material = $this->lockMaterial($material);
+            $available = $material->getRawOriginal('quantity');
+
+            if ($available < $quantity) {
+                throw new InsufficientStockException($material, $quantity, $available);
+            }
+
+            $amount = $this->cost($quantity, $material->getRawOriginal('unit_price'));
+            if ($amount <= 0) {
+                throw new InvalidArgumentException('التكلفة بتقرّب لصفر — المادة سعرها صفر.');
+            }
+
+            $material->update(['quantity' => $available - $quantity]);
+
+            $movement = InventoryMovement::query()->create([
+                'material_id' => $material->id,
+                'type' => InventoryMovementType::Sold,
+                'quantity' => $quantity,
+                'cost' => $amount,
+                'related_type' => null,
+                'related_id' => null,
+                'occurred_at' => $date,
+            ]);
+
+            $this->cashbox->recordIn($movement, $amount, CashboxTransactionKind::MaterialSale, $date, method: $method);
+
+            return $movement;
+        });
     }
 
     /**
-     * Issue $quantity of $material FIFO across batches, all-or-nothing.
+     * Re-price a material without moving a single unit and without touching the
+     * cashbox: the goods are still sitting in the shop, they are just worth a
+     * different amount now. The value of the stock changes, the balance does not.
+     */
+    public function changePrice(Material $material, int $unitPrice): void
+    {
+        if ($unitPrice <= 0) {
+            throw new InvalidArgumentException('Unit price must be greater than zero.');
+        }
+
+        DB::transaction(function () use ($material, $unitPrice) {
+            $this->lockMaterial($material)->update(['unit_price' => $unitPrice]);
+        });
+    }
+
+    /**
+     * Issue $quantity of $material to $related (a room requirement) all-or-nothing,
+     * priced at the material's current unit price. No cashbox movement: the
+     * money left when the stock was added, and issuing only moves it from the
+     * warehouse to a room.
      *
-     * @return array{cost: int, allocations: array<int, array{batch_id: int, quantity: int, cost: int}>}
+     * @return array{cost: int}
      */
     public function issue(Material $material, int $quantity, Model $related, DateTimeInterface|string $date): array
     {
@@ -109,62 +154,40 @@ class InventoryService
         }
 
         return DB::transaction(function () use ($material, $quantity, $related, $date) {
-            $batches = InventoryBatch::query()
-                ->where('material_id', $material->id)
-                ->where('remaining_quantity', '>', 0)
-                ->orderBy('purchase_date')
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get();
-
-            $available = $batches->sum(fn (InventoryBatch $batch) => $batch->getRawOriginal('remaining_quantity'));
+            $material = $this->lockMaterial($material);
+            $available = $material->getRawOriginal('quantity');
 
             if ($available < $quantity) {
                 throw new InsufficientStockException($material, $quantity, $available);
             }
 
-            $remaining = $quantity;
-            $totalCost = 0;
-            $allocations = [];
-
-            foreach ($batches as $batch) {
-                if ($remaining <= 0) {
-                    break;
-                }
-
-                $batchRemaining = $batch->getRawOriginal('remaining_quantity');
-                $unitCost = $batch->getRawOriginal('unit_cost');
-                $take = min($batchRemaining, $remaining);
-                $cost = $this->cost($take, $unitCost);
-
-                $batch->update(['remaining_quantity' => $batchRemaining - $take]);
-
-                InventoryMovement::query()->create([
-                    'material_id' => $material->id,
-                    'batch_id' => $batch->id,
-                    'type' => InventoryMovementType::Out,
-                    'quantity' => $take,
-                    'cost' => $cost,
-                    'related_type' => $related::class,
-                    'related_id' => $related->getKey(),
-                    'occurred_at' => $date,
-                ]);
-
-                $allocations[] = ['batch_id' => $batch->id, 'quantity' => $take, 'cost' => $cost];
-                $totalCost += $cost;
-                $remaining -= $take;
+            $cost = $this->cost($quantity, $material->getRawOriginal('unit_price'));
+            if ($cost <= 0) {
+                throw new InvalidArgumentException('التكلفة بتقرّب لصفر — المادة سعرها صفر.');
             }
 
-            return ['cost' => $totalCost, 'allocations' => $allocations];
+            $material->update(['quantity' => $available - $quantity]);
+
+            InventoryMovement::query()->create([
+                'material_id' => $material->id,
+                'type' => InventoryMovementType::Out,
+                'quantity' => $quantity,
+                'cost' => $cost,
+                'related_type' => $related::class,
+                'related_id' => $related->getKey(),
+                'occurred_at' => $date,
+            ]);
+
+            return ['cost' => $cost];
         });
     }
 
     /**
-     * Reverse every `out` movement previously issued to $related, crediting
-     * each quantity back to the exact batch it was taken from (not the
-     * cheapest/oldest available batch) — see "الإرجاع بعد حذف غرفة" in
-     * docs/inventory-costing.md. The original `out` movements are left
-     * untouched for audit; new `return` movements record the reversal.
+     * Give back everything issued to $related, at the quantity and the cost
+     * recorded on each original `out` movement — re-pricing the material later
+     * must not change what a past issue cost. The original `out` movements are
+     * left untouched for audit; new `return` movements record the reversal.
+     * No cashbox movement, same reason as issue().
      */
     public function returnIssued(Model $related): void
     {
@@ -176,15 +199,14 @@ class InventoryService
                 ->get();
 
             foreach ($outMovements as $movement) {
-                $batch = InventoryBatch::query()->whereKey($movement->batch_id)->lockForUpdate()->firstOrFail();
+                $material = $this->lockMaterial($movement->material);
 
-                $batch->update([
-                    'remaining_quantity' => $batch->getRawOriginal('remaining_quantity') + $movement->getRawOriginal('quantity'),
+                $material->update([
+                    'quantity' => $material->getRawOriginal('quantity') + $movement->getRawOriginal('quantity'),
                 ]);
 
                 InventoryMovement::query()->create([
                     'material_id' => $movement->material_id,
-                    'batch_id' => $movement->batch_id,
                     'type' => InventoryMovementType::ReturnedToStock,
                     'quantity' => $movement->getRawOriginal('quantity'),
                     'cost' => $movement->getRawOriginal('cost'),
@@ -196,65 +218,116 @@ class InventoryService
         });
     }
 
-    public function deletePurchase(InventoryBatch $batch): void
+    /**
+     * What is actually on the shelf for $material right now. Read fresh rather
+     * than from the caller's instance: a $material loaded before addStock() or
+     * issue() ran still holds its old quantity, and callers routinely hold
+     * exactly such a stale instance (a room's requirement, a blade view model).
+     */
+    public function currentStock(Material $material): int
     {
-        // The "untouched" check and the delete must happen inside the same
-        // locked transaction as issue()'s allocation — otherwise a concurrent
-        // issue() could deplete this batch between the check and the delete,
-        // and cascadeOnDelete() would silently wipe out the resulting `out`
-        // movement along with the batch (a real issue erased with no trace).
-        DB::transaction(function () use ($batch) {
-            $batch = InventoryBatch::query()->whereKey($batch->getKey())->lockForUpdate()->firstOrFail();
-
-            if ($batch->getRawOriginal('remaining_quantity') !== $batch->getRawOriginal('quantity')) {
-                throw new InvalidArgumentException('Cannot delete a purchase batch that has already been issued from.');
-            }
-
-            $this->cashbox->removeFor($batch);
-            $batch->delete();
-        });
+        return (int) Material::query()->whereKey($material->getKey())->toBase()->value('quantity');
     }
 
     /**
-     * Total value of all unissued stock, at each batch's own purchase cost —
-     * see stockValue() in docs/profit-calculation.md. An asset, never a cost,
-     * until issued.
+     * Current stock for several materials in one query — the single
+     * implementation behind every "stock per material" listing (materials
+     * index, a room's material requirements) instead of each controller
+     * hand-rolling the same query. Pass null for every material in the
+     * catalog. Raw scaled integers, not the cast decimal strings.
+     *
+     * @param  array<int>|null  $materialIds
+     * @return Collection<int, int>
+     */
+    public function stockByMaterialIds(?array $materialIds = null): Collection
+    {
+        return Material::query()
+            ->when($materialIds !== null, fn ($query) => $query->whereIn('id', $materialIds))
+            ->toBase()
+            ->pluck('quantity', 'id')
+            ->map(fn ($quantity) => (int) $quantity);
+    }
+
+    /**
+     * Total value of everything in the warehouse, each material at its own
+     * current price — see stockValue() in docs/profit-calculation.md. An asset,
+     * never a cost, until it is issued or sold.
      */
     public function stockValue(): int
     {
-        return InventoryBatch::query()
-            ->where('remaining_quantity', '>', 0)
-            ->get(['remaining_quantity', 'unit_cost'])
-            ->sum(fn (InventoryBatch $batch) => $this->cost(
-                $batch->getRawOriginal('remaining_quantity'),
-                $batch->getRawOriginal('unit_cost'),
-            ));
+        return $this->stockRows()
+            ->sum(fn ($material) => $this->cost((int) $material->quantity, (int) $material->unit_price));
     }
 
     /**
-     * How many purchases a filtered listing covers and what they cost in
-     * total. Lives here, not in the controller, because the total has to run
-     * through the same cost() as every other figure in the system — a
-     * selectRaw doing `quantity * unit_cost / 1000` in SQL would be a second
-     * copy of the formula, rounding differently at the edges.
-     *
-     * Takes the already-filtered query so the summary always describes
-     * exactly what the table below it shows.
-     *
-     * @param  Builder<InventoryBatch>  $query
-     * @return array{count: int, total: int}
+     * What one material on the shelf is worth right now — cost() behind a
+     * public door, so the stock page can print a per-row value column without
+     * re-deriving the mixed-scale rounding anywhere else. Read off the row's
+     * RAW price (the cast hands back a decimal string) and a raw scaled
+     * quantity, both of which the caller already has.
      */
-    public function purchasesSummary(Builder $query): array
+    public function valueOf(Material $material, int $scaledQuantity): int
     {
-        $batches = (clone $query)->reorder()->get(['quantity', 'unit_cost']);
+        return $this->cost($scaledQuantity, (int) $material->getRawOriginal('unit_price'));
+    }
+
+    /**
+     * The same total split by material type, for the stock page's summary
+     * cards. Materials saved without a type are grouped under 'none' with a
+     * dash label rather than dropped — they still have value. Only types that
+     * actually hold stock appear, so the cards grow with the data instead of
+     * rendering a row of zeroes.
+     *
+     * @return array{by_type: array<int|string, array{label: string, value: int}>, total: int}
+     */
+    public function stockValueByType(): array
+    {
+        $labels = MaterialType::query()->pluck('name', 'id');
+
+        $byType = [];
+
+        foreach ($this->stockRows() as $material) {
+            $key = $material->material_type_id === null
+                ? self::NO_TYPE_KEY
+                : (int) $material->material_type_id;
+
+            $byType[$key] ??= [
+                'label' => $key === self::NO_TYPE_KEY ? '—' : ($labels->get($key) ?? '—'),
+                'value' => 0,
+            ];
+
+            $byType[$key]['value'] += $this->cost((int) $material->quantity, (int) $material->unit_price);
+        }
 
         return [
-            'count' => $batches->count(),
-            'total' => $batches->sum(fn (InventoryBatch $batch) => $this->cost(
-                $batch->getRawOriginal('quantity'),
-                $batch->getRawOriginal('unit_cost'),
-            )),
+            'by_type' => $byType,
+            // Summed off by_type rather than recomputed, so the cards can never
+            // disagree with the total printed under them.
+            'total' => array_sum(array_column($byType, 'value')),
         ];
+    }
+
+    /**
+     * Every material that still holds stock, as raw rows — toBase() so the
+     * scaled integers come back untouched by the model casts.
+     *
+     * @return Collection<int, object>
+     */
+    private function stockRows(): Collection
+    {
+        return Material::query()
+            ->where('quantity', '>', 0)
+            ->toBase()
+            ->get(['material_type_id', 'quantity', 'unit_price']);
+    }
+
+    /**
+     * The material as it is right now, locked for the rest of the
+     * transaction — never the caller's instance, which may be stale.
+     */
+    private function lockMaterial(Material $material): Material
+    {
+        return Material::query()->whereKey($material->getKey())->lockForUpdate()->firstOrFail();
     }
 
     /**

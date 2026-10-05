@@ -40,14 +40,14 @@ test('the full cycle from opening balance through partner withdrawal produces th
 
     // 2. Purchase 3 @ 100 EGP → stock 3
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 3_000, 10_000, '2026-01-02');
+    $this->inventory->addStock($material, 3_000, 10_000, '2026-01-02');
 
     expect($this->inventory->currentStock($material))->toBe(3_000);
     expect($this->cashbox->balance())->toBe(970_000);
     expect($this->profit->netProfit())->toBe(0);
 
-    // 3. Purchase 10 @ 120 EGP → stock 13
-    $this->inventory->purchase($material, 10_000, 12_000, '2026-01-03');
+    // 3. Add 10 more @ 120 EGP → stock 13, and 120 EGP is now the one price
+    $this->inventory->addStock($material, 10_000, 12_000, '2026-01-03');
 
     expect($this->inventory->currentStock($material))->toBe(13_000);
     expect($this->cashbox->balance())->toBe(850_000);
@@ -64,14 +64,14 @@ test('the full cycle from opening balance through partner withdrawal produces th
     expect($this->cashbox->balance())->toBe(850_000);
     expect($this->profit->netProfit())->toBe(0);
 
-    // 5. Issue 5 units to the room: FIFO cost 540 EGP (3 @ 100 + 2 @ 120), stock 8
+    // 5. Issue 5 units to the room at the current price: 5 @ 120 = 600 EGP, stock 8
     $roomMaterial = $this->roomMaterials->addRequirement($room, $material, 5_000);
     $this->roomMaterials->issue($roomMaterial, 5_000, '2026-01-04');
 
     expect($this->inventory->currentStock($material))->toBe(8_000);
     expect($this->cashbox->balance())->toBe(850_000);
     expect($this->profit->netProfit())->toBe(0);
-    expect($this->profit->workInProgress())->toBe(54_000);
+    expect($this->profit->workInProgress())->toBe(60_000);
 
     // 6. Customer payment 10,000 EGP
     $this->payments->create($room, 1_000_000, '2026-01-05');
@@ -90,16 +90,16 @@ test('the full cycle from opening balance through partner withdrawal produces th
     $room->update(['status' => RoomStatus::Completed]);
 
     expect($this->cashbox->balance())->toBe(1_650_000);
-    expect($this->profit->netProfit())->toBe(2_746_000);
+    expect($this->profit->netProfit())->toBe(2_740_000);
 
-    // 9. Partner (20%) withdraws 2,000 EGP — share 5,492 EGP, remaining 3,492 EGP
+    // 9. Partner (20%) withdraws 2,000 EGP — share 5,480 EGP, remaining 3,480 EGP
     $partner = Partner::factory()->create(['percentage' => 2000]);
     $this->partners->withdraw($partner, 200_000, '2026-01-08');
 
     expect($this->cashbox->balance())->toBe(1_450_000);
-    expect($this->profit->netProfit())->toBe(2_746_000);
-    expect($this->partners->share($partner))->toBe(549_200);
-    expect($this->partners->remaining($partner))->toBe(349_200);
+    expect($this->profit->netProfit())->toBe(2_740_000);
+    expect($this->partners->share($partner))->toBe(548_000);
+    expect($this->partners->remaining($partner))->toBe(348_000);
 
     // Acceptance criterion 2: no orphaned transaction — the only row without a
     // source must be the single opening balance.
@@ -132,7 +132,7 @@ test('a full cycle that includes labour and extra room costs keeps the cashbox a
 
     // Buy 10 units @ 100 EGP = 1,000 EGP out
     $material = Material::factory()->create();
-    $this->inventory->purchase($material, 10_000, 10_000, '2026-01-02');
+    $this->inventory->addStock($material, 10_000, 10_000, '2026-01-02');
 
     $room = Room::factory()->for(Customer::factory())->create(['sale_price' => 3_000_000]);
 

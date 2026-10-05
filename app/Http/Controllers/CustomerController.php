@@ -7,18 +7,25 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $search = trim($request->string('q')->toString());
+
         $customers = Customer::query()
             ->withCount('rooms')
+            ->when($search !== '', fn ($query) => $query->where(fn ($inner) => $inner
+                ->where('name', 'like', '%'.$search.'%')
+                ->orWhere('phone', 'like', '%'.$search.'%')))
             ->orderBy('name')
-            ->paginate(25);
+            ->paginate(25)
+            ->withQueryString();
 
-        return view('customers.index', ['customers' => $customers]);
+        return view('customers.index', ['customers' => $customers, 'search' => $search]);
     }
 
     public function store(StoreCustomerRequest $request): RedirectResponse

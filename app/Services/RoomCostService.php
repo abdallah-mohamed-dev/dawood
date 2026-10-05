@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\PaymentMethod;
 use App\Enums\RoomCostType;
+use App\Exceptions\SeasonClosedException;
 use App\Models\Room;
 use App\Models\RoomCost;
 use DateTimeInterface;
@@ -22,6 +23,10 @@ class RoomCostService
 
     public function create(Room $room, RoomCostType $type, int $amount, DateTimeInterface|string $date, ?string $description = null, PaymentMethod $method = PaymentMethod::Cash): RoomCost
     {
+        if (app(SeasonService::class)->isLocked($room)) {
+            throw new SeasonClosedException;
+        }
+
         if ($amount <= 0) {
             throw new InvalidArgumentException('Room cost amount must be greater than zero.');
         }
@@ -49,6 +54,10 @@ class RoomCostService
 
     public function delete(RoomCost $cost): void
     {
+        if (app(SeasonService::class)->isLocked($cost)) {
+            throw new SeasonClosedException;
+        }
+
         DB::transaction(function () use ($cost) {
             $this->cashbox->removeFor($cost);
             $cost->delete();

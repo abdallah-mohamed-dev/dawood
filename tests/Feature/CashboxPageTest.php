@@ -184,7 +184,7 @@ test('the item column shows the detailed source, not the generic kind', function
     $cashbox->recordOut($expense, 30_000, CashboxTransactionKind::Expense, '2026-01-03');
 
     $material = Material::factory()->create(['name' => 'خشب زان']);
-    app(InventoryService::class)->purchase($material, 10_000, 10_000, '2026-01-04');
+    app(InventoryService::class)->addStock($material, 10_000, 10_000, '2026-01-04');
 
     $partner = Partner::factory()->create(['name' => 'عم سيد', 'percentage' => 1000]);
     $cashbox->recordOut(PartnerWithdrawal::factory()->for($partner)->create(), 5_000, CashboxTransactionKind::PartnerWithdrawal, '2026-01-05');

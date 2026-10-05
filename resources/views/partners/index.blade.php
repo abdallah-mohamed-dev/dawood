@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <x-data-table :headings="['الاسم', 'البريد الإلكتروني', 'النسبة', 'النصيب', 'السحوبات', 'المتبقي', __('Actions')]" :rows="$rows">
+    <x-data-table :headings="['الاسم', 'البريد الإلكتروني', 'النسبة', 'المُرحَّل', 'النصيب', 'السحوبات', 'المتبقي', __('Actions')]" :rows="$rows">
         @foreach ($rows as $row)
             <tr>
                 <td class="px-4 py-2">
@@ -26,6 +26,7 @@
                 </td>
                 <td class="px-4 py-2">{{ $row['partner']->email ?? '—' }}</td>
                 <td class="px-4 py-2">{{ number_format($row['partner']->percentage / 100, 2) }}%</td>
+                <td class="px-4 py-2 {{ $row['carried_in'] < 0 ? 'text-danger' : '' }}"><x-money :amount="$row['carried_in']" /></td>
                 <td class="px-4 py-2"><x-money :amount="$row['share']" /></td>
                 <td class="px-4 py-2"><x-money :amount="$row['withdrawn']" /></td>
                 <td class="px-4 py-2 {{ $row['remaining'] < 0 ? 'text-danger' : '' }}">

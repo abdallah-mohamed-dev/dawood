@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Enums\InventoryMovementType;
-use App\Models\InventoryBatch;
 use App\Models\InventoryMovement;
+use App\Models\Material;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,17 +19,21 @@ class InventoryMovementFactory extends Factory
      */
     public function definition(): array
     {
-        $batch = InventoryBatch::factory()->create();
+        $material = Material::factory()->create(['quantity' => 10_000]);
 
         return [
-            'material_id' => $batch->material_id,
-            'batch_id' => $batch->id,
+            'material_id' => $material->id,
             'type' => InventoryMovementType::In,
-            'quantity' => $batch->getRawOriginal('quantity'),
+            'quantity' => $material->getRawOriginal('quantity'),
             'cost' => $this->faker->numberBetween(1_000, 50_000),
             'related_type' => null,
             'related_id' => null,
             'occurred_at' => now()->toDateString(),
         ];
+    }
+
+    public function out(): static
+    {
+        return $this->state(fn () => ['type' => InventoryMovementType::Out]);
     }
 }

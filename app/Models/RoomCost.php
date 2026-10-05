@@ -25,6 +25,11 @@ class RoomCost extends Model
 
     protected static string $activityTypeLabel = 'تكلفة غرفة';
 
+    public function season(): BelongsTo
+    {
+        return $this->belongsTo(Season::class);
+    }
+
     public function activityLabel(): string
     {
         return ($this->type?->label() ?? '—').' — '.($this->room?->room_type ?? '—');

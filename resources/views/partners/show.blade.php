@@ -10,6 +10,13 @@
         </a>
     </div>
 
+    @if ($carriedIn !== 0)
+        <div class="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm shadow-sm">
+            المُرحَّل من موسم سابق: <span class="font-bold {{ $carriedIn < 0 ? 'text-danger' : 'text-gray-900' }}"><x-money :amount="$carriedIn" /></span>
+            @if ($carriedIn < 0) <span class="text-danger">(سحبت أكتر من مستحقك)</span> @endif
+        </div>
+    @endif
+
     @if ($netProfit <= 0 || $remaining < 0)
         <div class="mb-6 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm font-medium text-warning shadow-sm">
             التحذير:
@@ -66,6 +73,19 @@
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">{{ __('Add') }}</button>
         </form>
     </div>
+
+    <form method="GET" action="{{ route('partners.show', $partner) }}" class="mb-4 flex flex-wrap items-end gap-2">
+        <div>
+            <label class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
+            <input type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+        </div>
+        <div>
+            <label class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
+            <input type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+        </div>
+        <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
+        <a href="{{ route('partners.show', $partner) }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء الفلاتر</a>
+    </form>
 
     <x-data-table :headings="['التاريخ', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$withdrawals">
         @foreach ($withdrawals as $withdrawal)

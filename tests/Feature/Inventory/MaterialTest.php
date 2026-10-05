@@ -20,6 +20,7 @@ test('adding a material shows it listed with its unit', function () {
         'name' => 'لوح MDF',
         'unit' => 'لوح',
         'material_type_id' => MaterialType::query()->where('name', 'خامة')->value('id'),
+        'unit_price' => '120.00',
     ])->assertRedirect(route('inventory.materials.index'));
 
     $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
@@ -68,11 +69,15 @@ test('a material can be edited', function () {
         'name' => 'اسم محدث',
         'unit' => 'متر',
         'material_type_id' => $material->material_type_id,
+        'unit_price' => '75.50',
+        'quantity' => '0',
+        'payment_method' => 'cash',
     ])->assertRedirect(route('inventory.materials.index'));
 
     $material->refresh();
     expect($material->name)->toBe('اسم محدث');
     expect($material->unit)->toBe('متر');
+    expect($material->unit_price)->toBe('75.50');
 });
 
 test('updating a material to its own current name does not fail uniqueness validation', function () {
@@ -82,6 +87,9 @@ test('updating a material to its own current name does not fail uniqueness valid
         'name' => 'لوح MDF',
         'unit' => $material->unit,
         'material_type_id' => $material->material_type_id,
+        'unit_price' => '40',
+        'quantity' => '0',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionDoesntHaveErrors();
@@ -95,6 +103,9 @@ test('renaming a material to another existing material name fails validation', f
         'name' => 'لوح MDF',
         'unit' => $material->unit,
         'material_type_id' => $material->material_type_id,
+        'unit_price' => '40',
+        'quantity' => '0',
+        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionHasErrors('name');
@@ -197,19 +208,19 @@ test('the stock column is only summed for the materials on the current page', fu
     $inventory = app(InventoryService::class);
 
     $onPageOne = Material::factory()->create(['name' => 'أ مادة أولى']);
-    $inventory->purchase($onPageOne, 5_000, 10_000, '2026-01-01');
+    $inventory->addStock($onPageOne, 5_000, 10_000, '2026-01-01');
 
     Material::factory()->count(60)->sequence(fn ($sequence) => [
         'name' => 'ب مادة '.str_pad((string) ($sequence->index + 1), 3, '0', STR_PAD_LEFT),
     ])->create();
 
     $onPageTwo = Material::factory()->create(['name' => 'ي مادة أخيرة']);
-    $inventory->purchase($onPageTwo, 7_000, 10_000, '2026-01-01');
+    $inventory->addStock($onPageTwo, 7_000, 10_000, '2026-01-01');
 
-    // Page one must not pay for aggregating page two's batches.
+    // Page one must not pay for reading page two's quantities.
     $ids = [];
     DB::listen(function ($query) use (&$ids) {
-        if (str_contains($query->sql, 'sum(remaining_quantity)') || str_contains($query->sql, 'SUM(remaining_quantity)')) {
+        if (str_contains($query->sql, 'select "quantity", "id" from "materials"')) {
             $ids[] = $query->bindings;
         }
     });
