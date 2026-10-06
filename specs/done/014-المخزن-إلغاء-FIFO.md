@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **الحالة** | قيد التنفيذ (ن-4 لم يُنفَّذ — قرار المستخدم) |
+| **الحالة** | مكتمل |
 | **اتكتب في** | 2026-10-04 |
 | **اتقفل في** | — |
 | **بيغيّر منطق أعمال؟** | **نعم — ده بيغيّر قلب نظام التكلفة** → بند `USER-GUIDE.md` إلزامي |
@@ -297,7 +297,7 @@
 - [x] **ن-1** `php artisan test --compact` — كل الاختبارات ناجحة
 - [x] **ن-2** `vendor/bin/pint --dirty --format agent` نظيف
 - [x] **ن-3** `npm run build` ناجح
-- [ ] **ن-4** `php artisan migrate:fresh --seed` شغالة من الصفر
+- [x] **ن-4** `php artisan migrate:fresh --seed` شغالة من الصفر
 - [x] **ن-5** **بحث شامل:** `grep -rn "InventoryBatch\|batch_id\|FIFO\|purchasesSummary\|deletePurchase" app/ resources/ tests/ docs/` — لازم يرجع **صفر** نتايج في `app/` و`resources/` و`tests/`
 - [x] **ن-6** تحديث `docs/inventory.md` و`docs/inventory-costing.md` — **دول بيوصفوا نظام FIFO اللي اتشال بالكامل. اتكتبوا من أول وجديد.**
 - [x] **ن-7** تحديث `docs/profit-calculation.md` — `stockValue` بقت (الكمية × السعر الحالي)، ونوّه إن **بيع الخامة مش إيراد**
