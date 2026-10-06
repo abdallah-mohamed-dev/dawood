@@ -1,7 +1,7 @@
 <x-app-layout title="{{ $customer->name }}">
     <div class="mb-6 flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold tracking-tight text-gray-900">{{ $customer->name }}</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-ink">{{ $customer->name }}</h1>
             <p class="mt-1 text-sm text-secondary">
                 {{ $customer->phone ?? 'بدون رقم هاتف' }}
                 @if ($customer->address)
@@ -10,7 +10,7 @@
             </p>
         </div>
         <div class="flex gap-3">
-            <a href="{{ route('customers.edit', $customer) }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
+            <a href="{{ route('customers.edit', $customer) }}" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">
                 {{ __('Edit') }}
             </a>
         </div>

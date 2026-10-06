@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SeasonStatus;
+use App\Models\Partner;
 use App\Models\Season;
 use App\Services\CashboxService;
+use App\Services\PartnerService;
 use App\Services\ProfitService;
 use App\Services\SeasonService;
 use Illuminate\Http\Request;
@@ -16,6 +18,7 @@ class ProfitController extends Controller
         private readonly ProfitService $profit,
         private readonly CashboxService $cashbox,
         private readonly SeasonService $seasons,
+        private readonly PartnerService $partners,
     ) {}
 
     /**
@@ -57,6 +60,10 @@ class ProfitController extends Controller
             'adminByMonth' => $this->profit->adminExpensesByMonth(),
             'laborByMonth' => $this->profit->laborCostsByMonth(),
             'otherByMonth' => $this->profit->otherRoomCostsByMonth(),
+            'partnerShares' => Partner::query()->orderBy('name')->get()->map(fn (Partner $partner) => [
+                'name' => $partner->name,
+                'share' => $this->partners->share($partner),
+            ]),
         ]);
     }
 
@@ -84,6 +91,10 @@ class ProfitController extends Controller
             'adminByMonth' => null,
             'laborByMonth' => null,
             'otherByMonth' => null,
+            'partnerShares' => $closed->partnerShares()->with('partner')->get()->map(fn ($row) => [
+                'name' => $row->partner?->name ?? '—',
+                'share' => $row->getRawOriginal('share_amount'),
+            ]),
         ];
     }
 }

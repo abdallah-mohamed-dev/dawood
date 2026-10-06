@@ -1,5 +1,5 @@
 <x-app-layout title="تعديل دفعة">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">تعديل دفعة</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">تعديل دفعة</h1>
 
     <p class="mb-4 text-sm text-secondary">
         العميل: {{ $payment->room->customer->name }} — الغرفة: {{ $payment->room->room_type }}
@@ -16,15 +16,15 @@
         <x-field name="note" label="ملاحظة" :value="old('note', $payment->note)" />
 
         <div>
-            <p class="mb-1 block text-sm font-medium text-gray-700">رقم الإيصال</p>
-            <p class="font-mono text-sm text-gray-900">{{ $payment->formattedReceiptNumber() }}</p>
+            <p class="mb-1 block text-sm font-medium text-ink-soft">رقم الإيصال</p>
+            <p class="font-mono text-sm text-ink">{{ $payment->formattedReceiptNumber() }}</p>
         </div>
 
         <div class="flex gap-3">
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
                 {{ __('Save') }}
             </button>
-            <a href="{{ route('rooms.show', $payment->room) }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
+            <a href="{{ route('rooms.show', $payment->room) }}" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">
                 {{ __('Cancel') }}
             </a>
         </div>

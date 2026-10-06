@@ -3,8 +3,8 @@
 <x-field name="name" label="اسم المادة" :value="old('name', $material->name ?? '')" required />
 
 <div>
-    <label for="material_type_id" class="mb-1 block text-sm font-medium text-gray-700">نوع الخامة</label>
-    <select id="material_type_id" name="material_type_id" required class="w-full max-w-md rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+    <label for="material_type_id" class="mb-1 block text-sm font-medium text-ink-soft">نوع الخامة</label>
+    <select id="material_type_id" name="material_type_id" required class="w-full max-w-md rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         <option value="">اختر النوع</option>
         @foreach ($materialTypes as $materialType)
             <option value="{{ $materialType->id }}" @selected((string) old('material_type_id', $material->material_type_id ?? '') === (string) $materialType->id)>{{ $materialType->name }}</option>
@@ -43,6 +43,6 @@
      method the user never saw. --}}
 <x-payment-method-select name="payment_method" width="w-full max-w-md" />
 
-<p class="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-gray-700">
+<p class="rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-ink-soft">
     تنبيه: تغيير الكمية هنا بيتحرك بمبلغ حقيقي — الزيادة بتخصم من الخزنة والنقص بيزوّدها — بالتاريخ النهارده وبطريقة الدفع المختارة. تغيير سعر الوحدة لوحده ما بيحرّكش فلوس، لكنه بيغيّر قيمة المخزن كلها.
 </p>

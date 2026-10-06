@@ -1,10 +1,11 @@
 <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
     <div>
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">{{ $room->room_type }}</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-ink">{{ $room->room_type }}</h1>
         <p class="mt-1 text-sm text-secondary">
             العميل:
             <a href="{{ route('customers.show', $room->customer) }}" class="text-primary hover:underline">{{ $room->customer->name }}</a>
         </p>
+        <p class="mt-1 text-sm text-secondary">تاريخ الإنشاء: {{ $room->created_at->format('Y-m-d') }}</p>
         @if ($room->started_at)
             <p class="mt-1 text-sm text-secondary">بدأ التنفيذ: {{ $room->started_at->format('Y-m-d') }}</p>
         @endif
@@ -19,7 +20,7 @@
     <div class="flex items-center gap-3">
         <form method="POST" action="{{ route('rooms.status.update', $room) }}">
             @csrf
-            <select name="status" onchange="this.form.submit()" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <select name="status" onchange="this.form.submit()" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @foreach ($statuses as $status)
                     <option value="{{ $status->value }}" @selected($room->status === $status)>{{ $status->label() }}</option>
                 @endforeach
@@ -44,7 +45,7 @@
 
 @if ($hasIssuedMaterials)
     <dialog id="delete-room-dialog" class="w-full max-w-md rounded-lg border border-border p-6 backdrop:bg-black/40">
-        <h2 class="mb-3 text-lg font-semibold text-gray-900">تأكيد حذف الغرفة</h2>
+        <h2 class="mb-3 text-lg font-semibold text-ink">تأكيد حذف الغرفة</h2>
         <p class="mb-4 text-sm text-secondary">صُرفت خامات لهذه الغرفة. اختر ماذا يحدث لها:</p>
 
         <ul class="mb-4 space-y-1 text-sm text-secondary">
@@ -78,7 +79,7 @@
                 <button type="submit" class="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:opacity-90 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-danger/40 focus:ring-offset-2">
                     تأكيد الحذف
                 </button>
-                <button type="button" onclick="document.getElementById('delete-room-dialog').close()" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
+                <button type="button" onclick="document.getElementById('delete-room-dialog').close()" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">
                     إلغاء
                 </button>
             </div>

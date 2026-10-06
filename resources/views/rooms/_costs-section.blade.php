@@ -16,7 +16,7 @@
 
 <div class="flex h-full flex-col rounded-xl border border-border bg-surface p-4 shadow-sm">
     <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-900">{{ $title }}</h2>
+        <h2 class="text-sm font-semibold text-ink">{{ $title }}</h2>
         <span class="text-sm text-secondary">الإجمالي: <x-money :amount="$total" /></span>
     </div>
 
@@ -25,24 +25,24 @@
         <input type="hidden" name="type" value="{{ $type->value }}">
 
         <div class="col-span-2">
-            <label for="{{ $bag }}_description" class="mb-1 block text-xs font-medium text-gray-700">{{ $descriptionLabel }}</label>
-            <input id="{{ $bag }}_description" type="text" name="description" value="{{ $oldDescription }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label for="{{ $bag }}_description" class="mb-1 block text-xs font-medium text-ink-soft">{{ $descriptionLabel }}</label>
+            <input id="{{ $bag }}_description" type="text" name="description" value="{{ $oldDescription }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
             @error('description', $bag)
                 <p class="mt-1 text-xs text-danger">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
-            <label for="{{ $bag }}_amount" class="mb-1 block text-xs font-medium text-gray-700">المبلغ (ج.م)</label>
-            <input id="{{ $bag }}_amount" type="number" step="0.01" min="0" name="amount" value="{{ $oldAmount }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
+            <label for="{{ $bag }}_amount" class="mb-1 block text-xs font-medium text-ink-soft">المبلغ (ج.م)</label>
+            <input id="{{ $bag }}_amount" type="number" step="0.01" min="0" name="amount" value="{{ $oldAmount }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
             @error('amount', $bag)
                 <p class="mt-1 text-xs text-danger">{{ $message }}</p>
             @enderror
         </div>
 
         <div>
-            <label for="{{ $bag }}_occurred_at" class="mb-1 block text-xs font-medium text-gray-700">التاريخ</label>
-            <input id="{{ $bag }}_occurred_at" type="date" name="occurred_at" value="{{ $oldDate }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
+            <label for="{{ $bag }}_occurred_at" class="mb-1 block text-xs font-medium text-ink-soft">التاريخ</label>
+            <input id="{{ $bag }}_occurred_at" type="date" name="occurred_at" value="{{ $oldDate }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
             @error('occurred_at', $bag)
                 <p class="mt-1 text-xs text-danger">{{ $message }}</p>
             @enderror

@@ -15,12 +15,12 @@
 @endphp
 
 <div>
-    <label for="{{ $inputId }}" class="mb-1 block text-xs font-medium text-gray-700">طريقة الدفع</label>
+    <label for="{{ $inputId }}" class="mb-1 block text-xs font-medium text-ink-soft">طريقة الدفع</label>
     <select
         id="{{ $inputId }}"
         name="{{ $name }}"
         required
-        class="{{ $width }} rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        class="{{ $width }} rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
     >
         @foreach (\App\Enums\PaymentMethod::cases() as $method)
             <option value="{{ $method->value }}" @selected($current === $method->value)>{{ $method->label() }}</option>

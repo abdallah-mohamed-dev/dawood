@@ -307,3 +307,13 @@ test('listing many rows does not grow the query count', function () {
     // source and that source's own relation.
     expect($withMany)->toBeLessThanOrEqual($withOne + 4);
 });
+
+test('the cashbox page shows the balance chart and its figures as text', function () {
+    $admin = User::factory()->create();
+    app(CashboxService::class)->setOpeningBalance(100000, now());
+
+    $response = $this->actingAs($admin)->get(route('cashbox.index'))->assertOk();
+
+    $response->assertSee('role="img"', false);
+    $response->assertSeeInOrder(['رسم', 'جدول']);
+});

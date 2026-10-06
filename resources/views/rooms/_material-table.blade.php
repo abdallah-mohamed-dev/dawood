@@ -89,8 +89,8 @@
                                 @csrf
                                 @method('PATCH')
                                 <div>
-                                    <label class="mb-1 block text-xs font-medium text-gray-700">الكمية المطلوبة</label>
-                                    <input type="number" step="0.001" min="0" name="required_quantity" value="{{ old('required_quantity', $roomMaterial->required_quantity) }}" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
+                                    <label class="mb-1 block text-xs font-medium text-ink-soft">الكمية المطلوبة</label>
+                                    <input type="number" step="0.001" min="0" name="required_quantity" value="{{ old('required_quantity', $roomMaterial->required_quantity) }}" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
                                     @unless ($showType)
                                         @error('required_quantity', $editBag)
                                             <p class="mt-1 text-xs text-danger">{{ $message }}</p>
@@ -98,7 +98,7 @@
                                     @endunless
                                 </div>
                                 <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">{{ __('Save') }}</button>
-                                <button type="button" @click="editing = false" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">{{ __('Cancel') }}</button>
+                                <button type="button" @click="editing = false" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">{{ __('Cancel') }}</button>
                             </form>
                         </td>
                     </tr>

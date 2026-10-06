@@ -6,9 +6,11 @@ use App\Http\Controllers\BackupController;
 use App\Http\Controllers\CapitalItemController;
 use App\Http\Controllers\CashboxController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DebtController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\Exports\CsvExportController;
 use App\Http\Controllers\Inventory\MaterialController;
 use App\Http\Controllers\Inventory\MovementController;
 use App\Http\Controllers\Inventory\ShortageController;
@@ -36,9 +38,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -109,4 +109,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/logs', [ActivityLogController::class, 'purge'])->name('logs.purge');
 
     Route::get('/backup/csv', [BackupController::class, 'downloadCsvArchive'])->name('backup.csv');
+
+    Route::prefix('exports')->name('exports.')->group(function () {
+        Route::get('/customers', [CsvExportController::class, 'customers'])->name('customers');
+        Route::get('/rooms', [CsvExportController::class, 'rooms'])->name('rooms');
+        Route::get('/materials', [CsvExportController::class, 'materials'])->name('materials');
+        Route::get('/purchases', [CsvExportController::class, 'purchases'])->name('purchases');
+        Route::get('/payments', [CsvExportController::class, 'payments'])->name('payments');
+        Route::get('/expenses', [CsvExportController::class, 'expenses'])->name('expenses');
+        Route::get('/cashbox', [CsvExportController::class, 'cashbox'])->name('cashbox');
+        Route::get('/partners', [CsvExportController::class, 'partners'])->name('partners');
+        Route::get('/withdrawals', [CsvExportController::class, 'withdrawals'])->name('withdrawals');
+    });
 });

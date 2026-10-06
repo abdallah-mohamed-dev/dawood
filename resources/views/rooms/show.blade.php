@@ -5,6 +5,19 @@
 <x-app-layout title="{{ $room->room_type }}">
     @include('rooms._header')
     @include('rooms._summary-cards')
+
+    @php
+        $costByType = $room->materialsCostByType();
+        $typeBars = $materialTypes->map(fn ($type) => [
+            'label' => $type->name,
+            'value' => $costByType[$type->id] ?? 0,
+            'note' => '',
+        ])->all();
+    @endphp
+    <x-panel title="تكلفة الخامات حسب النوع" class="mb-6">
+        <x-charts.hbar :items="$typeBars" alt="تكلفة الخامات حسب النوع" />
+    </x-panel>
+
     @include('rooms._materials-section')
     <div class="mb-6 mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-2">
         @include('rooms._costs-section', [

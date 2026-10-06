@@ -2,10 +2,10 @@
 
 use App\Models\User;
 
-test('the sidebar lists the twelve pages in the agreed order', function () {
+test('the sidebar lists the pages in the agreed group order', function () {
     $html = $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()->getContent();
 
-    $labels = ['العملاء', 'المخزن', 'الغرف', 'المشتريات', 'المدفوعات', 'المصروفات الإدارية', 'الخزنة', 'تقارير الربح', 'المواسم', 'الشركاء', 'رأس المال', 'النسخ الاحتياطي'];
+    $labels = ['العملاء', 'الغرف', 'المخزن', 'الخامات', 'المشتريات', 'حركات المخزون', 'الفلوس', 'المدفوعات', 'المصروفات الإدارية', 'الديون', 'الخزنة', 'الإدارة', 'تقارير الربح', 'المصنعيات', 'المواسم', 'الشركاء', 'رأس المال'];
 
     $nav = substr($html, strpos($html, '<nav'), strpos($html, '</nav>') - strpos($html, '<nav'));
     $positions = array_map(fn (string $label) => strpos($nav, $label), $labels);
@@ -26,7 +26,7 @@ test('the sidebar does not list the dashboard or the old movement log', function
 test('every sidebar link opens with a 200', function () {
     $user = User::factory()->create();
 
-    foreach (['customers.index', 'inventory.materials.index', 'rooms.index', 'inventory.shortages.index', 'payments.index', 'expenses.index', 'cashbox.index', 'reports.profit', 'seasons.index', 'partners.index', 'capital.index', 'backup.index'] as $route) {
+    foreach (['customers.index', 'inventory.materials.index', 'rooms.index', 'inventory.shortages.index', 'inventory.movements.index', 'payments.index', 'expenses.index', 'debts.index', 'cashbox.index', 'reports.profit', 'reports.labor', 'seasons.index', 'partners.index', 'capital.index', 'backup.index', 'settings.index'] as $route) {
         $this->actingAs($user)->get(route($route))->assertOk();
     }
 });

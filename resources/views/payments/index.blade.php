@@ -1,17 +1,17 @@
 <x-app-layout title="مدفوعات العملاء">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">مدفوعات العملاء</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">مدفوعات العملاء</h1>
 
     <form method="GET" action="{{ route('payments.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
         <div class="relative w-full max-w-xs">
-            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالعميل أو الغرفة أو رقم الإيصال" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالعميل أو الغرفة أو رقم الإيصال" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <div>
-            <label class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
-            <input type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="mb-1 block text-xs font-medium text-ink-soft">من تاريخ</label>
+            <input type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <div>
-            <label class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
-            <input type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="mb-1 block text-xs font-medium text-ink-soft">إلى تاريخ</label>
+            <input type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
         <a href="{{ route('payments.index') }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء الفلاتر</a>

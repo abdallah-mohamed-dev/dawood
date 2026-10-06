@@ -1,6 +1,6 @@
 <x-app-layout title="الشركاء">
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">الشركاء</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-ink">الشركاء</h1>
         <a href="{{ route('partners.create') }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
             {{ __('Add') }}
         </a>

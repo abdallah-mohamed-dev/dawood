@@ -697,3 +697,22 @@ test('an invalid payment method is rejected in the right bag', function () {
 
     expect(RoomCost::query()->count())->toBe(0);
 });
+
+test('the room page shows the composition and material-type charts with their figures as text', function () {
+    $room = Room::factory()->create(['customer_id' => $this->customer->id, 'sale_price' => 1_000_000]);
+    RoomMaterial::factory()->create(['room_id' => $room->id, 'issued_quantity' => 1000, 'cost' => 200000]);
+
+    $response = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk();
+
+    $response->assertSee('role="img"', false);
+    $response->assertSeeInOrder(['رسم', 'جدول']);
+});
+
+test('the room page shows the room creation date', function () {
+    $room = Room::factory()->create(['customer_id' => $this->customer->id]);
+
+    $this->actingAs($this->admin)
+        ->get(route('rooms.show', $room))
+        ->assertOk()
+        ->assertSee($room->created_at->format('Y-m-d'));
+});

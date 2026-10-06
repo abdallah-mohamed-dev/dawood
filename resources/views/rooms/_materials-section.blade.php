@@ -5,7 +5,7 @@
 
 <div class="mb-6" x-data="persistedToggle('room.materials.combined', false)">
     <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-900">المواد</h2>
+        <h2 class="text-sm font-semibold text-ink">المواد</h2>
         <button type="button" @click="toggle()" class="text-sm text-primary hover:underline" x-text="open ? 'عرض كل نوع في بوكس' : 'عرض الكل مع بعض'"></button>
     </div>
 
@@ -28,21 +28,21 @@
             @endphp
 
             <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <h3 class="mb-3 text-sm font-semibold text-gray-900">{{ $typeTitles[$type->name] ?? $type->name }}</h3>
+                <h3 class="mb-3 text-sm font-semibold text-ink">{{ $typeTitles[$type->name] ?? $type->name }}</h3>
 
                 @unless ($locked)
                     <form method="POST" action="{{ route('rooms.materials.store', $room) }}" class="mb-4 flex flex-wrap items-end gap-3">
                         @csrf
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-gray-700">{{ $type->name }}</label>
+                            <label class="mb-1 block text-xs font-medium text-ink-soft">{{ $type->name }}</label>
                             <x-searchable-select name="material_id" :options="$options" :required="true" :placeholder="'اختر '.$type->name" />
                             @error('material_id')
                                 <p class="mt-1 text-xs text-danger">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
-                            <label class="mb-1 block text-xs font-medium text-gray-700">الكمية المطلوبة</label>
-                            <input type="number" step="0.001" min="0" name="required_quantity" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
+                            <label class="mb-1 block text-xs font-medium text-ink-soft">الكمية المطلوبة</label>
+                            <input type="number" step="0.001" min="0" name="required_quantity" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
                             @error('required_quantity')
                                 <p class="mt-1 text-xs text-danger">{{ $message }}</p>
                             @enderror

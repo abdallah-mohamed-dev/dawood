@@ -10,12 +10,12 @@
         type="search"
         x-model="q"
         placeholder="ابحث..."
-        class="w-56 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        class="w-56 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
     >
     <select
         name="{{ $name }}"
         @if ($required) required @endif
-        class="w-56 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+        class="w-56 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
     >
         <option value="">{{ $placeholder }}</option>
         @foreach ($options as $value => $label)

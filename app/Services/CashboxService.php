@@ -169,6 +169,57 @@ class CashboxService
         return $breakdown;
     }
 
+    /**
+     * سلسلة شهرية للخزنة — قراءة فقط، للعرض (specs/020.2).
+     *
+     * النافذة آخر $months شهر منتهية بالشهر الحالي. الرصيد في كل شهر = الرصيد
+     * المرحّل قبل النافذة + صافي الشهور لحد الشهر ده، فالحركات الأقدم من النافذة
+     * مش بتضيع من الرصيد.
+     *
+     * @return list<array{month: string, label: string, in: int, out: int, balance_end: int}>
+     */
+    public function monthlySeries(int $months = 6): array
+    {
+        $start = now()->startOfMonth()->subMonths($months - 1);
+
+        $perMonth = DB::table('cashbox_transactions')
+            ->selectRaw("strftime('%Y-%m', occurred_at) as month")
+            ->selectRaw("SUM(CASE WHEN type = 'in' THEN amount ELSE 0 END) as total_in")
+            ->selectRaw("SUM(CASE WHEN type = 'out' THEN amount ELSE 0 END) as total_out")
+            ->where('occurred_at', '>=', $start->toDateString())
+            ->groupBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $carried = (int) CashboxTransaction::query()
+            ->where('occurred_at', '<', $start->toDateString())
+            ->selectRaw("COALESCE(SUM(CASE WHEN type = 'in' THEN amount ELSE -amount END), 0) as net")
+            ->value('net');
+
+        $series = [];
+        $running = $carried;
+
+        for ($i = 0; $i < $months; $i++) {
+            $month = $start->copy()->addMonths($i);
+            $key = $month->format('Y-m');
+            $row = $perMonth->get($key);
+
+            $in = (int) ($row->total_in ?? 0);
+            $out = (int) ($row->total_out ?? 0);
+            $running += $in - $out;
+
+            $series[] = [
+                'month' => $key,
+                'label' => __('date.months.'.$month->month),
+                'in' => $in,
+                'out' => $out,
+                'balance_end' => $running,
+            ];
+        }
+
+        return $series;
+    }
+
     private function record(CashboxTransactionType $type, Model $source, int $amount, CashboxTransactionKind $kind, DateTimeInterface|string $date, ?string $description, PaymentMethod $method): CashboxTransaction
     {
         if ($amount <= 0) {

@@ -1,5 +1,5 @@
 <x-app-layout title="بنود المصروفات">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">بنود المصروفات</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">بنود المصروفات</h1>
 
     <x-quick-add :action="route('expenses.categories.store')" title="إضافة بند">
         <x-quick-field name="name" label="اسم البند" width="w-64" required />

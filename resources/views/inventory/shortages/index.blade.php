@@ -1,26 +1,26 @@
 <x-app-layout title="المشتريات المطلوبة">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">المشتريات المطلوبة</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">المشتريات المطلوبة</h1>
 
     <form method="GET" action="{{ route('inventory.shortages.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
         <div class="relative w-full max-w-xs">
-            <input type="search" name="q" value="{{ $filters['q'] }}" placeholder="ابحث باسم الخامة" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <input type="search" name="q" value="{{ $filters['q'] }}" placeholder="ابحث باسم الخامة" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
 
-        <select name="room_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="room_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">كل الغرف</option>
             @foreach ($activeRooms as $room)
                 <option value="{{ $room->id }}" @selected($filters['room_id'] === $room->id)>{{ $room->room_type }}</option>
             @endforeach
         </select>
 
-        <select name="customer_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="customer_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">كل العملاء</option>
             @foreach ($customers as $customer)
                 <option value="{{ $customer->id }}" @selected($filters['customer_id'] === $customer->id)>{{ $customer->name }}</option>
             @endforeach
         </select>
 
-        <select name="material_type_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="material_type_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">كل الأنواع</option>
             @foreach ($materialTypes as $type)
                 <option value="{{ $type->id }}" @selected($filters['material_type_id'] === $type->id)>{{ $type->name }}</option>
@@ -33,15 +33,15 @@
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">إجمالي التكلفة التقديرية</div>
-            <div class="mt-1 text-xl font-bold text-gray-900"><x-money :amount="$totalCost" /></div>
+            <div class="mt-1 text-xl font-bold text-ink"><x-money :amount="$totalCost" /></div>
         </div>
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">عدد الغرف</div>
-            <div class="mt-1 text-xl font-bold text-gray-900">{{ $rooms->count() }}</div>
+            <div class="mt-1 text-xl font-bold text-ink">{{ $rooms->count() }}</div>
         </div>
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">عدد الخامات الناقصة</div>
-            <div class="mt-1 text-xl font-bold text-gray-900">{{ $lineCount }}</div>
+            <div class="mt-1 text-xl font-bold text-ink">{{ $lineCount }}</div>
         </div>
     </div>
 
@@ -56,7 +56,7 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <span class="text-sm text-secondary">الإجمالي: <x-money :amount="$group['total']" /></span>
-                    <a href="{{ route('inventory.shortages.print', $room) }}" target="_blank" class="rounded-lg border border-border px-3 py-1.5 text-sm text-gray-700 hover:bg-bg">طباعة أمر الشراء</a>
+                    <a href="{{ route('inventory.shortages.print', $room) }}" target="_blank" class="rounded-lg border border-border px-3 py-1.5 text-sm text-ink-soft hover:bg-bg">طباعة أمر الشراء</a>
                 </div>
             </div>
 

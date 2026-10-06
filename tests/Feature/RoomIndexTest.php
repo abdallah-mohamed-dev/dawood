@@ -135,3 +135,13 @@ test('the number of queries does not grow with the number of rooms', function ()
 
     expect($many)->toBe($few);
 });
+
+test('the rooms index shows both charts and their figures as text', function () {
+    $this->actingAs(User::factory()->create());
+    Room::factory()->create(['customer_id' => Customer::factory(), 'sale_price' => 1_000_000]);
+
+    $response = $this->get(route('rooms.index'))->assertOk();
+
+    $response->assertSee('role="img"', false);
+    $response->assertSeeInOrder(['رسم', 'جدول']);
+});

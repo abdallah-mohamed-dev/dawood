@@ -1,26 +1,26 @@
 <x-app-layout title="الخزنة">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">الخزنة</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">الخزنة</h1>
 
     <form method="GET" action="{{ route('cashbox.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
-        <select name="kind" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="kind" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">كل البنود</option>
             @foreach ($kinds as $kind)
                 <option value="{{ $kind->value }}" @selected($filters['kind'] === $kind->value)>{{ $kind->label() }}</option>
             @endforeach
         </select>
-        <select name="payment_method" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="payment_method" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">كل الطرق</option>
             @foreach ($methods as $method)
                 <option value="{{ $method->value }}" @selected($filters['payment_method'] === $method->value)>{{ $method->label() }}</option>
             @endforeach
         </select>
         <div>
-            <label class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
-            <input type="date" name="from" value="{{ $filters['from'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="mb-1 block text-xs font-medium text-ink-soft">من تاريخ</label>
+            <input type="date" name="from" value="{{ $filters['from'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <div>
-            <label class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
-            <input type="date" name="to" value="{{ $filters['to'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="mb-1 block text-xs font-medium text-ink-soft">إلى تاريخ</label>
+            <input type="date" name="to" value="{{ $filters['to'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
         <a href="{{ route('cashbox.index') }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء الفلاتر</a>
@@ -31,7 +31,7 @@
     <div class="mb-6 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
             <div class="text-sm text-secondary">الرصيد الحالي</div>
-            <div class="mt-1 text-2xl font-bold {{ $balance < 0 ? 'text-danger' : 'text-gray-900' }}">
+            <div class="mt-1 text-2xl font-bold {{ $balance < 0 ? 'text-danger' : 'text-ink' }}">
                 <x-money :amount="$balance" />
             </div>
         </div>
@@ -47,19 +47,19 @@
              Debts are a register, not money in the box, so it reads apart from the three above. --}}
         <a href="{{ route('debts.index') }}" class="block rounded-xl border-2 border-dashed border-warning/50 bg-warning/5 p-4 transition-colors hover:bg-warning/10">
             <div class="text-sm font-medium text-warning">إجمالي الديون القائمة</div>
-            <div class="mt-1 text-2xl font-bold text-gray-900"><x-money :amount="$debtsOutstanding" /></div>
+            <div class="mt-1 text-2xl font-bold text-ink"><x-money :amount="$debtsOutstanding" /></div>
             <p class="mt-2 text-xs text-secondary">الديون للتسجيل والتذكير فقط ولا تدخل في رصيد الخزنة.</p>
         </a>
     </div>
 
     <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-3 text-sm font-semibold text-gray-900">الرصيد الافتتاحي</h2>
+        <h2 class="mb-3 text-sm font-semibold text-ink">الرصيد الافتتاحي</h2>
 
         <form method="POST" action="{{ route('cashbox.opening-balance.store') }}" class="flex flex-wrap items-end gap-3">
             @csrf
 
             <div>
-                <label for="amount" class="mb-1 block text-xs font-medium text-gray-700">المبلغ (ج.م)</label>
+                <label for="amount" class="mb-1 block text-xs font-medium text-ink-soft">المبلغ (ج.م)</label>
                 <input
                     id="amount"
                     type="number"
@@ -68,7 +68,7 @@
                     name="amount"
                     value="{{ old('amount', $openingBalance?->amount) }}"
                     required
-                    class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                 @error('amount')
                     <p class="mt-1 text-xs text-danger">{{ $message }}</p>
@@ -76,14 +76,14 @@
             </div>
 
             <div>
-                <label for="occurred_at" class="mb-1 block text-xs font-medium text-gray-700">التاريخ</label>
+                <label for="occurred_at" class="mb-1 block text-xs font-medium text-ink-soft">التاريخ</label>
                 <input
                     id="occurred_at"
                     type="date"
                     name="occurred_at"
                     value="{{ old('occurred_at', $openingBalance?->occurred_at?->toDateString() ?? now()->toDateString()) }}"
                     required
-                    class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
                 @error('occurred_at')
                     <p class="mt-1 text-xs text-danger">{{ $message }}</p>
@@ -100,7 +100,7 @@
                     <x-payment-method-select :selected="$openingBalance?->payment_method" />
                 </div>
 
-                <button type="button" @click="toggle()" class="rounded-lg border border-border px-3 py-2 text-xs font-medium text-gray-700 hover:bg-bg" x-text="open ? 'إخفاء طريقة الدفع' : 'إظهار طريقة الدفع'"></button>
+                <button type="button" @click="toggle()" class="rounded-lg border border-border px-3 py-2 text-xs font-medium text-ink-soft hover:bg-bg" x-text="open ? 'إخفاء طريقة الدفع' : 'إظهار طريقة الدفع'"></button>
             </div>
 
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">
@@ -109,9 +109,45 @@
         </form>
     </div>
 
+    <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <x-panel class="lg:col-span-2" title="رصيد الخزنة" sub="آخر 6 شهور">
+            <x-charts.area-line
+                :labels="array_column($series, 'label')"
+                :values="array_column($series, 'balance_end')"
+                alt="رصيد الخزنة في آخر 6 شهور"
+            />
+        </x-panel>
+
+        <x-panel title="داخل وخارج" sub="الخزنة شهر بشهر">
+            <x-charts.grouped-bars
+                :labels="array_column($series, 'label')"
+                :series="[
+                    ['name' => 'داخل', 'token' => 'chart-a', 'values' => array_column($series, 'in')],
+                    ['name' => 'خارج', 'token' => 'chart-b', 'values' => array_column($series, 'out')],
+                ]"
+                alt="داخل وخارج الخزنة في آخر 6 شهور"
+            />
+        </x-panel>
+    </div>
+
+    <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <x-panel title="الداخل حسب الطريقة">
+            <x-charts.hbar
+                :items="collect($methods)->map(fn ($method) => ['label' => $method->label(), 'value' => $breakdown[$method->value]['in'] ?? 0])->all()"
+                alt="إجمالي الداخل حسب طريقة الدفع"
+            />
+        </x-panel>
+        <x-panel title="الخارج حسب الطريقة">
+            <x-charts.hbar
+                :items="collect($methods)->map(fn ($method) => ['label' => $method->label(), 'value' => $breakdown[$method->value]['out'] ?? 0])->all()"
+                alt="إجمالي الخارج حسب طريقة الدفع"
+            />
+        </x-panel>
+    </div>
+
     <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm" x-data="persistedToggle('cashbox.breakdown.visible')">
         <div class="mb-3 flex items-center justify-between gap-3">
-            <h2 class="text-sm font-semibold text-gray-900">التقسيم حسب طريقة الدفع</h2>
+            <h2 class="text-sm font-semibold text-ink">التقسيم حسب طريقة الدفع</h2>
             <button type="button" @click="toggle()" class="text-xs font-medium text-primary hover:underline" x-text="open ? 'إخفاء' : 'إظهار'"></button>
         </div>
 
@@ -120,7 +156,7 @@
                 @foreach ($methods as $method)
                     @php $row = $breakdown[$method->value] ?? ['in' => 0, 'out' => 0]; @endphp
                     <div class="rounded-lg border border-border bg-bg-subtle p-3">
-                        <div class="text-xs font-semibold text-gray-900">{{ $method->label() }}</div>
+                        <div class="text-xs font-semibold text-ink">{{ $method->label() }}</div>
                         <div class="mt-2 text-xs text-secondary">
                             داخل: <span class="font-semibold text-success"><x-money :amount="$row['in']" /></span>
                         </div>

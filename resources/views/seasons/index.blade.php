@@ -1,12 +1,12 @@
 <x-app-layout title="المواسم">
     <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">المواسم</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-ink">المواسم</h1>
         <div class="flex items-center gap-3">
             <a href="{{ route('seasons.preview') }}" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">معاينة إقفال الموسم</a>
             @if ($canReopen)
                 <form method="POST" action="{{ route('seasons.reopen', $latestClosed) }}" onsubmit="return confirm('تفتح الموسم ده تاني؟ الموسم الجديد الفاضي هيتمسح.');">
                     @csrf
-                    <button type="submit" class="rounded-lg border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">فتح الموسم</button>
+                    <button type="submit" class="rounded-lg border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">فتح الموسم</button>
                 </form>
             @endif
         </div>
@@ -43,7 +43,7 @@
 
     @if ($selected && $selected->status === \App\Enums\SeasonStatus::Closed)
         <div class="mt-8 rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-gray-900">تفاصيل {{ $names[$selected->id] }}</h2>
+            <h2 class="mb-4 text-lg font-semibold text-ink">تفاصيل {{ $names[$selected->id] }}</h2>
 
             <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div><span class="text-sm text-secondary">الإيراد</span> <div class="font-bold"><x-money :amount="$selected->getRawOriginal('revenue')" /></div></div>
@@ -54,7 +54,7 @@
                 <div><span class="text-sm text-secondary">صافي الربح</span> <div class="font-bold"><x-money :amount="$selected->getRawOriginal('net_profit')" /></div></div>
             </div>
 
-            <p class="mb-4 text-sm text-gray-700">
+            <p class="mb-4 text-sm text-ink-soft">
                 الخسارة المُدوَّرة الداخلة <x-money :amount="$selected->getRawOriginal('loss_carried_in')" />
                 ⇐ القابل للتوزيع <x-money :amount="$selected->getRawOriginal('distributable_profit')" />
                 ⇐ الخسارة المُدوَّرة الخارجة <x-money :amount="$selected->getRawOriginal('loss_carried_out')" />

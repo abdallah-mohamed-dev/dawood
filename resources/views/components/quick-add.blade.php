@@ -12,7 +12,7 @@
     submitted — the bag protects the messages, not the values.
 --}}
 <div {{ $attributes->merge(['class' => 'mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm']) }}>
-    <h2 class="mb-3 text-sm font-semibold text-gray-900">{{ $title }}</h2>
+    <h2 class="mb-3 text-sm font-semibold text-ink">{{ $title }}</h2>
 
     <form method="POST" action="{{ $action }}" class="flex flex-wrap items-end gap-3">
         @csrf

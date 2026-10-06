@@ -84,6 +84,20 @@ class RoomController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        // One row per status, over the full filtered set (not just this page),
+        // for the two summary charts below the filters.
+        $byStatus = (clone $matching)
+            ->selectRaw('status, COUNT(*) as cnt, SUM(sale_price) as sale_total')
+            ->groupBy('status')
+            ->get()
+            ->keyBy(fn ($row) => $row->status->value);
+
+        $paidByStatus = (clone $matching)
+            ->withSum('customerPayments as paid_total', 'amount')
+            ->get(['id', 'status'])
+            ->groupBy(fn ($room) => $room->status->value)
+            ->map(fn ($rooms) => (int) $rooms->sum('paid_total'));
+
         return view('rooms.index', [
             'rooms' => $rooms,
             'filters' => $filters,
@@ -91,6 +105,8 @@ class RoomController extends Controller
             'seasons' => Season::query()->orderByDesc('number')->get(),
             'statuses' => RoomStatus::cases(),
             'customers' => Customer::query()->orderBy('name')->get(),
+            'byStatus' => $byStatus,
+            'paidByStatus' => $paidByStatus,
         ]);
     }
 
