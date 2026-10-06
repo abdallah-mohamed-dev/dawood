@@ -10,6 +10,7 @@
     <title>{{ $title ? "{$title} - ".config('app.name') : config('app.name') }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{ Vite::fonts('ibm-plex-sans-arabic') }}
 </head>
 <body class="min-h-screen bg-bg font-sans text-ink antialiased">
     <div class="flex min-h-screen flex-col items-center justify-center px-4 py-8">
