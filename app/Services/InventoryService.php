@@ -272,6 +272,31 @@ class InventoryService
     }
 
     /**
+     * The unit price a past purchase was made at, recovered from the two
+     * numbers the movement actually stores (its total cost and its quantity).
+     * This is the inverse of cost(), and it lives here next to it so the
+     * mixed-scale ×1000 rule stays in one file (CLAUDE.md rule 2) instead of
+     * being re-derived in a controller.
+     *
+     * Note: cost() rounds to the nearest piastre on the way in, so for an
+     * awkward quantity the recovered price can differ from the typed one by
+     * a piastre. It is a faithful reading of what was stored, not a second
+     * source of truth — nothing is ever written back from it.
+     */
+    public function unitPriceOf(int $scaledQuantity, int $costPiastres): int
+    {
+        if ($scaledQuantity === 0) {
+            return 0;
+        }
+
+        $product = $costPiastres * 1000;
+        $whole = intdiv($product, $scaledQuantity);
+        $remainder = $product % $scaledQuantity;
+
+        return $remainder * 2 >= $scaledQuantity ? $whole + 1 : $whole;
+    }
+
+    /**
      * The same total split by material type, for the stock page's summary
      * cards. Materials saved without a type are grouped under 'none' with a
      * dash label rather than dropped — they still have value. Only types that

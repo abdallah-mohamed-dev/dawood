@@ -16,6 +16,7 @@ use App\Models\Partner;
 use App\Models\PartnerWithdrawal;
 use App\Models\Room;
 use App\Models\RoomCost;
+use App\Services\InventoryService;
 use App\Services\PartnerService;
 use App\Services\ProfitService;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,6 +36,7 @@ class CsvExportController extends Controller
     public function __construct(
         private readonly ProfitService $profit,
         private readonly PartnerService $partners,
+        private readonly InventoryService $inventory,
     ) {}
 
     public function customers(): StreamedResponse
@@ -101,16 +103,19 @@ class CsvExportController extends Controller
             $material->unit ?? '',
             QuantityCast::toDecimalString($material->getRawOriginal('quantity')),
             $this->money($material->getRawOriginal('unit_price')),
+            // Priced by the service, never multiplied here (CLAUDE.md rule 2).
+            $this->money($this->inventory->valueOf($material, (int) $material->getRawOriginal('quantity'))),
         ]);
 
         return $this->stream('materials', [
-            'الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة',
+            'الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة', 'قيمة المخزون',
         ], $rows);
     }
 
     /**
      * المشتريات = حركات الوارد (InventoryMovementType::In) — addStock() هو المصدر الوحيد ليها.
-     * مفيش عمود سعر الوحدة: الحركة بتخزن الإجمالي بس، وحسابه يبقى في Excel.
+     * الحركة بتخزن الإجمالي بس، فسعر الوحدة بيترجع من `InventoryService::unitPriceOf()`
+     * (عكس `cost()`، وفي نفس الملف) — الملف المصدَّر لازم يبان فيه كل البيانات.
      */
     public function purchases(): StreamedResponse
     {
@@ -123,11 +128,15 @@ class CsvExportController extends Controller
                 $movement->material?->name ?? '',
                 QuantityCast::toDecimalString($movement->getRawOriginal('quantity')),
                 $movement->material?->unit ?? '',
+                $this->money($this->inventory->unitPriceOf(
+                    (int) $movement->getRawOriginal('quantity'),
+                    (int) $movement->getRawOriginal('cost'),
+                )),
                 $this->money($movement->getRawOriginal('cost')),
             ]);
 
         return $this->stream('purchases', [
-            'التاريخ', 'الخامة', 'الكمية', 'الوحدة', 'الإجمالي',
+            'التاريخ', 'الخامة', 'الكمية', 'الوحدة', 'سعر الوحدة', 'الإجمالي',
         ], $rows);
     }
 

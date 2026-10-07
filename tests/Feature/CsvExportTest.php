@@ -17,6 +17,7 @@ use App\Models\RoomMaterial;
 use App\Models\Season;
 use App\Models\User;
 use App\Services\CashboxService;
+use App\Services\InventoryService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 
@@ -153,8 +154,9 @@ test('the materials export shows type, quantity in thousandths and unit price in
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.materials')));
 
-    expect($rows[0])->toBe(['الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة']);
-    expect($rows[1])->toBe([$material->name, 'خامة', 'لوح', '1.250', '1500.00']);
+    expect($rows[0])->toBe(['الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة', 'قيمة المخزون']);
+    // 1.250 لوح × 1500.00 ج.م = 1875.00 ج.م
+    expect($rows[1])->toBe([$material->name, 'خامة', 'لوح', '1.250', '1500.00', '1875.00']);
 });
 
 test('the purchases export lists only inbound stock movements', function () {
@@ -169,9 +171,10 @@ test('the purchases export lists only inbound stock movements', function () {
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.purchases')));
 
-    expect($rows[0])->toBe(['التاريخ', 'الخامة', 'الكمية', 'الوحدة', 'الإجمالي']);
+    expect($rows[0])->toBe(['التاريخ', 'الخامة', 'الكمية', 'الوحدة', 'سعر الوحدة', 'الإجمالي']);
     expect($rows)->toHaveCount(2);
-    expect($rows[1])->toBe(['2026-10-01', 'خشب زان', '2.500', 'لوح', '15000.00']);
+    // 15000.00 ج.م إجمالي ÷ 2.500 لوح = 6000.00 ج.م للوحدة
+    expect($rows[1])->toBe(['2026-10-01', 'خشب زان', '2.500', 'لوح', '6000.00', '15000.00']);
 });
 
 test('the payments export shows customer, room, method and receipt number', function () {
@@ -254,6 +257,19 @@ test('the withdrawals export shows date, partner, amount and note', function () 
 
     expect($rows[0])->toBe(['التاريخ', 'الشريك', 'المبلغ', 'ملاحظة']);
     expect($rows[1])->toBe(['2026-10-04', 'محمد', '3000.00', 'مصاريف شخصية']);
+});
+
+test('the purchases export recovers the unit price the purchase was made at', function () {
+    $material = Material::factory()->create(['unit' => 'متر']);
+
+    // A real purchase through the service: 3.000 متر at 250.00 ج.م each.
+    app(InventoryService::class)->addStock($material, 3000, 25000, '2026-10-02');
+
+    $row = csvRows($this->actingAs($this->admin)->get(route('exports.purchases')))[1];
+
+    expect($row[2])->toBe('3.000');    // الكمية
+    expect($row[4])->toBe('250.00');   // سعر الوحدة — نفس السعر اللي اتشتري بيه
+    expect($row[5])->toBe('750.00');   // الإجمالي
 });
 
 test('the rooms export filters by season when asked to', function () {
