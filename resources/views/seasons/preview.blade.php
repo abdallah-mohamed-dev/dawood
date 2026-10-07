@@ -25,8 +25,7 @@
             </div>
         @endif
 
-        <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-3 text-sm font-semibold text-ink">الربح والخسارة المُدوَّرة</h2>
+        <x-panel title="الربح والخسارة المُدوَّرة" class="mb-6">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>الإيراد: <x-money :amount="$data['revenue']" /></div>
                 <div>تكلفة الخامات: <x-money :amount="$data['cost_of_materials']" /></div>
@@ -40,17 +39,15 @@
                 ⇐ القابل للتوزيع <x-money :amount="$data['distributable']" />
                 ⇐ الخسارة المُدوَّرة الخارجة <x-money :amount="$data['loss_carried_out']" />
             </p>
-        </div>
+        </x-panel>
 
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <div class="text-sm text-secondary">الغرف اللي هتتأرشف (مكتملة وملغاة)</div>
-                <div class="mt-1 font-bold">{{ $data['archived_rooms']['count'] }} غرفة — <x-money :amount="$data['archived_rooms']['value']" /></div>
-            </div>
-            <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <div class="text-sm text-secondary">الغرف اللي هتترحّل (تحت التنفيذ ومسودة)</div>
-                <div class="mt-1 font-bold">{{ $data['wip']['count'] }} غرفة — تكلفتها المتراكمة <x-money :amount="$data['wip']['cost']" /></div>
-            </div>
+            <x-stat label="الغرف اللي هتتأرشف (مكتملة وملغاة)" size="sm">
+                {{ $data['archived_rooms']['count'] }} غرفة — <x-money :amount="$data['archived_rooms']['value']" />
+            </x-stat>
+            <x-stat label="الغرف اللي هتترحّل (تحت التنفيذ ومسودة)" size="sm">
+                {{ $data['wip']['count'] }} غرفة — تكلفتها المتراكمة <x-money :amount="$data['wip']['cost']" />
+            </x-stat>
         </div>
 
         <div class="mb-6 overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
@@ -78,7 +75,7 @@
             </table>
         </div>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
+        <x-panel>
             <p class="mb-3 text-sm text-ink-soft">
                 الخزنة دلوقتي <x-money :amount="$data['cashbox_balance']" />. الباقي بيترحّل كما هو، والمخزون بقيمة <x-money :amount="$data['stock_value']" /> بيترحّل كمان.
             </p>
@@ -88,6 +85,6 @@
                 <button type="submit" class="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90">أكّد إقفال الموسم</button>
                 <a href="{{ route('seasons.index') }}" class="ms-3 text-sm text-secondary hover:underline">رجوع</a>
             </form>
-        </div>
+        </x-panel>
     @endif
 </x-app-layout>

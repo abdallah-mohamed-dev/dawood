@@ -30,18 +30,12 @@
     </div>
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">رصيد الخزنة (نقدي)</div>
-            <div class="mt-1 text-2xl font-bold {{ $cashboxBalance < 0 ? 'text-danger' : 'text-ink' }}">
-                <x-money :amount="$cashboxBalance" />
-            </div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">صافي الربح (استحقاقي)</div>
-            <div class="mt-1 text-2xl font-bold {{ $netProfit < 0 ? 'text-danger' : 'text-success' }}">
-                <x-money :amount="$netProfit" />
-            </div>
-        </div>
+        <x-stat label="رصيد الخزنة (نقدي)" size="2xl" :tone="$cashboxBalance < 0 ? 'danger' : 'ink'">
+            <x-money :amount="$cashboxBalance" />
+        </x-stat>
+        <x-stat label="صافي الربح (استحقاقي)" size="2xl" :tone="$netProfit < 0 ? 'danger' : 'success'">
+            <x-money :amount="$netProfit" />
+        </x-stat>
     </div>
 
     <x-panel title="من الإيراد إلى صافي الربح" sub="الإيراد وكل خصم على التوالي، لحد صافي الربح النهائي">
@@ -59,29 +53,13 @@
     </x-panel>
 
     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">الإيراد (الغرف المكتملة)</div>
-            <div class="mt-1 text-lg font-semibold text-ink"><x-money :amount="$revenue" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">تكلفة الخامات (الغرف المكتملة)</div>
-            <div class="mt-1 text-lg font-semibold text-ink"><x-money :amount="$costOfMaterials" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">تكاليف الغرف المكتملة (مصنعية + أخرى)</div>
-            <div class="mt-1 text-lg font-semibold text-ink"><x-money :amount="$roomCosts" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">تكاليف غرف ملغاة (خسارة)</div>
-            <div class="mt-1 text-lg font-semibold {{ $cancelledRoomCosts > 0 ? 'text-danger' : 'text-ink' }}">
-                <x-money :amount="$cancelledRoomCosts" />
-            </div>
-            <div class="mt-1 text-xs text-secondary">مصنعية ومصروفات غرف ألغيت — فلوس خرجت ولن تعود، فتُخصم فورًا.</div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">المصروفات الإدارية</div>
-            <div class="mt-1 text-lg font-semibold text-ink"><x-money :amount="$adminExpenses" /></div>
-        </div>
+        <x-stat label="الإيراد (الغرف المكتملة)" size="lg"><x-money :amount="$revenue" /></x-stat>
+        <x-stat label="تكلفة الخامات (الغرف المكتملة)" size="lg"><x-money :amount="$costOfMaterials" /></x-stat>
+        <x-stat label="تكاليف الغرف المكتملة (مصنعية + أخرى)" size="lg"><x-money :amount="$roomCosts" /></x-stat>
+        <x-stat label="تكاليف غرف ملغاة (خسارة)" size="lg" :tone="$cancelledRoomCosts > 0 ? 'danger' : 'ink'" hint="مصنعية ومصروفات غرف ألغيت — فلوس خرجت ولن تعود، فتُخصم فورًا.">
+            <x-money :amount="$cancelledRoomCosts" />
+        </x-stat>
+        <x-stat label="المصروفات الإدارية" size="lg"><x-money :amount="$adminExpenses" /></x-stat>
     </div>
 
     <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">

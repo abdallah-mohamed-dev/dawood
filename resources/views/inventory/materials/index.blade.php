@@ -13,16 +13,15 @@
     --}}
     <div class="mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($stockSummary['by_type'] as $card)
-            <div class="rounded-xl border border-border bg-surface p-5 shadow-sm">
-                <p class="text-sm text-secondary">قيمة {{ $card['label'] }}</p>
-                <p class="mt-1 text-xl font-bold text-ink"><x-money :amount="$card['value']" /></p>
-            </div>
+            <x-stat label="قيمة {{ $card['label'] }}">
+                <x-money :amount="$card['value']" />
+            </x-stat>
         @endforeach
 
-        <div class="rounded-xl border border-primary/30 bg-primary/10 p-5 shadow-sm">
-            <p class="text-sm text-secondary">إجمالي قيمة المخزن</p>
-            <p class="mt-1 text-xl font-bold text-primary"><x-money :amount="$stockSummary['total']" /></p>
-        </div>
+        {{-- The total reads apart from the per-type cards: tinted, not plain. --}}
+        <x-stat label="إجمالي قيمة المخزن" tone="primary" class="border-primary/30 bg-primary/10">
+            <x-money :amount="$stockSummary['total']" />
+        </x-stat>
     </div>
 
     <p class="mb-6 text-xs text-secondary">

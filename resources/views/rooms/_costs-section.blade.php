@@ -14,11 +14,8 @@
     $oldDate = $wasSubmitted ? old('occurred_at', now()->toDateString()) : now()->toDateString();
 @endphp
 
-<div class="flex h-full flex-col rounded-xl border border-border bg-surface p-4 shadow-sm">
-    <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-ink">{{ $title }}</h2>
-        <span class="text-sm text-secondary">الإجمالي: <x-money :amount="$total" /></span>
-    </div>
+<x-panel :title="$title" class="flex h-full flex-col">
+    <x-slot:actions><span class="text-sm text-secondary">الإجمالي: <x-money :amount="$total" /></span></x-slot:actions>
 
     <form method="POST" action="{{ route('rooms.costs.store', $room) }}" class="mb-4 grid grid-cols-2 gap-3">
         @csrf
@@ -67,4 +64,4 @@
             @endforeach
         </x-data-table>
     </div>
-</div>
+</x-panel>

@@ -29,26 +29,13 @@
     @endif
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">صافي الربح الحالي</div>
-            <div class="mt-1 text-xl font-bold text-ink"><x-money :amount="$netProfit" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">نصيب الشريك</div>
-            <div class="mt-1 text-xl font-bold text-ink"><x-money :amount="$share" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">السحوبات</div>
-            <div class="mt-1 text-xl font-bold text-ink"><x-money :amount="$withdrawn" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">المتبقي</div>
-            <div class="mt-1 text-xl font-bold {{ $remaining < 0 ? 'text-danger' : 'text-success' }}"><x-money :amount="$remaining" /></div>
-        </div>
+        <x-stat label="صافي الربح الحالي"><x-money :amount="$netProfit" /></x-stat>
+        <x-stat label="نصيب الشريك"><x-money :amount="$share" /></x-stat>
+        <x-stat label="السحوبات"><x-money :amount="$withdrawn" /></x-stat>
+        <x-stat label="المتبقي" :tone="$remaining < 0 ? 'danger' : 'success'"><x-money :amount="$remaining" /></x-stat>
     </div>
 
-    <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-3 text-sm font-semibold text-ink">إضافة سحب</h2>
+    <x-panel title="إضافة سحب" class="mb-6">
         <form method="POST" action="{{ route('partners.withdrawals.store', $partner) }}" class="flex flex-wrap items-end gap-3">
             @csrf
             <div>
@@ -72,7 +59,7 @@
             <x-payment-method-select />
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">{{ __('Add') }}</button>
         </form>
-    </div>
+    </x-panel>
 
     <form method="GET" action="{{ route('partners.show', $partner) }}" class="mb-4 flex flex-wrap items-end gap-2">
         <div>

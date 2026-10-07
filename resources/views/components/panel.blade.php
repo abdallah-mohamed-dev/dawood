@@ -3,10 +3,10 @@
     link on the header row, then the body. Footer is optional.
     <x-panel title="..." sub="..." link="route-url" link-label="...">
 --}}
-@props(['title' => null, 'sub' => null, 'link' => null, 'linkLabel' => 'عرض الكل', 'footer' => null])
+@props(['title' => null, 'sub' => null, 'link' => null, 'linkLabel' => 'عرض الكل', 'footer' => null, 'actions' => null])
 
 <section {{ $attributes->merge(['class' => 'rounded-xl border border-border bg-surface shadow-sm']) }}>
-    @if ($title || $link)
+    @if ($title || $link || $actions)
         <header class="flex flex-wrap items-baseline justify-between gap-2 border-b border-border-soft px-4 py-3">
             <div>
                 @if ($title)
@@ -18,6 +18,11 @@
             </div>
             @if ($link)
                 <a href="{{ $link }}" class="text-xs font-medium text-primary hover:underline">{{ $linkLabel }}</a>
+            @endif
+
+            {{-- A button or toggle that belongs on the header row. --}}
+            @if ($actions)
+                <div class="flex items-center gap-3">{{ $actions }}</div>
             @endif
         </header>
     @endif

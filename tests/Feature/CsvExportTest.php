@@ -322,6 +322,22 @@ test('the withdrawals export filters by season when asked to', function () {
     expect(csvRows($this->actingAs($this->admin)->get(route('exports.withdrawals'))))->toHaveCount(3);
 });
 
+test('the partners export withdrawal total follows the season filter', function () {
+    $season = Season::factory()->create(['number' => 1, 'status' => SeasonStatus::Closed]);
+    $partner = Partner::factory()->create(['name' => 'محمد', 'percentage' => 2500]);
+    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 300000, 'season_id' => $season->id]);
+    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 100000, 'season_id' => null]);
+
+    $all = csvRows($this->actingAs($this->admin)->get(route('exports.partners')));
+    expect($all[1][3])->toBe('4000.00');   // كل المواسم
+
+    $open = csvRows($this->actingAs($this->admin)->get(route('exports.partners', ['season' => 'open'])));
+    expect($open[1][3])->toBe('1000.00');  // الموسم المفتوح بس
+
+    $closed = csvRows($this->actingAs($this->admin)->get(route('exports.partners', ['season' => $season->id])));
+    expect($closed[1][3])->toBe('3000.00'); // الموسم المقفول بس
+});
+
 test('the rooms export runs the same number of queries whatever the number of rooms', function () {
     $customer = Customer::factory()->create();
     $addRoom = function () use ($customer) {

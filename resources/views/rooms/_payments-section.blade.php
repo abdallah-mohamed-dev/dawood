@@ -1,5 +1,4 @@
-<div class="mb-6 mt-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-    <h2 class="mb-3 text-sm font-semibold text-ink">إضافة دفعة</h2>
+<x-panel title="إضافة دفعة" class="mb-6 mt-6">
     <form method="POST" action="{{ route('rooms.payments.store', $room) }}" class="flex flex-wrap items-end gap-3">
         @csrf
         <div>
@@ -23,7 +22,7 @@
         <x-payment-method-select id="payment_payment_method" />
         <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">{{ __('Add') }}</button>
     </form>
-</div>
+</x-panel>
 
 <x-data-table :headings="['رقم الإيصال', 'التاريخ', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$room->customerPayments">
     @foreach ($room->customerPayments as $payment)

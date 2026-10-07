@@ -32,14 +32,10 @@
         <a href="{{ route('reports.labor') }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء الفلاتر</a>
     </form>
 
-    <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <div class="text-sm text-secondary">إجمالي المصنعيات</div>
-        <div class="mt-1 text-2xl font-bold text-ink"><x-money :amount="$total" /></div>
-    </div>
+    <x-stat label="إجمالي المصنعيات" size="2xl" class="mb-6"><x-money :amount="$total" /></x-stat>
 
     <div class="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-3 text-sm font-semibold text-ink">شهر بشهر</h2>
+        <x-panel title="شهر بشهر">
             <x-data-table :headings="['الشهر', 'عدد الدفعات', 'الإجمالي']" :rows="$byMonth">
                 @foreach ($byMonth as $row)
                     <tr>
@@ -49,10 +45,9 @@
                     </tr>
                 @endforeach
             </x-data-table>
-        </div>
+        </x-panel>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-3 text-sm font-semibold text-ink">غرفة بغرفة</h2>
+        <x-panel title="غرفة بغرفة">
             <x-data-table :headings="['الغرفة', 'العميل', 'عدد الدفعات', 'الإجمالي']" :rows="$perRoom">
                 @foreach ($perRoom as $row)
                     @php $room = $rooms[$row->room_id] ?? null; @endphp
@@ -70,11 +65,10 @@
                     </tr>
                 @endforeach
             </x-data-table>
-        </div>
+        </x-panel>
     </div>
 
-    <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-3 text-sm font-semibold text-ink">كل الدفعات</h2>
+    <x-panel title="كل الدفعات">
         <x-data-table :headings="['التاريخ', 'الغرفة', 'العميل', 'الوصف', 'المبلغ']" :rows="$details">
             @php $currentMonth = null; @endphp
             @foreach ($details as $detail)
@@ -101,5 +95,5 @@
             @endforeach
         </x-data-table>
         <div class="mt-4">{{ $details->links() }}</div>
-    </div>
+    </x-panel>
 </x-app-layout>

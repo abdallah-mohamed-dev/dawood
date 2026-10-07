@@ -2,8 +2,7 @@
     <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">الملف الشخصي</h1>
 
     <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-ink">البيانات الأساسية</h2>
+        <x-panel title="البيانات الأساسية">
 
             <form method="POST" action="{{ route('profile.update') }}" class="space-y-4">
                 @csrf
@@ -16,10 +15,9 @@
                     {{ __('Save') }}
                 </button>
             </form>
-        </div>
+        </x-panel>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-ink">تغيير كلمة المرور</h2>
+        <x-panel title="تغيير كلمة المرور">
 
             <form method="POST" action="{{ route('profile.password.update') }}" class="space-y-4">
                 @csrf
@@ -33,6 +31,6 @@
                     {{ __('Save') }}
                 </button>
             </form>
-        </div>
+        </x-panel>
     </div>
 </x-app-layout>

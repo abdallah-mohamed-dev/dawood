@@ -51,3 +51,8 @@
     --color-ramp-2: #b4713c;
     --color-ramp-3: #d9ac85;
 }
+
+/* Alpine hides these until it boots, so x-show elements never flash. */
+[x-cloak] {
+    display: none !important;
+}

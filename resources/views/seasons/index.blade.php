@@ -42,8 +42,7 @@
     </x-data-table>
 
     @if ($selected && $selected->status === \App\Enums\SeasonStatus::Closed)
-        <div class="mt-8 rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-4 text-lg font-semibold text-ink">تفاصيل {{ $names[$selected->id] }}</h2>
+        <x-panel title="تفاصيل {{ $names[$selected->id] }}" class="mt-8">
 
             <div class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div><span class="text-sm text-secondary">الإيراد</span> <div class="font-bold"><x-money :amount="$selected->getRawOriginal('revenue')" /></div></div>
@@ -72,6 +71,6 @@
                     </tr>
                 @endforeach
             </x-data-table>
-        </div>
+        </x-panel>
     @endif
 </x-app-layout>

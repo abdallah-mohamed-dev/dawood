@@ -3,9 +3,7 @@
         <h1 class="text-2xl font-bold text-ink">الإعدادات</h1>
     </div>
 
-    <div class="mb-6 rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <h2 class="mb-1 text-lg font-semibold text-ink">أسماء أنواع الخامات</h2>
-        <p class="mb-4 text-xs text-secondary">تغيير الاسم بيظهر في المخزن فورًا.</p>
+    <x-panel title="أسماء أنواع الخامات" sub="تغيير الاسم بيظهر في المخزن فورًا." class="mb-6">
 
         <div class="space-y-4">
             @foreach ($materialTypes as $materialType)
@@ -44,17 +42,14 @@
                 </form>
             @endforeach
         </div>
-    </div>
+    </x-panel>
 
-    <div class="rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <h2 class="mb-4 text-lg font-semibold text-ink">سجلات النظام</h2>
+    <x-panel title="سجلات النظام">
         <a href="{{ route('logs.index') }}" class="inline-block rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-ink-soft shadow-sm transition-colors hover:bg-bg-subtle">
             سجل العمليات
         </a>
-    </div>
-    <div class="mb-6 rounded-xl border border-border bg-surface p-6 shadow-sm">
-        <h2 class="mb-1 text-lg font-semibold text-ink">التذكيرات</h2>
-        <p class="mb-4 text-xs text-secondary">التذكيرات بتظهر فوق الصفحات. ومش بتقفل حاجة لوحدها.</p>
+    </x-panel>
+    <x-panel title="التذكيرات" sub="التذكيرات بتظهر فوق الصفحات. ومش بتقفل حاجة لوحدها." class="mb-6">
 
         <form method="POST" action="{{ route('settings.reminders.update') }}" class="flex flex-wrap items-end gap-3">
             @csrf
@@ -71,5 +66,5 @@
             </div>
             <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">{{ __('Save') }}</button>
         </form>
-    </div>
+    </x-panel>
 </x-app-layout>

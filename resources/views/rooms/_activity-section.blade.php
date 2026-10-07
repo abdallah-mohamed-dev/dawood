@@ -1,8 +1,4 @@
-<div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-    <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-ink">آخر التعديلات على الغرفة</h2>
-        <a href="{{ route('logs.index', ['q' => $room->room_type]) }}" class="text-sm text-primary hover:underline">عرض السجل الكامل</a>
-    </div>
+<x-panel title="آخر التعديلات على الغرفة" :link="route('logs.index', ['q' => $room->room_type])" link-label="عرض السجل الكامل" class="mb-6">
 
     @forelse ($activityLogs as $log)
         <div class="flex flex-wrap items-baseline gap-2 border-b border-border py-2 text-sm last:border-0">
@@ -16,4 +12,4 @@
     @empty
         <p class="text-sm text-secondary">لا توجد تعديلات مسجّلة على الغرفة دي بعد.</p>
     @endforelse
-</div>
+</x-panel>

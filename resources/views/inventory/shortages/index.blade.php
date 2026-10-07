@@ -31,34 +31,23 @@
     </form>
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">إجمالي التكلفة التقديرية</div>
-            <div class="mt-1 text-xl font-bold text-ink"><x-money :amount="$totalCost" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">عدد الغرف</div>
-            <div class="mt-1 text-xl font-bold text-ink">{{ $rooms->count() }}</div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">عدد الخامات الناقصة</div>
-            <div class="mt-1 text-xl font-bold text-ink">{{ $lineCount }}</div>
-        </div>
+        <x-stat label="إجمالي التكلفة التقديرية"><x-money :amount="$totalCost" /></x-stat>
+        <x-stat label="عدد الغرف">{{ $rooms->count() }}</x-stat>
+        <x-stat label="عدد الخامات الناقصة">{{ $lineCount }}</x-stat>
     </div>
 
     @forelse ($rooms as $group)
         @php $room = $group['room']; @endphp
-        <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm" id="room-{{ $room->id }}">
-            <div class="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                    <a href="{{ route('rooms.show', $room) }}" class="text-base font-semibold text-primary hover:underline">{{ $room->room_type }}</a>
-                    <span class="text-sm text-secondary">— العميل: <a href="{{ route('customers.show', $room->customer) }}" class="hover:underline">{{ $room->customer->name }}</a></span>
-                    <span class="ms-2"><x-status-badge :status="$room->status" /></span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-secondary">الإجمالي: <x-money :amount="$group['total']" /></span>
-                    <a href="{{ route('inventory.shortages.print', $room) }}" target="_blank" class="rounded-lg border border-border px-3 py-1.5 text-sm text-ink-soft hover:bg-bg">طباعة أمر الشراء</a>
-                </div>
-            </div>
+        <x-panel class="mb-6" id="room-{{ $room->id }}">
+            <x-slot:title>
+                <a href="{{ route('rooms.show', $room) }}" class="text-base font-semibold text-primary hover:underline">{{ $room->room_type }}</a>
+                <span class="text-sm text-secondary">— العميل: <a href="{{ route('customers.show', $room->customer) }}" class="hover:underline">{{ $room->customer->name }}</a></span>
+                <span class="ms-2"><x-status-badge :status="$room->status" /></span>
+            </x-slot:title>
+            <x-slot:actions>
+                <span class="text-sm text-secondary">الإجمالي: <x-money :amount="$group['total']" /></span>
+                <a href="{{ route('inventory.shortages.print', $room) }}" target="_blank" class="rounded-lg border border-border px-3 py-1.5 text-sm text-ink-soft hover:bg-bg">طباعة أمر الشراء</a>
+            </x-slot:actions>
 
             <x-data-table :headings="['الخامة', 'النوع', 'المطلوب', 'المصروف', 'المتاح بالمخزن', 'الناقص', 'سعر الوحدة', 'التكلفة التقديرية']" :rows="$group['lines']">
                 @foreach ($group['lines'] as $line)
@@ -75,11 +64,11 @@
                     </tr>
                 @endforeach
             </x-data-table>
-        </div>
+        </x-panel>
     @empty
-        <div class="rounded-xl border border-border bg-surface p-6 text-center text-secondary shadow-sm">
-            لا توجد خامات ناقصة — كل احتياجات الغرف متوفرة في المخزن.
-        </div>
+        <x-panel>
+            <p class="py-2 text-center text-secondary">لا توجد خامات ناقصة — كل احتياجات الغرف متوفرة في المخزن.</p>
+        </x-panel>
     @endforelse
 
     <p class="mt-2 text-xs text-secondary">المخزن بيتوزع على الغرف بالترتيب (الأقدم الأول). الغرفة بتظهر بالناقص اللي بعد ما الغرف اللي قبلها تاخد نصيبها.</p>

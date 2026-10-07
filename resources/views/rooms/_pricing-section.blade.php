@@ -2,9 +2,7 @@
     $locked = $room->status === \App\Enums\RoomStatus::Completed;
 @endphp
 
-<div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-    <h2 class="mb-1 text-sm font-semibold text-ink">التسعير التقديري</h2>
-    <p class="mb-4 text-xs text-secondary">تقدير بيكتبه المستخدم للمقارنة بعدين. ما بيدخلش في الخزنة ولا في الربح.</p>
+<x-panel title="التسعير التقديري" sub="تقدير بيكتبه المستخدم للمقارنة بعدين. ما بيدخلش في الخزنة ولا في الربح." class="mb-6">
 
     @if ($locked)
         <p class="mb-4 rounded-lg bg-bg-subtle px-3 py-2 text-sm text-secondary">الغرفة مكتملة، التسعير مقفول.</p>
@@ -110,4 +108,4 @@
             </div>
         @endif
     @endif
-</div>
+</x-panel>

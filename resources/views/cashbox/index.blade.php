@@ -29,20 +29,11 @@
 
 
     <div class="mb-6 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">الرصيد الحالي</div>
-            <div class="mt-1 text-2xl font-bold {{ $balance < 0 ? 'text-danger' : 'text-ink' }}">
-                <x-money :amount="$balance" />
-            </div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">إجمالي الداخل</div>
-            <div class="mt-1 text-2xl font-bold text-success"><x-money :amount="$totalIn" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">إجمالي الخارج</div>
-            <div class="mt-1 text-2xl font-bold text-danger"><x-money :amount="$totalOut" /></div>
-        </div>
+        <x-stat label="الرصيد الحالي" size="2xl" :tone="$balance < 0 ? 'danger' : 'ink'">
+            <x-money :amount="$balance" />
+        </x-stat>
+        <x-stat label="إجمالي الداخل" size="2xl" tone="success"><x-money :amount="$totalIn" /></x-stat>
+        <x-stat label="إجمالي الخارج" size="2xl" tone="danger"><x-money :amount="$totalOut" /></x-stat>
         {{-- Fourth card, deliberately different: dashed warning border, tinted background.
              Debts are a register, not money in the box, so it reads apart from the three above. --}}
         <a href="{{ route('debts.index') }}" class="block rounded-xl border-2 border-dashed border-warning/50 bg-warning/5 p-4 transition-colors hover:bg-warning/10">
@@ -52,8 +43,7 @@
         </a>
     </div>
 
-    <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-3 text-sm font-semibold text-ink">الرصيد الافتتاحي</h2>
+    <x-panel title="الرصيد الافتتاحي" class="mb-6">
 
         <form method="POST" action="{{ route('cashbox.opening-balance.store') }}" class="flex flex-wrap items-end gap-3">
             @csrf
@@ -107,7 +97,7 @@
                 {{ __('Save') }}
             </button>
         </form>
-    </div>
+    </x-panel>
 
     <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <x-panel class="lg:col-span-2" title="رصيد الخزنة" sub="آخر 6 شهور">
@@ -145,11 +135,10 @@
         </x-panel>
     </div>
 
-    <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm" x-data="persistedToggle('cashbox.breakdown.visible')">
-        <div class="mb-3 flex items-center justify-between gap-3">
-            <h2 class="text-sm font-semibold text-ink">التقسيم حسب طريقة الدفع</h2>
+    <x-panel title="التقسيم حسب طريقة الدفع" class="mb-6" x-data="persistedToggle('cashbox.breakdown.visible')">
+        <x-slot:actions>
             <button type="button" @click="toggle()" class="text-xs font-medium text-primary hover:underline" x-text="open ? 'إخفاء' : 'إظهار'"></button>
-        </div>
+        </x-slot:actions>
 
         <div x-show="open">
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -179,7 +168,7 @@
                 التقسيم للعرض فقط. رصيد الخزنة رقم واحد، وهذه ليست محافظ منفصلة بأرصدة مستقلة.
             </p>
         </div>
-    </div>
+    </x-panel>
 
     @php
         $cashboxHeadings = ['التاريخ', 'البند', 'طريقة الدفع', 'المبلغ'];

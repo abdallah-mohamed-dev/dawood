@@ -6,35 +6,27 @@
 
     {{-- KPI cards: five numbers, two of them with a trend line. --}}
     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <p class="text-xs font-semibold text-secondary">رصيد الخزنة</p>
-            <p class="mt-1 text-xl font-bold text-ink"><x-money :amount="$kpis['balance']" /></p>
-            <div class="mt-3"><x-charts.sparkline :values="array_column($series, 'balance_end')" /></div>
-        </div>
+        <x-stat label="رصيد الخزنة">
+            <x-money :amount="$kpis['balance']" />
+            <x-slot:after><x-charts.sparkline :values="array_column($series, 'balance_end')" /></x-slot:after>
+        </x-stat>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <p class="text-xs font-semibold text-secondary">صافي الربح <span class="font-normal">(الموسم المفتوح)</span></p>
-            <p class="mt-1 text-xl font-bold text-ink"><x-money :amount="$kpis['netProfit']" /></p>
-            <p class="mt-3 text-xs text-secondary">من الغرف المكتملة بعد المصروفات</p>
-        </div>
+        <x-stat label="صافي الربح (الموسم المفتوح)" hint="من الغرف المكتملة بعد المصروفات">
+            <x-money :amount="$kpis['netProfit']" />
+        </x-stat>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <p class="text-xs font-semibold text-secondary">شغل تحت التنفيذ</p>
-            <p class="mt-1 text-xl font-bold text-ink"><x-money :amount="$kpis['workInProgress']" /></p>
-            <p class="mt-3 text-xs text-secondary">خامات اتصرفت لغرف لسه ماتكملتش</p>
-        </div>
+        <x-stat label="شغل تحت التنفيذ" hint="خامات اتصرفت لغرف لسه ماتكملتش">
+            <x-money :amount="$kpis['workInProgress']" />
+        </x-stat>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <p class="text-xs font-semibold text-secondary">قيمة المخزن</p>
-            <p class="mt-1 text-xl font-bold text-ink"><x-money :amount="$kpis['stockValue']" /></p>
-            <p class="mt-3 text-xs text-secondary">الكميات الموجودة × أسعارها</p>
-        </div>
+        <x-stat label="قيمة المخزن" hint="الكميات الموجودة × أسعارها">
+            <x-money :amount="$kpis['stockValue']" />
+        </x-stat>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <p class="text-xs font-semibold text-secondary">داخل الخزنة الشهر ده</p>
-            <p class="mt-1 text-xl font-bold text-ink"><x-money :amount="$kpis['inThisMonth']" /></p>
-            <div class="mt-3"><x-charts.sparkline :values="array_column($series, 'in')" /></div>
-        </div>
+        <x-stat label="داخل الخزنة الشهر ده">
+            <x-money :amount="$kpis['inThisMonth']" />
+            <x-slot:after><x-charts.sparkline :values="array_column($series, 'in')" /></x-slot:after>
+        </x-stat>
     </div>
 
     <div class="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">

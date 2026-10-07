@@ -1,9 +1,7 @@
 <x-app-layout title="النسخ الاحتياطي">
     <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">النسخ الاحتياطي</h1>
 
-    <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-1 text-sm font-semibold text-ink">نسخة كاملة من قاعدة البيانات</h2>
-        <p class="mb-3 text-sm text-secondary">تحميل نسخة كاملة من بيانات النظام كلها كملف واحد، تقدر تحتفظ بيه كنسخة احتياطية.</p>
+    <x-panel title="نسخة كاملة من قاعدة البيانات" sub="تحميل نسخة كاملة من بيانات النظام كلها كملف واحد، تقدر تحتفظ بيه كنسخة احتياطية.">
 
         <a
             href="{{ route('backup.database') }}"
@@ -11,11 +9,9 @@
         >
             تحميل نسخة قاعدة البيانات
         </a>
-    </div>
+    </x-panel>
 
-    <div class="mt-4 rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-1 text-sm font-semibold text-ink">نسخة CSV شاملة</h2>
-        <p class="mb-3 text-sm text-secondary">ملف مضغوط فيه ملف CSV منفصل لكل جدول من جداول النظام، بيتفتح في Excel.</p>
+    <x-panel title="نسخة CSV شاملة" sub="ملف مضغوط فيه ملف CSV منفصل لكل جدول من جداول النظام، بيتفتح في Excel." class="mt-4">
 
         <a
             href="{{ route('backup.csv') }}"
@@ -23,16 +19,14 @@
         >
             تحميل نسخة CSV شاملة
         </a>
-    </div>
+    </x-panel>
 
-    <div class="mt-4 rounded-xl border border-border bg-surface p-4 shadow-sm">
-        <h2 class="mb-1 text-sm font-semibold text-ink">تصدير ملفات منفصلة (Excel)</h2>
-        <p class="mb-3 text-sm text-secondary">الملفات دي مقروءة ومخصصة للفتح على Excel. للنسخة الاحتياطية الكاملة استخدم الزرارين فوق.</p>
+    <x-panel title="تصدير ملفات منفصلة (Excel)" sub="الملفات دي مقروءة ومخصصة للفتح على Excel. للنسخة الاحتياطية الكاملة استخدم الزرارين فوق." class="mt-4">
 
         @php
             // Rooms/expenses/payments/withdrawals carry a season (payments via
             // their room — specs/012 ق-5), so they alone get the season filter.
-            $seasonAware = ['exports.rooms', 'exports.payments', 'exports.expenses', 'exports.withdrawals'];
+            $seasonAware = ['exports.rooms', 'exports.payments', 'exports.expenses', 'exports.withdrawals', 'exports.partners'];
         @endphp
 
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,5 +67,5 @@
                 @endif
             @endforeach
         </div>
-    </div>
+    </x-panel>
 </x-app-layout>

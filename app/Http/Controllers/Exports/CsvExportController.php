@@ -207,15 +207,18 @@ class CsvExportController extends Controller
     }
 
     /**
-     * المسحوب = نفس الرقم اللي في صفحة الشريك (PartnerService::totalWithdrawn — الموسم المفتوح).
+     * المسحوب بيتبع نفس فلتر الموسم بتاع باقي الملفات: من غير فلتر = كل المواسم،
+     * `open` = الموسم المفتوح (نفس رقم صفحة الشريك)، ورقم = موسم مقفول بعينه.
      */
-    public function partners(): StreamedResponse
+    public function partners(Request $request): StreamedResponse
     {
+        $season = $this->seasonFilterValue($request);
+
         $rows = Partner::query()->lazyById(500)->map(fn (Partner $partner) => [
             $partner->name,
             $partner->percentage === null ? '' : number_format($partner->percentage / 100, 2).'%',
             $partner->email ?? '',
-            $this->money($this->partners->totalWithdrawn($partner)),
+            $this->money($this->partners->totalWithdrawnForSeason($partner, $season)),
             $this->date($partner->created_at),
         ]);
 
@@ -239,6 +242,21 @@ class CsvExportController extends Controller
         return $this->stream('withdrawals', [
             'التاريخ', 'الشريك', 'المبلغ', 'ملاحظة',
         ], $rows);
+    }
+
+    /**
+     * The `season` query parameter as the services want it: 'open' for the
+     * open season, an int for a sealed one, null for no filter at all.
+     */
+    private function seasonFilterValue(Request $request): int|string|null
+    {
+        $season = trim($request->string('season')->toString());
+
+        return match (true) {
+            $season === '' || $season === 'all' => null,
+            $season === 'open' => 'open',
+            default => (int) $season,
+        };
     }
 
     /**

@@ -27,8 +27,7 @@
                     ->mapWithKeys(fn ($material) => [$material->id => $material->name.' ('.$material->unit.')']);
             @endphp
 
-            <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <h3 class="mb-3 text-sm font-semibold text-ink">{{ $typeTitles[$type->name] ?? $type->name }}</h3>
+            <x-panel :title="$typeTitles[$type->name] ?? $type->name">
 
                 @unless ($locked)
                     <form method="POST" action="{{ route('rooms.materials.store', $room) }}" class="mb-4 flex flex-wrap items-end gap-3">
@@ -55,7 +54,7 @@
                     'rows' => $rows,
                     'showType' => false,
                 ])
-            </div>
+            </x-panel>
         @endforeach
     </div>
 </div>
