@@ -66,5 +66,5 @@ test('a room shows on its customer page with type and price', function () {
 
     $response = $this->actingAs($this->admin)->get(route('customers.show', $customer));
 
-    $response->assertOk()->assertSee('غرفة نوم')->assertSee('30,000.00 ج.م');
+    $response->assertOk()->assertSee('غرفة نوم')->assertSeeText('30,000.00 ج.م');
 });

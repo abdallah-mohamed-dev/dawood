@@ -21,7 +21,11 @@ function expensesTable(array $query = []): string
         ->assertOk()
         ->getContent();
 
-    return substr($html, strpos($html, 'overflow-x-auto rounded-xl'));
+    $table = substr($html, strpos($html, 'overflow-x-auto rounded-xl'));
+
+    // Tags stripped: the currency lives in its own span, so "1,500.00 ج.م" is
+    // only one string once the markup is gone.
+    return strip_tags($table);
 }
 
 test('a separator row appears once between two different months', function () {

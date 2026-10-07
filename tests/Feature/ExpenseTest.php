@@ -42,7 +42,7 @@ test('the expenses index lists an expense with its category, description, and am
     $response->assertOk()
         ->assertSee('كهرباء')
         ->assertSee('فاتورة يناير')
-        ->assertSee('2,000.00 ج.م');
+        ->assertSeeText('2,000.00 ج.م');
 });
 
 test('a zero expense amount is rejected', function () {

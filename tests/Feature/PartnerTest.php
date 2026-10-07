@@ -139,9 +139,9 @@ test('the partner show page lists the share, withdrawals, and remaining', functi
     $response->assertOk()
         ->assertSee('أحمد')
         ->assertSee('نسبة الشريك: 20.00%')
-        ->assertSee('5,000.00 ج.م') // share
-        ->assertSee('2,000.00 ج.م') // withdrawn
-        ->assertSee('3,000.00 ج.م'); // remaining
+        ->assertSeeText('5,000.00 ج.م') // share
+        ->assertSeeText('2,000.00 ج.م') // withdrawn
+        ->assertSeeText('3,000.00 ج.م'); // remaining
 });
 
 test('deleting a partner with withdrawals is rejected', function () {
@@ -163,7 +163,7 @@ test('the partners index shows the computed figures for each partner', function 
     $response->assertOk()
         ->assertSee('أحمد')
         ->assertSee('20.00%')
-        ->assertSee('5,000.00 ج.م'); // share of a 25,000 EGP net profit at 20%
+        ->assertSeeText('5,000.00 ج.م'); // share of a 25,000 EGP net profit at 20%
 });
 
 test('a partner can be added without an email', function () {

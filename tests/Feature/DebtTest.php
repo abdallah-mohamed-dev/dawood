@@ -135,8 +135,8 @@ test('the cashbox box shows only outstanding debts, checked against a hand-compu
     $this->actingAs($this->admin)
         ->get(route('cashbox.index'))
         ->assertSee('إجمالي الديون القائمة')
-        ->assertSee('1,000.00 ج.م')
-        ->assertDontSee('1,500.00 ج.م');
+        ->assertSeeText('1,000.00 ج.م')
+        ->assertDontSeeText('1,500.00 ج.م');
 });
 
 test('the cashbox box explains that debts are not part of the balance', function () {

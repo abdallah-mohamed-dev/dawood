@@ -161,7 +161,7 @@ test('the payments registry lists a payment with its customer and room', functio
         ->assertSee($this->customer->name)
         ->assertSee($this->room->room_type)
         ->assertSee('دفعة مقدمة')
-        ->assertSee('10,000.00 ج.م');
+        ->assertSeeText('10,000.00 ج.م');
 });
 
 test('a payment note of exactly "0" is preserved, not silently discarded', function () {

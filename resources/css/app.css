@@ -52,6 +52,13 @@
     --color-ramp-3: #d9ac85;
 }
 
+/* The currency beside a figure: a touch smaller and lighter, so the number
+   reads first. Sized in em so it tracks whatever text size it sits in. */
+@utility currency {
+    font-size: 0.8em;
+    font-weight: 400;
+}
+
 /* Alpine hides these until it boots, so x-show elements never flash. */
 [x-cloak] {
     display: none !important;

@@ -33,8 +33,8 @@ test('each month separator shows the total for that month, checked by hand', fun
 
     $this->actingAs($this->admin)
         ->get(route('cashbox.index'))
-        ->assertSee('1,801.00 ج.م')
-        ->assertSee('999.00 ج.م');
+        ->assertSeeText('1,801.00 ج.م')
+        ->assertSeeText('999.00 ج.م');
 });
 
 test('the month totals come from every row of that month, not only the rows on this page', function () {
@@ -48,7 +48,7 @@ test('the month totals come from every row of that month, not only the rows on t
 
     $this->actingAs($this->admin)
         ->get(route('cashbox.index'))
-        ->assertSee('30.30 ج.م');
+        ->assertSeeText('30.30 ج.م');
 });
 
 test('the opening balance is still recorded with the chosen payment method', function () {

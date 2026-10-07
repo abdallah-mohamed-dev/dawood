@@ -282,11 +282,11 @@ test('the summary cards show each type and a total that is their sum', function 
     $this->actingAs($this->admin)->get(route('inventory.materials.index'))
         ->assertOk()
         ->assertSee('قيمة خامة')
-        ->assertSee('1,000.00 ج.م')
+        ->assertSeeText('1,000.00 ج.م')
         ->assertSee('قيمة اكسسوار')
-        ->assertSee('200.00 ج.م')
+        ->assertSeeText('200.00 ج.م')
         ->assertSee('إجمالي قيمة المخزن')
-        ->assertSee('1,200.00 ج.م');
+        ->assertSeeText('1,200.00 ج.م');
 });
 
 test('the summary cards say in Arabic that they ignore the filters', function () {
@@ -301,8 +301,8 @@ test('the row value column is the quantity times the price, priced by the servic
         ->assertOk()
         ->assertSee('سعر الوحدة')
         ->assertSee('القيمة')
-        ->assertSee('100.00 ج.م')
-        ->assertSee('1,000.00 ج.م');
+        ->assertSeeText('100.00 ج.م')
+        ->assertSeeText('1,000.00 ج.م');
 });
 
 test('filtering by material type returns only that type', function () {
@@ -363,9 +363,9 @@ test('the summary cards do not follow the type filter', function () {
         ->get(route('inventory.materials.index', ['material_type_id' => $accessory->material_type_id]))
         ->assertOk()
         ->assertSee('قيمة خامة')
-        ->assertSee('1,000.00 ج.م')
+        ->assertSeeText('1,000.00 ج.م')
         ->assertSee('إجمالي قيمة المخزن')
-        ->assertSee('1,200.00 ج.م');
+        ->assertSeeText('1,200.00 ج.م');
 });
 
 test('a material still holding stock cannot be deleted', function () {

@@ -19,7 +19,7 @@ test('the profit report shows revenue, cost, expenses, and net profit for comple
     $response = $this->actingAs($this->admin)->get(route('reports.profit'));
 
     $response->assertOk()
-        ->assertSee('30,000.00 ج.م');
+        ->assertSeeText('30,000.00 ج.م');
 });
 
 test('the profit report shows the waterfall chart and its figures as text', function () {

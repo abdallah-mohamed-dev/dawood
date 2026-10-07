@@ -37,7 +37,7 @@ test('the cashbox page shows the current balance and totals', function () {
     $response = $this->actingAs($this->admin)->get(route('cashbox.index'));
 
     $response->assertOk();
-    $response->assertSee('5,700.00 ج.م'); // balance: 5000 + 1000 - 300 = 5700 EGP
+    $response->assertSeeText('5,700.00 ج.م'); // balance: 5000 + 1000 - 300 = 5700 EGP
     $response->assertSee('رصيد افتتاحي');
     $response->assertSee('دفعة عميل');
     $response->assertSee('مصروف إداري');
@@ -171,7 +171,7 @@ test('paging one table does not move the other', function () {
     $this->actingAs($this->admin)
         ->get(route('cashbox.index', ['in_page' => 2]))
         ->assertOk()
-        ->assertSee('555.55 ج.م');
+        ->assertSeeText('555.55 ج.م');
 });
 
 test('the item column shows the detailed source, not the generic kind', function () {
