@@ -1,0 +1,937 @@
+<title>صفحة الغرفة — ثلاث تصميمات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+
+<style>
+/* Layout: a chooser at the top, then each design on a desktop canvas beside a
+   phone shell. Light only, like the app: white surfaces on a near-white
+   neutral ground, copper kept for accents alone. */
+:root {
+    color-scheme: light;
+
+    --page: #f1f0ee;
+    --bg: #f7f6f4;
+    --surface: #ffffff;
+    --surface-2: #fbfaf9;
+    --surface-3: #f2f1ef;
+    --ink: #1a1a18;
+    --ink-soft: #46443f;
+    --muted: #6e6b65;
+    --line: #e3e2de;
+    --line-soft: #eeedea;
+    --accent: #9c5a2c;
+    --accent-dark: #85491f;
+    --accent-wash: #9c5a2c14;
+    --good: #3f6b39;
+    --good-wash: #3f6b3914;
+    --bad: #b03a26;
+    --bad-wash: #b03a2614;
+    --warn: #8a6a16;
+    --warn-wash: #8a6a1614;
+    --frame: #2b2a27;
+    --shadow: 0 1px 2px #1a1a1810, 0 10px 28px #1a1a180d;
+    --radius: 14px;
+    --font: 'IBM Plex Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font-family: var(--font); font-size: 14px; line-height: 1.5; direction: rtl;
+}
+.wrap { max-width: 1480px; margin: 0 auto; padding-block: 28px 64px; padding-inline: 16px; }
+
+.lede { max-width: 64ch; }
+.lede h1 { margin: 0 0 6px; font-size: clamp(22px, 3.2vw, 30px); font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
+.lede p { margin: 0; color: var(--muted); font-size: 14.5px; }
+
+.switch { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 10px; }
+.switch button {
+    font: inherit; font-weight: 600; font-size: 13.5px;
+    padding: 9px 16px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+    transition: background .15s, color .15s, border-color .15s;
+}
+.switch button:hover { border-color: var(--accent); color: var(--accent); }
+.switch button[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.switch button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.fixes { margin: 0 0 22px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.fixes h2 { margin: 0 0 8px; font-size: 13px; font-weight: 700; letter-spacing: .04em; color: var(--muted); }
+.fixes ul { margin: 0; padding-inline-start: 18px; color: var(--ink-soft); font-size: 13.5px; }
+.fixes li { margin-bottom: 3px; }
+.fixes li:last-child { margin-bottom: 0; }
+.hint { margin: 10px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.stage { display: grid; gap: 26px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1120px) { .stage { grid-template-columns: minmax(0, 1fr) 392px; } }
+
+.frame-label { display: flex; align-items: baseline; gap: 8px; margin: 0 0 9px; font-size: 12px; font-weight: 700; letter-spacing: .06em; color: var(--muted); }
+.frame-label span { font-weight: 500; letter-spacing: 0; font-size: 12px; }
+
+.screen { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg); box-shadow: var(--shadow); overflow: hidden; }
+.screen-bar { display: flex; align-items: center; gap: 6px; padding: 9px 12px; background: var(--surface-3); border-bottom: 1px solid var(--line); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #d9d8d4; }
+.screen-body { padding: 16px; min-width: 0; max-height: 720px; overflow-y: auto; }
+
+.phone { width: 392px; max-width: 100%; border: 9px solid var(--frame); border-radius: 30px; background: var(--bg); overflow: hidden; box-shadow: var(--shadow); }
+.phone-notch { height: 20px; background: var(--frame); }
+.phone-body { height: 680px; overflow-y: auto; padding: 12px; background: var(--bg); position: relative; }
+.screen-body::-webkit-scrollbar, .phone-body::-webkit-scrollbar { width: 6px; }
+.screen-body::-webkit-scrollbar-thumb, .phone-body::-webkit-scrollbar-thumb { background: #d4d3cf; border-radius: 3px; }
+
+/* ---------- atoms ---------- */
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    font: inherit; font-size: 12.5px; font-weight: 600; line-height: 1;
+    padding: 7px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink-soft);
+    transition: background .14s, border-color .14s, color .14s, transform .08s;
+}
+.btn:hover { background: var(--surface-3); border-color: var(--muted); color: var(--ink); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+.btn-ghost { border-color: transparent; background: transparent; }
+.btn-ghost:hover { background: var(--surface-3); border-color: transparent; }
+.btn-sm { padding: 5px 9px; font-size: 11.5px; }
+.btn-danger { color: var(--bad); }
+.btn-danger:hover { background: var(--bad-wash); border-color: var(--bad); color: var(--bad); }
+.btn[disabled] { opacity: .4; cursor: not-allowed; }
+.btn[disabled]:hover { background: var(--surface); border-color: var(--line); color: var(--ink-soft); transform: none; }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+.pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.pill-prog { background: var(--warn-wash); color: var(--warn); }
+
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: var(--surface-3); color: var(--muted); white-space: nowrap; }
+.chip-short { background: var(--bad-wash); color: var(--bad); }
+.chip-done { background: var(--good-wash); color: var(--good); }
+
+.num { font-variant-numeric: tabular-nums; }
+.cur { font-size: .8em; font-weight: 400; color: var(--muted); }
+.lbl { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: start; font-size: 11px; font-weight: 600; letter-spacing: .03em; color: var(--muted); padding: 8px 10px; background: var(--surface-3); white-space: nowrap; }
+td { padding: 9px 10px; border-top: 1px solid var(--line-soft); vertical-align: middle; }
+tbody tr:hover { background: var(--surface-2); }
+tfoot td { background: var(--surface-3); font-weight: 700; border-top: 1px solid var(--line); }
+.t-wrap { overflow-x: auto; }
+.t-end { text-align: end; }
+.row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+
+.empty { padding: 20px 12px; text-align: center; color: var(--muted); font-size: 12.5px; }
+
+input, select { font: inherit; font-size: 13px; color: var(--ink); padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); width: 100%; min-width: 0; }
+input:focus, select:focus { outline: 2px solid var(--accent-wash); border-color: var(--accent); }
+select { cursor: pointer; }
+label.f { display: block; }
+label.f > span { display: block; margin-bottom: 4px; font-size: 11.5px; color: var(--muted); }
+
+.comp { display: flex; height: 9px; border-radius: 999px; overflow: hidden; background: var(--surface-3); }
+.comp i { display: block; height: 100%; }
+.comp-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 7px; font-size: 11.5px; color: var(--muted); }
+.comp-legend b { display: inline-flex; align-items: center; gap: 5px; font-weight: 500; }
+.comp-legend b::before { content: ''; width: 8px; height: 8px; border-radius: 2px; background: var(--k); }
+
+.bar { height: 6px; border-radius: 999px; background: var(--surface-3); overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--good); border-radius: 999px; }
+
+.addrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; padding: 12px; background: var(--surface-2); border: 1px dashed var(--line); border-radius: 9px; margin-top: 11px; }
+.addrow label.f { flex: 1 1 120px; min-width: 0; }
+.addrow .acts { display: flex; gap: 6px; }
+
+/* ---------- design 1 ---------- */
+.d-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 13px 15px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px 12px 0 0; border-bottom: 0; }
+.d-head h2 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+.d-head .sub { color: var(--muted); font-size: 12.5px; }
+.d-head .sub a { color: var(--accent); text-decoration: none; }
+.d-head .sub a:hover { text-decoration: underline; }
+.d-head .spacer { flex: 1 1 auto; min-width: 0; }
+
+.stats { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-bottom: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 620px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.stat { background: var(--surface); padding: 11px 13px; }
+.stat .lbl { display: block; margin-bottom: 3px; }
+.stat .v { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.stat .n { margin-top: 3px; font-size: 11px; color: var(--muted); }
+
+.tabs { display: flex; gap: 2px; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); padding: 0 8px; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs button { font: inherit; font-size: 13px; font-weight: 600; white-space: nowrap; padding: 11px 13px; border: 0; background: none; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: color .14s, border-color .14s; }
+.tabs button:hover { color: var(--ink); }
+.tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.tabs .count { font-size: 10.5px; font-weight: 600; background: var(--surface-3); color: var(--muted); border-radius: 999px; padding: 1px 6px; margin-inline-start: 5px; }
+
+.pane { background: var(--surface); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 12px 12px; padding: 14px; }
+.pane-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 11px; }
+.pane-bar .search { flex: 1 1 150px; min-width: 0; }
+
+/* ---------- design 2 ---------- */
+.ws { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .ws { grid-template-columns: minmax(0, 1fr) 278px; } }
+.rail { display: grid; gap: 10px; align-content: start; position: sticky; top: 0; }
+.rail-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 13px; }
+.rail-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 6px 0; }
+.rail-row + .rail-row { border-top: 1px solid var(--line-soft); }
+.rail-row .k { font-size: 12.5px; color: var(--muted); }
+.rail-row .v { font-size: 14px; font-weight: 600; }
+.rail-hero .lbl { display: block; }
+.rail-hero .v { font-size: 24px; font-weight: 700; letter-spacing: -.02em; margin-top: 2px; }
+.quick { display: grid; gap: 7px; }
+.quick .btn { width: 100%; padding: 9px; font-size: 13px; }
+
+.sec { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.sec + .sec { margin-top: 12px; }
+.sec-head { display: flex; align-items: center; gap: 10px; padding: 11px 13px; border-bottom: 1px solid var(--line-soft); }
+.sec-head h3 { margin: 0; font-size: 13.5px; font-weight: 600; }
+.sec-head .tot { margin-inline-start: auto; font-size: 12.5px; color: var(--muted); }
+.filters { display: flex; gap: 7px; flex-wrap: wrap; padding: 10px 13px; border-bottom: 1px solid var(--line-soft); align-items: center; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; border: 0; background: var(--surface); color: var(--muted); cursor: pointer; }
+.seg button + button { border-inline-start: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent-wash); color: var(--accent); }
+.filters .search { flex: 1 1 140px; min-width: 0; }
+
+.drawer { border: 1px solid var(--accent); background: var(--accent-wash); border-radius: 12px; padding: 13px; margin-bottom: 12px; }
+.drawer h3 { margin: 0 0 10px; font-size: 13.5px; font-weight: 600; }
+.drawer .grid { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.drawer .grid label.f { flex: 1 1 120px; min-width: 0; }
+
+/* ---------- design 3 ---------- */
+.ledger { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; }
+.ledger-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.ledger-top h2 { margin: 0; font-size: 18px; font-weight: 700; }
+.ledger-strip { display: flex; flex-wrap: wrap; margin-top: 12px; border: 1px solid var(--line-soft); border-radius: 10px; overflow: hidden; }
+.ledger-strip .cell { flex: 1 1 108px; min-width: 0; padding: 9px 12px; background: var(--surface); border-inline-end: 1px solid var(--line-soft); }
+.ledger-strip .cell:last-child { border-inline-end: 0; }
+.ledger-strip .cell .lbl { display: block; margin-bottom: 2px; }
+.ledger-strip .cell .v { font-size: 15.5px; font-weight: 700; }
+
+.acc { margin-top: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.acc-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; border: 0; background: var(--surface); cursor: pointer; font: inherit; text-align: start; color: var(--ink); }
+.acc-head:hover { background: var(--surface-2); }
+.acc-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.acc-head .t { font-size: 13.5px; font-weight: 600; }
+.acc-head .meta { margin-inline-start: auto; display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); }
+.caret { transition: transform .18s; color: var(--muted); font-size: 11px; }
+.acc-head[aria-expanded="true"] .caret { transform: rotate(180deg); }
+.acc-body { padding: 13px 14px 14px; border-top: 1px solid var(--line-soft); }
+
+/* ---------- mobile bits ---------- */
+.m-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.m-stat { background: var(--surface); padding: 9px 11px; }
+.m-stat .lbl { display: block; margin-bottom: 2px; font-size: 11px; }
+.m-stat .v { font-size: 15px; font-weight: 700; }
+.m-list { display: grid; gap: 8px; }
+.m-item { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 11px; }
+.m-item .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.m-item .nm { font-size: 13.5px; font-weight: 600; }
+.m-item .kv { display: flex; flex-wrap: wrap; gap: 3px 14px; margin-top: 7px; font-size: 12px; color: var(--muted); }
+.m-item .kv b { font-weight: 600; color: var(--ink-soft); }
+.m-item .acts { display: flex; gap: 6px; margin-top: 10px; }
+.m-item .acts .btn { flex: 1; }
+.m-bottom { position: sticky; bottom: -12px; margin: 12px -12px -12px; padding: 9px 12px; background: var(--surface); border-top: 1px solid var(--line); display: flex; gap: 7px; }
+.m-bottom .btn { flex: 1; }
+
+.toast {
+    position: absolute; inset-inline: 12px; bottom: 64px; z-index: 5;
+    background: var(--ink); color: #fff; border-radius: 9px; padding: 9px 12px;
+    font-size: 12.5px; font-weight: 500; box-shadow: var(--shadow);
+}
+.toast-desk { position: fixed; inset-inline-start: 50%; transform: translateX(50%); bottom: 24px; inset-inline-end: auto; z-index: 50; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+    <div class="lede">
+        <h1>صفحة الغرفة — ثلاث تصميمات</h1>
+        <p>بروتوتايب شغال على بيانات غرفة حقيقية: التبويبات والأقسام والزراير كلها تشتغل، والإضافة بتضيف فعلًا والأرقام بتتحدّث معاها. كل تصميم معروض على الديسكتوب والموبايل.</p>
+    </div>
+
+    <div class="switch" role="tablist" aria-label="اختيار التصميم">
+        <button role="tab" aria-selected="true" aria-controls="d1" id="t1">١ · تبويبات</button>
+        <button role="tab" aria-selected="false" aria-controls="d2" id="t2">٢ · عمود جانبي ثابت</button>
+        <button role="tab" aria-selected="false" aria-controls="d3" id="t3">٣ · سجل مضغوط</button>
+    </div>
+
+    <section id="d1" role="tabpanel" aria-labelledby="t1"></section>
+    <section id="d2" role="tabpanel" aria-labelledby="t2" hidden></section>
+    <section id="d3" role="tabpanel" aria-labelledby="t3" hidden></section>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ---------------------------------------------------------------- data
+    // One room, shared by the three designs, so the same figures appear in all.
+    var DATA = {
+        room: { name: 'صالون', customer: 'مقى كمال', created: '2026-10-05', started: '2026-10-07', salePrice: 1850000, status: 'تحت التنفيذ' },
+        materials: [
+            { id: 1, name: 'خشب زان', type: 'خامة', unit: 'لوح', required: 12, issued: 8, stock: 4, cost: 320000 },
+            { id: 2, name: 'أبلكاش 18مم', type: 'خامة', unit: 'لوح', required: 6, issued: 6, stock: 10, cost: 150000 },
+            { id: 3, name: 'ورنيش', type: 'خامة', unit: 'لتر', required: 3, issued: 2, stock: 1, cost: 36000 },
+            { id: 4, name: 'مفصلات', type: 'اكسسوار', unit: 'قطعة', required: 24, issued: 24, stock: 40, cost: 48000 },
+            { id: 5, name: 'مقابض', type: 'اكسسوار', unit: 'قطعة', required: 12, issued: 0, stock: 5, cost: 0 }
+        ],
+        costs: [
+            { id: 1, kind: 'مصنعية', desc: 'نجارة الهيكل', amount: 250000, date: '2026-10-08', method: 'كاش' },
+            { id: 2, kind: 'مصنعية', desc: 'تجميع وتركيب', amount: 120000, date: '2026-10-14', method: 'انستاباي' },
+            { id: 3, kind: 'مصروف', desc: 'نقل من الورشة', amount: 35000, date: '2026-10-09', method: 'كاش' }
+        ],
+        payments: [
+            { id: 1, receipt: '00012', amount: 500000, date: '2026-10-05', method: 'كاش', note: 'عربون' },
+            { id: 2, receipt: '00018', amount: 300000, date: '2026-10-12', method: 'انستاباي', note: '' }
+        ],
+        pricing: { materials: 500000, accessories: 80000, labor: 350000, other: 40000, days: 14 },
+        log: [
+            { at: '2026-10-14 16:20', what: 'تكلفة غرفة', ev: 'أُضيفت', det: 'تجميع وتركيب — 1,200.00 ج.م' },
+            { at: '2026-10-12 11:05', what: 'دفعة عميل', ev: 'أُضيفت', det: 'إيصال 00018 — 3,000.00 ج.م' },
+            { at: '2026-10-09 09:40', what: 'خامة غرفة', ev: 'صُرفت', det: 'مفصلات — 24 قطعة' },
+            { at: '2026-10-07 08:15', what: 'غرفة', ev: 'تعدّلت', det: 'الحالة: مسودة ← تحت التنفيذ' }
+        ]
+    };
+
+    var state = {
+        d1Tab: 'materials', d1TabM: 'materials',
+        d1Filter: 'all', d2Filter: 'all',
+        d2Drawer: null,
+        d3Open: { materials: true, costs: false, payments: false, pricing: false, log: false },
+        d3OpenM: { materials: true, costs: false, payments: false, pricing: false, log: false },
+        d3Add: {}, addType: {},
+        toast: null
+    };
+    var toastTimer = null;
+
+    // ------------------------------------------------------------- helpers
+    function money(p) {
+        var neg = p < 0, v = Math.abs(p);
+        var s = (Math.floor(v / 100)).toLocaleString('en-US') + '.' + String(v % 100).padStart(2, '0');
+        return (neg ? '-' : '') + s;
+    }
+    function m(p) { return '<span class="num">' + money(p) + ' <span class="cur">ج.م</span></span>'; }
+    function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+
+    function totals() {
+        var mats = DATA.materials.reduce(function (a, x) { return a + x.cost; }, 0);
+        var labor = DATA.costs.filter(function (c) { return c.kind === 'مصنعية'; }).reduce(function (a, x) { return a + x.amount; }, 0);
+        var other = DATA.costs.filter(function (c) { return c.kind !== 'مصنعية'; }).reduce(function (a, x) { return a + x.amount; }, 0);
+        var paid = DATA.payments.reduce(function (a, x) { return a + x.amount; }, 0);
+        var total = mats + labor + other;
+        var sale = DATA.room.salePrice;
+        var short = DATA.materials.filter(function (x) { return Math.max(0, x.required - x.issued) > x.stock; }).length;
+        return {
+            mats: mats, labor: labor, other: other, total: total, paid: paid,
+            sale: sale, profit: sale - total, remaining: sale - paid,
+            pct: sale > 0 ? Math.round(paid * 100 / sale) : 0,
+            shortCount: short,
+            compMats: sale > 0 ? Math.round(mats * 100 / sale) : 0,
+            compWork: sale > 0 ? Math.round((labor + other) * 100 / sale) : 0
+        };
+    }
+
+    function shortOf(x) { return Math.max(0, Math.max(0, x.required - x.issued) - x.stock); }
+
+    function matChip(x) {
+        var s = shortOf(x);
+        if (s > 0) return '<span class="chip chip-short">ناقص ' + s + ' ' + esc(x.unit) + '</span>';
+        if (x.issued >= x.required) return '<span class="chip chip-done">اتصرفت كاملة</span>';
+        return '';
+    }
+
+    function compBar(t) {
+        var profitPct = Math.max(0, 100 - t.compMats - t.compWork);
+        return '<div class="comp" role="img" aria-label="تركيب سعر البيع: خامات ' + t.compMats + '٪، مصنعية وأخرى ' + t.compWork + '٪، ربح ' + profitPct + '٪">' +
+            '<i style="width:' + t.compMats + '%;background:#8f5024"></i>' +
+            '<i style="width:' + t.compWork + '%;background:#c08a5e"></i>' +
+            '<i style="width:' + profitPct + '%;background:#3f6b39"></i></div>' +
+            '<div class="comp-legend">' +
+            '<b style="--k:#8f5024">خامات ' + money(t.mats) + ' (' + t.compMats + '٪)</b>' +
+            '<b style="--k:#c08a5e">مصنعية وأخرى ' + money(t.labor + t.other) + ' (' + t.compWork + '٪)</b>' +
+            '<b style="--k:#3f6b39">الربح ' + money(t.profit) + ' (' + profitPct + '٪)</b></div>';
+    }
+
+    function toast(msg) {
+        state.toast = msg;
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { state.toast = null; render(); }, 2200);
+    }
+
+    // ------------------------------------------------- shared content blocks
+    function materialsTable(filter) {
+        var rows = DATA.materials.filter(function (x) { return filter === 'all' || x.type === filter; });
+        if (!rows.length) return '<div class="empty">مفيش مواد في التصنيف ده.</div>';
+        return '<div class="t-wrap"><table><thead><tr>' +
+            '<th>المادة</th><th>المطلوب</th><th>المصروف</th><th>المخزن</th><th>التكلفة</th><th class="t-end">إجراءات</th>' +
+            '</tr></thead><tbody>' +
+            rows.map(function (x) {
+                return '<tr><td><div style="font-weight:600">' + esc(x.name) + '</div>' +
+                    '<span class="chip">' + esc(x.type) + '</span> ' + matChip(x) + '</td>' +
+                    '<td class="num">' + x.required + ' ' + esc(x.unit) + '</td>' +
+                    '<td class="num">' + x.issued + ' ' + esc(x.unit) + '</td>' +
+                    '<td class="num">' + x.stock + ' ' + esc(x.unit) + '</td>' +
+                    '<td>' + m(x.cost) + '</td>' +
+                    '<td><div class="row-actions">' +
+                    '<button class="btn btn-sm" data-act="toast" data-msg="فتح تعديل كمية ' + esc(x.name) + '">تعديل</button>' +
+                    '<button class="btn btn-sm btn-primary" data-act="issue" data-id="' + x.id + '"' + (x.issued >= x.required ? ' disabled' : '') + '>صرف</button>' +
+                    '<button class="btn btn-sm btn-danger" data-act="delMat" data-id="' + x.id + '">حذف</button>' +
+                    '</div></td></tr>';
+            }).join('') +
+            '</tbody><tfoot><tr><td colspan="4">إجمالي تكلفة الخامات</td><td colspan="2">' + m(totals().mats) + '</td></tr></tfoot></table></div>';
+    }
+
+    function materialsCards(filter) {
+        var rows = DATA.materials.filter(function (x) { return filter === 'all' || x.type === filter; });
+        if (!rows.length) return '<div class="empty">مفيش مواد.</div>';
+        return '<div class="m-list">' + rows.map(function (x) {
+            return '<div class="m-item"><div class="top"><span class="nm">' + esc(x.name) + '</span>' +
+                '<span>' + matChip(x) + ' <span class="chip">' + esc(x.type) + '</span></span></div>' +
+                '<div class="kv"><span>مطلوب <b class="num">' + x.required + ' ' + esc(x.unit) + '</b></span>' +
+                '<span>مصروف <b class="num">' + x.issued + '</b></span>' +
+                '<span>بالمخزن <b class="num">' + x.stock + '</b></span>' +
+                '<span>تكلفة <b>' + m(x.cost) + '</b></span></div>' +
+                '<div class="acts"><button class="btn btn-sm" data-act="toast" data-msg="تعديل ' + esc(x.name) + '">تعديل</button>' +
+                '<button class="btn btn-sm btn-primary" data-act="issue" data-id="' + x.id + '"' + (x.issued >= x.required ? ' disabled' : '') + '>صرف</button>' +
+                '<button class="btn btn-sm btn-danger" data-act="delMat" data-id="' + x.id + '">حذف</button></div></div>';
+        }).join('') + '</div>';
+    }
+
+    function costsTable() {
+        if (!DATA.costs.length) return '<div class="empty">لسه مفيش مصنعية ولا مصروفات على الغرفة دي.</div>';
+        var t = totals();
+        return '<div class="t-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الوصف</th><th>طريقة الدفع</th><th>المبلغ</th><th class="t-end"></th></tr></thead><tbody>' +
+            DATA.costs.map(function (c) {
+                return '<tr><td class="num">' + esc(c.date) + '</td>' +
+                    '<td><span class="chip">' + esc(c.kind) + '</span></td>' +
+                    '<td>' + esc(c.desc) + '</td><td>' + esc(c.method) + '</td><td>' + m(c.amount) + '</td>' +
+                    '<td><div class="row-actions"><button class="btn btn-sm btn-danger" data-act="delCost" data-id="' + c.id + '">حذف</button></div></td></tr>';
+            }).join('') +
+            '</tbody><tfoot><tr><td colspan="4">مصنعية ' + money(t.labor) + ' · مصروفات ' + money(t.other) + '</td><td colspan="2">' + m(t.labor + t.other) + '</td></tr></tfoot></table></div>';
+    }
+
+    function costsCards() {
+        if (!DATA.costs.length) return '<div class="empty">مفيش تكاليف لسه.</div>';
+        return '<div class="m-list">' + DATA.costs.map(function (c) {
+            return '<div class="m-item"><div class="top"><span class="nm">' + esc(c.desc) + '</span><span class="chip">' + esc(c.kind) + '</span></div>' +
+                '<div class="kv"><span>' + esc(c.date) + '</span><span>' + esc(c.method) + '</span><span><b>' + m(c.amount) + '</b></span></div></div>';
+        }).join('') + '</div>';
+    }
+
+    function paymentsTable() {
+        if (!DATA.payments.length) return '<div class="empty">لسه مفيش دفعات من العميل.</div>';
+        var t = totals();
+        return '<div class="t-wrap"><table><thead><tr><th>الإيصال</th><th>التاريخ</th><th>طريقة الدفع</th><th>ملاحظة</th><th>المبلغ</th><th class="t-end"></th></tr></thead><tbody>' +
+            DATA.payments.map(function (p) {
+                return '<tr><td class="num">' + esc(p.receipt) + '</td><td class="num">' + esc(p.date) + '</td>' +
+                    '<td>' + esc(p.method) + '</td><td style="color:var(--muted)">' + (p.note ? esc(p.note) : '—') + '</td>' +
+                    '<td>' + m(p.amount) + '</td>' +
+                    '<td><div class="row-actions"><button class="btn btn-sm btn-danger" data-act="delPay" data-id="' + p.id + '">حذف</button></div></td></tr>';
+            }).join('') +
+            '</tbody><tfoot><tr><td colspan="4">محصَّل ' + t.pct + '٪ من سعر البيع</td><td colspan="2">' + m(t.paid) + '</td></tr></tfoot></table></div>';
+    }
+
+    function paymentsCards() {
+        if (!DATA.payments.length) return '<div class="empty">مفيش دفعات لسه.</div>';
+        return '<div class="m-list">' + DATA.payments.map(function (p) {
+            return '<div class="m-item"><div class="top"><span class="nm">' + m(p.amount) + '</span><span class="chip">' + esc(p.method) + '</span></div>' +
+                '<div class="kv"><span>إيصال <b class="num">' + esc(p.receipt) + '</b></span><span>' + esc(p.date) + '</span>' + (p.note ? '<span>' + esc(p.note) + '</span>' : '') + '</div></div>';
+        }).join('') + '</div>';
+    }
+
+    function pricingBlock() {
+        var p = DATA.pricing, t = totals();
+        var lines = [
+            ['الخامات', p.materials, DATA.materials.filter(function (x) { return x.type === 'خامة'; }).reduce(function (a, x) { return a + x.cost; }, 0)],
+            ['الاكسسوارات', p.accessories, DATA.materials.filter(function (x) { return x.type === 'اكسسوار'; }).reduce(function (a, x) { return a + x.cost; }, 0)],
+            ['المصنعية', p.labor, t.labor],
+            ['مصروفات أخرى', p.other, t.other]
+        ];
+        var estTotal = p.materials + p.accessories + p.labor + p.other;
+        return '<div class="t-wrap"><table><thead><tr><th>البند</th><th>التقدير</th><th>الفعلي</th><th class="t-end">الفرق</th></tr></thead><tbody>' +
+            lines.map(function (l) {
+                var d = l[2] - l[1];
+                var col = d > 0 ? 'var(--bad)' : (d < 0 ? 'var(--good)' : 'var(--muted)');
+                return '<tr><td>' + l[0] + '</td><td>' + m(l[1]) + '</td><td>' + m(l[2]) + '</td>' +
+                    '<td class="t-end" style="color:' + col + '">' + (d > 0 ? '+' : '') + money(d) + '</td></tr>';
+            }).join('') +
+            '</tbody><tfoot><tr><td>الإجمالي</td><td>' + m(estTotal) + '</td><td>' + m(t.total) + '</td>' +
+            '<td class="t-end" style="color:' + (t.total - estTotal > 0 ? 'var(--bad)' : 'var(--good)') + '">' + (t.total - estTotal > 0 ? '+' : '') + money(t.total - estTotal) + '</td></tr></tfoot></table></div>' +
+            '<p class="hint">المدة المتوقعة ' + p.days + ' يوم · بدأ التنفيذ ' + DATA.room.started + '. الفرق الأحمر معناه التكلفة زادت عن التقدير.</p>';
+    }
+
+    function logBlock() {
+        return '<div class="m-list">' + DATA.log.map(function (l) {
+            return '<div style="display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line-soft)">' +
+                '<span class="lbl num">' + esc(l.at) + '</span><b style="font-size:12.5px">' + esc(l.what) + '</b>' +
+                '<span style="font-size:12.5px;color:var(--muted)">' + esc(l.ev) + '</span>' +
+                '<span style="font-size:12.5px;color:var(--ink-soft)">' + esc(l.det) + '</span></div>';
+        }).join('') + '</div>';
+    }
+
+    function addCostForm(where) {
+        return '<div class="addrow">' +
+            '<label class="f" style="flex:1 1 90px"><span>النوع</span><select data-f="' + where + '-kind"><option>مصنعية</option><option>مصروف</option></select></label>' +
+            '<label class="f" style="flex:2 1 150px"><span>الوصف</span><input data-f="' + where + '-desc" placeholder="نجارة، نقل…"></label>' +
+            '<label class="f"><span>المبلغ (ج.م)</span><input data-f="' + where + '-amount" type="number" inputmode="decimal" placeholder="0.00"></label>' +
+            '<div class="acts"><button class="btn btn-primary" data-act="addCost" data-where="' + where + '">إضافة</button>' +
+            '<button class="btn btn-ghost" data-act="closeAdd" data-where="' + where + '">إلغاء</button></div></div>';
+    }
+
+    function addPayForm(where) {
+        return '<div class="addrow">' +
+            '<label class="f"><span>المبلغ (ج.م)</span><input data-f="' + where + '-amount" type="number" inputmode="decimal" placeholder="0.00"></label>' +
+            '<label class="f" style="flex:1 1 120px"><span>طريقة الدفع</span><select data-f="' + where + '-method"><option>كاش</option><option>انستاباي</option><option>محفظة</option><option>شيك</option></select></label>' +
+            '<label class="f" style="flex:2 1 150px"><span>ملاحظة</span><input data-f="' + where + '-note" placeholder="اختياري"></label>' +
+            '<div class="acts"><button class="btn btn-primary" data-act="addPay" data-where="' + where + '">إضافة</button>' +
+            '<button class="btn btn-ghost" data-act="closeAdd" data-where="' + where + '">إلغاء</button></div></div>';
+    }
+
+    var CATALOG = {
+        'خامة': [['سويدي 2سم', 'لوح'], ['زان روماني', 'لوح'], ['أبلكاش 9مم', 'لوح'], ['ورنيش لامع', 'لتر']],
+        'اكسسوار': [['مقابض ألوميتال', 'قطعة'], ['مفصلات بوش', 'قطعة'], ['سكك دوايل', 'طقم'], ['مسامير', 'علبة']]
+    };
+
+    function addMatForm(where) {
+        var type = state.addType[where] || 'خامة';
+        return '<div class="addrow">' +
+            '<label class="f" style="flex:1 1 110px"><span>النوع</span>' +
+            '<select data-act="addType" data-where="' + where + '">' +
+            Object.keys(CATALOG).map(function (k) {
+                return '<option value="' + k + '"' + (k === type ? ' selected' : '') + '>' + k + '</option>';
+            }).join('') + '</select></label>' +
+            '<label class="f" style="flex:2 1 170px"><span>المادة</span><select data-f="' + where + '-name">' +
+            CATALOG[type].map(function (x) { return '<option value="' + x[0] + '|' + x[1] + '">' + x[0] + ' (' + x[1] + ')</option>'; }).join('') +
+            '</select></label>' +
+            '<label class="f" style="flex:1 1 90px"><span>الكمية المطلوبة</span><input data-f="' + where + '-qty" type="number" inputmode="numeric" placeholder="0"></label>' +
+            '<div class="acts"><button class="btn btn-primary" data-act="addMat" data-where="' + where + '">إضافة</button>' +
+            '<button class="btn btn-ghost" data-act="closeAdd" data-where="' + where + '">إلغاء</button></div></div>';
+    }
+
+    // ------------------------------------------------------------ design 1
+    function design1() {
+        var t = totals();
+        var tabs = [
+            { k: 'materials', t: 'المواد', c: DATA.materials.length },
+            { k: 'costs', t: 'التكاليف', c: DATA.costs.length },
+            { k: 'payments', t: 'الدفعات', c: DATA.payments.length },
+            { k: 'pricing', t: 'التسعير' },
+            { k: 'log', t: 'السجل' }
+        ];
+        function strip(sel, attr) {
+            return '<div class="tabs" role="tablist" aria-label="أقسام الغرفة">' + tabs.map(function (x) {
+                return '<button role="tab" aria-selected="' + (sel === x.k ? 'true' : 'false') + '" data-act="' + attr + '" data-k="' + x.k + '">' +
+                    x.t + (x.c !== undefined ? '<span class="count">' + x.c + '</span>' : '') + '</button>';
+            }).join('') + '</div>';
+        }
+        function pane(sel, isMobile) {
+            var body = '';
+            if (sel === 'materials') {
+                body = '<div class="pane-bar"><div class="seg">' +
+                    ['all', 'خامة', 'اكسسوار'].map(function (f) {
+                        return '<button aria-pressed="' + (state.d1Filter === f ? 'true' : 'false') + '" data-act="d1filter" data-f="' + f + '">' + (f === 'all' ? 'الكل' : f + 'ات') + '</button>';
+                    }).join('') + '</div>' +
+                    '<input class="search" type="search" placeholder="ابحث في مواد الغرفة…" aria-label="بحث">' +
+                    '<button class="btn btn-primary" data-act="openAdd" data-where="d1mat">+ إضافة مادة</button></div>' +
+                    (state.d3Add['d1mat'] ? addMatForm('d1mat') : '') +
+                    (isMobile ? materialsCards(state.d1Filter) : materialsTable(state.d1Filter));
+            } else if (sel === 'costs') {
+                body = '<div class="pane-bar"><span class="lbl">مصنعية ' + money(t.labor) + ' · مصروفات ' + money(t.other) + '</span>' +
+                    '<div style="flex:1"></div><button class="btn btn-primary" data-act="openAdd" data-where="d1cost">+ إضافة تكلفة</button></div>' +
+                    (state.d3Add['d1cost'] ? addCostForm('d1cost') : '') +
+                    (isMobile ? costsCards() : costsTable());
+            } else if (sel === 'payments') {
+                body = '<div class="pane-bar"><span class="lbl">محصَّل ' + money(t.paid) + ' من ' + money(t.sale) + ' (' + t.pct + '٪)</span>' +
+                    '<div style="flex:1"></div><button class="btn btn-primary" data-act="openAdd" data-where="d1pay">+ تسجيل دفعة</button></div>' +
+                    (state.d3Add['d1pay'] ? addPayForm('d1pay') : '') +
+                    (isMobile ? paymentsCards() : paymentsTable());
+            } else if (sel === 'pricing') {
+                body = pricingBlock();
+            } else {
+                body = logBlock();
+            }
+            return '<div class="pane">' + body + '</div>';
+        }
+
+        return '<div class="fixes"><h2>فكرة التصميم</h2><ul>' +
+            '<li>الأرقام فوق ثابتة، والتفاصيل في تبويبات — بدل شريط تحت شريط لحد آخر الصفحة.</li>' +
+            '<li>٤ أرقام أساسية بس؛ الباقي جوه التبويب بتاعه.</li>' +
+            '<li>تركيب سعر البيع خط رفيع تحت الأرقام، مش بلوك بعرض الشاشة.</li>' +
+            '<li>«تعديل / صرف / حذف» زراير واضحة، و«صرف» بيتقفل لوحده لما المادة تتصرف كاملة.</li>' +
+            '</ul><p class="hint">جرّب: بدّل التبويبات، اضغط «صرف» على مقابض، وسجّل دفعة — الأرقام فوق هتتحرك.</p></div>' +
+            '<div class="stage"><div><p class="frame-label">ديسكتوب <span>— التبويب المفتوح بس هو اللي بيتعرض</span></p>' +
+            '<div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body">' +
+
+            '<div class="d-head"><div><h2>' + esc(DATA.room.name) + '</h2>' +
+            '<div class="sub">العميل: <a href="#d1">' + esc(DATA.room.customer) + '</a> · أُنشئت ' + DATA.room.created + ' · بدأ التنفيذ ' + DATA.room.started + '</div></div>' +
+            '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span><div class="spacer"></div>' +
+            '<select aria-label="حالة الغرفة" style="width:auto"><option>تحت التنفيذ</option><option>مسودة</option><option>مكتملة</option><option>ملغاة</option></select>' +
+            '<button class="btn btn-danger" data-act="toast" data-msg="هيفتح تأكيد حذف الغرفة">حذف الغرفة</button></div>' +
+
+            '<div class="stats">' +
+            '<div class="stat"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+            '<div class="stat"><span class="lbl">إجمالي التكلفة</span><div class="v">' + m(t.total) + '</div>' +
+            '<div class="n">خامات ' + money(t.mats) + ' · مصنعية وأخرى ' + money(t.labor + t.other) + '</div></div>' +
+            '<div class="stat"><span class="lbl">الربح المتوقع</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div>' +
+            '<div class="n">لحد ما الغرفة تكتمل</div></div>' +
+            '<div class="stat"><span class="lbl">المتبقي للتحصيل</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div>' +
+            '<div class="n">مدفوع ' + money(t.paid) + ' (' + t.pct + '٪)</div></div></div>' +
+
+            '<div style="background:var(--surface);border:1px solid var(--line);border-bottom:0;padding:10px 13px">' + compBar(t) + '</div>' +
+            strip(state.d1Tab, 'd1tab') + pane(state.d1Tab, false) +
+
+            '</div></div></div>' +
+
+            '<div><p class="frame-label">موبايل</p><div class="phone"><div class="phone-notch"></div><div class="phone-body">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+            '<div><div style="font-size:17px;font-weight:700">' + esc(DATA.room.name) + '</div>' +
+            '<div style="font-size:12px;color:var(--muted)">' + esc(DATA.room.customer) + '</div></div>' +
+            '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span></div>' +
+            '<div class="m-stats" style="margin-top:11px">' +
+            '<div class="m-stat"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+            '<div class="m-stat"><span class="lbl">التكلفة</span><div class="v">' + m(t.total) + '</div></div>' +
+            '<div class="m-stat"><span class="lbl">الربح المتوقع</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div></div>' +
+            '<div class="m-stat"><span class="lbl">المتبقي</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div></div></div>' +
+            '<div style="margin-top:10px">' + compBar(t) + '</div>' +
+            '<div style="margin-top:11px">' + strip(state.d1TabM, 'd1tabm') + '</div>' +
+            pane(state.d1TabM, true) +
+            '<div class="m-bottom"><button class="btn btn-primary" data-act="openAdd" data-where="d1pay">+ دفعة</button>' +
+            '<button class="btn" data-act="openAdd" data-where="d1cost">+ تكلفة</button>' +
+            '<button class="btn" data-act="openAdd" data-where="d1mat">+ مادة</button></div>' +
+            (state.toast ? '<div class="toast">' + esc(state.toast) + '</div>' : '') +
+            '</div></div></div></div>';
+    }
+
+    // ------------------------------------------------------------ design 2
+    function design2() {
+        var t = totals();
+        var profitPct = Math.max(0, 100 - t.compMats - t.compWork);
+        var drawer = '';
+        if (state.d2Drawer === 'issue') {
+            drawer = '<div class="drawer"><h3>صرف خامة للغرفة</h3><div class="grid">' +
+                '<label class="f" style="flex:2 1 160px"><span>المادة</span><select data-f="d2issue-id">' +
+                DATA.materials.filter(function (x) { return x.issued < x.required; }).map(function (x) {
+                    return '<option value="' + x.id + '">' + esc(x.name) + ' — باقي ' + (x.required - x.issued) + ' ' + esc(x.unit) + '</option>';
+                }).join('') + '</select></label>' +
+                '<div class="acts" style="display:flex;gap:6px"><button class="btn btn-primary" data-act="issueFromDrawer">صرف</button>' +
+                '<button class="btn btn-ghost" data-act="closeDrawer">إلغاء</button></div></div></div>';
+        } else if (state.d2Drawer === 'pay') {
+            drawer = '<div class="drawer"><h3>تسجيل دفعة من العميل</h3>' + addPayForm('d2pay').replace('addrow', 'grid') + '</div>';
+        } else if (state.d2Drawer === 'cost') {
+            drawer = '<div class="drawer"><h3>إضافة مصنعية أو مصروف</h3>' + addCostForm('d2cost').replace('addrow', 'grid') + '</div>';
+        }
+
+        return '<div class="fixes"><h2>فكرة التصميم</h2><ul>' +
+            '<li>عمود جانبي ثابت فيه فلوس الغرفة كلها — بيفضل قدامك وانت بتشتغل في أي قسم.</li>' +
+            '<li>الخامات والاكسسوارات جدول واحد بفلتر، بدل بوكسين بنفس الكلام متكرر.</li>' +
+            '<li>المصنعية والمصروفات جدول واحد بعمود «النوع»، بدل فورمين متطابقين.</li>' +
+            '<li>زراير الإجراءات السريعة بتفتح فورم صغير فوق، والفورم بيتقفل بعد ما تضيف.</li>' +
+            '</ul><p class="hint">جرّب: اضغط «تسجيل دفعة» أو «صرف خامة» من العمود الجانبي — الفورم هيفتح والأرقام هتتحدّث.</p></div>' +
+            '<div class="stage"><div><p class="frame-label">ديسكتوب <span>— العمود الجانبي ثابت مع السكرول</span></p>' +
+            '<div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body">' +
+
+            '<div class="d-head" style="border-radius:12px;border-bottom:1px solid var(--line);margin-bottom:14px">' +
+            '<div><h2>' + esc(DATA.room.name) + '</h2><div class="sub">العميل: <a href="#d2">' + esc(DATA.room.customer) + '</a> · أُنشئت ' + DATA.room.created + '</div></div>' +
+            '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span><div class="spacer"></div>' +
+            '<select aria-label="حالة الغرفة" style="width:auto"><option>تحت التنفيذ</option><option>مكتملة</option></select>' +
+            '<button class="btn btn-danger" data-act="toast" data-msg="هيفتح تأكيد حذف الغرفة">حذف الغرفة</button></div>' +
+
+            '<div class="ws"><div>' + drawer +
+            '<div class="sec"><div class="sec-head"><h3>مواد الغرفة</h3>' +
+            '<span class="tot">' + DATA.materials.length + ' مواد' + (t.shortCount ? ' · ' + t.shortCount + ' ناقصة' : '') + '</span></div>' +
+            '<div class="filters"><div class="seg">' +
+            ['all', 'خامة', 'اكسسوار'].map(function (f) {
+                return '<button aria-pressed="' + (state.d2Filter === f ? 'true' : 'false') + '" data-act="d2filter" data-f="' + f + '">' + (f === 'all' ? 'الكل' : f + 'ات') + '</button>';
+            }).join('') + '</div>' +
+            '<input class="search" type="search" placeholder="ابحث…" aria-label="بحث">' +
+            '<button class="btn btn-primary" data-act="openAdd" data-where="d2mat">+ إضافة</button></div>' +
+            (state.d3Add['d2mat'] ? '<div style="padding:0 13px 13px">' + addMatForm('d2mat') + '</div>' : '') +
+            materialsTable(state.d2Filter) + '</div>' +
+
+            '<div class="sec"><div class="sec-head"><h3>تكاليف الغرفة</h3>' +
+            '<span class="tot">مصنعية ' + money(t.labor) + ' · مصروفات ' + money(t.other) + '</span>' +
+            '<button class="btn btn-sm btn-primary" data-act="drawer" data-k="cost">+ تكلفة</button></div>' +
+            costsTable() + '</div>' +
+
+            '<div class="sec"><div class="sec-head"><h3>الدفعات</h3>' +
+            '<span class="tot">محصَّل ' + money(t.paid) + ' من ' + money(t.sale) + '</span>' +
+            '<button class="btn btn-sm btn-primary" data-act="drawer" data-k="pay">+ دفعة</button></div>' +
+            paymentsTable() + '</div>' +
+
+            '<div class="sec"><div class="sec-head"><h3>التسعير التقديري مقابل الفعلي</h3></div>' +
+            '<div style="padding:13px">' + pricingBlock() + '</div></div>' +
+
+            '</div><aside class="rail">' +
+            '<div class="rail-card rail-hero"><span class="lbl">المتبقي للتحصيل</span>' +
+            '<div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div>' +
+            '<div class="bar" style="margin-top:9px"><i style="width:' + t.pct + '%"></i></div>' +
+            '<div class="lbl" style="margin-top:6px">محصَّل ' + t.pct + '٪ · ' + money(t.paid) + ' من ' + money(t.sale) + '</div></div>' +
+            '<div class="rail-card">' +
+            '<div class="rail-row"><span class="k">سعر البيع</span><span class="v">' + m(t.sale) + '</span></div>' +
+            '<div class="rail-row"><span class="k">تكلفة الخامات</span><span class="v">' + m(t.mats) + '</span></div>' +
+            '<div class="rail-row"><span class="k">مصنعية + أخرى</span><span class="v">' + m(t.labor + t.other) + '</span></div>' +
+            '<div class="rail-row"><span class="k">إجمالي التكلفة</span><span class="v">' + m(t.total) + '</span></div>' +
+            '<div class="rail-row"><span class="k">الربح المتوقع</span><span class="v" style="color:var(--good)">' + m(t.profit) + '</span></div>' +
+            '<div class="comp" style="margin-top:10px">' +
+            '<i style="width:' + t.compMats + '%;background:#8f5024"></i><i style="width:' + t.compWork + '%;background:#c08a5e"></i><i style="width:' + profitPct + '%;background:#3f6b39"></i></div>' +
+            '<div class="comp-legend"><b style="--k:#8f5024">خامات ' + t.compMats + '٪</b><b style="--k:#3f6b39">ربح ' + profitPct + '٪</b></div></div>' +
+            '<div class="rail-card quick">' +
+            '<button class="btn btn-primary" data-act="drawer" data-k="issue">صرف خامة</button>' +
+            '<button class="btn" data-act="drawer" data-k="pay">تسجيل دفعة</button>' +
+            '<button class="btn" data-act="drawer" data-k="cost">إضافة مصنعية</button></div>' +
+            '</aside></div>' +
+
+            '</div></div></div>' +
+
+            '<div><p class="frame-label">موبايل <span>— العمود بيتحول كارت فوق</span></p>' +
+            '<div class="phone"><div class="phone-notch"></div><div class="phone-body">' +
+            '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+            '<div><div style="font-size:17px;font-weight:700">' + esc(DATA.room.name) + '</div>' +
+            '<div style="font-size:12px;color:var(--muted)">' + esc(DATA.room.customer) + '</div></div>' +
+            '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span></div>' +
+            '<div class="rail-card rail-hero" style="margin-top:11px"><span class="lbl">المتبقي للتحصيل</span>' +
+            '<div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div>' +
+            '<div class="bar" style="margin-top:9px"><i style="width:' + t.pct + '%"></i></div>' +
+            '<div class="lbl" style="margin-top:6px">محصَّل ' + t.pct + '٪ · ' + money(t.paid) + ' من ' + money(t.sale) + '</div></div>' +
+            // Same rows as the desktop rail — nothing is dropped on the phone.
+            '<div class="rail-card" style="margin-top:9px">' +
+            '<div class="rail-row"><span class="k">سعر البيع</span><span class="v">' + m(t.sale) + '</span></div>' +
+            '<div class="rail-row"><span class="k">تكلفة الخامات</span><span class="v">' + m(t.mats) + '</span></div>' +
+            '<div class="rail-row"><span class="k">مصنعية + أخرى</span><span class="v">' + m(t.labor + t.other) + '</span></div>' +
+            '<div class="rail-row"><span class="k">إجمالي التكلفة</span><span class="v">' + m(t.total) + '</span></div>' +
+            '<div class="rail-row"><span class="k">الربح المتوقع</span><span class="v" style="color:var(--good)">' + m(t.profit) + '</span></div>' +
+            '<div class="comp" style="margin-top:10px">' +
+            '<i style="width:' + t.compMats + '%;background:#8f5024"></i><i style="width:' + t.compWork + '%;background:#c08a5e"></i>' +
+            '<i style="width:' + profitPct + '%;background:#3f6b39"></i></div>' +
+            '<div class="comp-legend"><b style="--k:#8f5024">خامات ' + t.compMats + '٪</b>' +
+            '<b style="--k:#c08a5e">مصنعية وأخرى ' + t.compWork + '٪</b>' +
+            '<b style="--k:#3f6b39">ربح ' + profitPct + '٪</b></div></div>' +
+            (state.d2Drawer ? '<div style="margin-top:10px">' + drawer + '</div>' : '') +
+            '<div class="sec" style="margin-top:11px"><div class="sec-head"><h3>مواد الغرفة</h3><span class="tot">' + DATA.materials.length + '</span></div>' +
+            '<div style="padding:11px">' + materialsCards('all') + '</div></div>' +
+            '<div class="sec" style="margin-top:9px"><div class="sec-head"><h3>التكاليف</h3><span class="tot">' + money(t.labor + t.other) + '</span></div>' +
+            '<div style="padding:11px">' + costsCards() + '</div></div>' +
+            '<div class="sec" style="margin-top:9px"><div class="sec-head"><h3>الدفعات</h3><span class="tot">' + money(t.paid) + '</span></div>' +
+            '<div style="padding:11px">' + paymentsCards() + '</div></div>' +
+            '<div class="m-bottom"><button class="btn btn-primary" data-act="drawer" data-k="issue">صرف خامة</button>' +
+            '<button class="btn" data-act="drawer" data-k="pay">+ دفعة</button></div>' +
+            (state.toast ? '<div class="toast">' + esc(state.toast) + '</div>' : '') +
+            '</div></div></div></div>';
+    }
+
+    // ------------------------------------------------------------ design 3
+    function design3() {
+        var t = totals();
+        var secs = [
+            { k: 'materials', t: 'المواد', meta: DATA.materials.length + ' مواد' + (t.shortCount ? ' · ' + t.shortCount + ' ناقصة' : '') },
+            { k: 'costs', t: 'التكاليف', meta: money(t.labor + t.other) + ' ج.م' },
+            { k: 'payments', t: 'الدفعات', meta: money(t.paid) + ' من ' + money(t.sale) },
+            { k: 'pricing', t: 'التسعير التقديري', meta: 'فرق ' + money(t.total - (DATA.pricing.materials + DATA.pricing.accessories + DATA.pricing.labor + DATA.pricing.other)) },
+            { k: 'log', t: 'سجل التعديلات', meta: DATA.log.length + ' حركات' }
+        ];
+        function body(k, isMobile) {
+            if (k === 'materials') {
+                return (isMobile ? materialsCards('all') : materialsTable('all')) +
+                    (state.d3Add['d3mat' + (isMobile ? 'm' : '')] ? addMatForm('d3mat' + (isMobile ? 'm' : '')) :
+                        '<button class="btn btn-primary" style="margin-top:11px;width:100%" data-act="openAdd" data-where="d3mat' + (isMobile ? 'm' : '') + '">+ إضافة مادة</button>');
+            }
+            if (k === 'costs') {
+                return (isMobile ? costsCards() : costsTable()) +
+                    (state.d3Add['d3cost' + (isMobile ? 'm' : '')] ? addCostForm('d3cost' + (isMobile ? 'm' : '')) :
+                        '<button class="btn btn-primary" style="margin-top:11px;width:100%" data-act="openAdd" data-where="d3cost' + (isMobile ? 'm' : '') + '">+ إضافة تكلفة</button>');
+            }
+            if (k === 'payments') {
+                return (isMobile ? paymentsCards() : paymentsTable()) +
+                    (state.d3Add['d3pay' + (isMobile ? 'm' : '')] ? addPayForm('d3pay' + (isMobile ? 'm' : '')) :
+                        '<button class="btn btn-primary" style="margin-top:11px;width:100%" data-act="openAdd" data-where="d3pay' + (isMobile ? 'm' : '') + '">+ تسجيل دفعة</button>');
+            }
+            if (k === 'pricing') return pricingBlock();
+            return logBlock();
+        }
+        function accs(openMap, attr, isMobile) {
+            return secs.map(function (s) {
+                var open = openMap[s.k];
+                return '<div class="acc"><button class="acc-head" aria-expanded="' + (open ? 'true' : 'false') + '" data-act="' + attr + '" data-k="' + s.k + '">' +
+                    '<span class="t">' + s.t + '</span><span class="meta"><span class="num">' + esc(s.meta) + '</span><span class="caret">▾</span></span></button>' +
+                    (open ? '<div class="acc-body">' + body(s.k, isMobile) + '</div>' : '') + '</div>';
+            }).join('');
+        }
+
+        return '<div class="fixes"><h2>فكرة التصميم</h2><ul>' +
+            '<li>كل الأرقام في شريط واحد مضغوط — مش ٦ كروت كل واحد بحجم كارت.</li>' +
+            '<li>كل قسم بيتفتح ويتقفل، وإجماليه ظاهر وهو مقفول — تشوف الصورة كلها من غير ما تفتح حاجة.</li>' +
+            '<li>الإضافة سطر جوه القسم نفسه، بيظهر لما تضغط ويختفي بعد ما تضيف.</li>' +
+            '<li>الرسمة الفاضية مابتظهرش أصلًا بدل ما تاخد بلوك مكتوب فيه «مفيش بيانات».</li>' +
+            '</ul><p class="hint">جرّب: افتح «الدفعات» وسجّل دفعة، أو «التكاليف» وضيف مصنعية — الشريط فوق هيتحدّث.</p></div>' +
+            '<div class="stage"><div><p class="frame-label">ديسكتوب <span>— الأقسام مقفولة، تفتح اللي محتاجه</span></p>' +
+            '<div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body">' +
+
+            '<div class="ledger"><div class="ledger-top"><h2>' + esc(DATA.room.name) + '</h2>' +
+            '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span>' +
+            '<span style="color:var(--muted);font-size:12.5px">العميل: <a href="#d3" style="color:var(--accent);text-decoration:none">' + esc(DATA.room.customer) + '</a> · أُنشئت ' + DATA.room.created + '</span>' +
+            '<div style="flex:1 1 auto"></div>' +
+            '<select aria-label="حالة الغرفة" style="width:auto"><option>تحت التنفيذ</option><option>مكتملة</option></select>' +
+            '<button class="btn btn-danger btn-sm" data-act="toast" data-msg="هيفتح تأكيد حذف الغرفة">حذف</button></div>' +
+            '<div class="ledger-strip">' +
+            '<div class="cell"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+            '<div class="cell"><span class="lbl">خامات</span><div class="v">' + m(t.mats) + '</div></div>' +
+            '<div class="cell"><span class="lbl">مصنعية</span><div class="v">' + m(t.labor) + '</div></div>' +
+            '<div class="cell"><span class="lbl">أخرى</span><div class="v">' + m(t.other) + '</div></div>' +
+            '<div class="cell"><span class="lbl">الربح المتوقع</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div></div>' +
+            '<div class="cell"><span class="lbl">المتبقي</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div></div></div>' +
+            '<div style="margin-top:11px">' + compBar(t) + '</div></div>' +
+            accs(state.d3Open, 'd3acc', false) +
+
+            '</div></div></div>' +
+
+            '<div><p class="frame-label">موبايل</p><div class="phone"><div class="phone-notch"></div><div class="phone-body">' +
+            '<div class="ledger" style="padding:11px 12px"><div class="ledger-top">' +
+            '<h2 style="font-size:16px">' + esc(DATA.room.name) + '</h2><span class="pill pill-prog">' + esc(DATA.room.status) + '</span></div>' +
+            '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + esc(DATA.room.customer) + ' · ' + DATA.room.created + '</div>' +
+            '<div class="ledger-strip" style="margin-top:10px">' +
+            '<div class="cell" style="flex:1 1 44%"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+            '<div class="cell" style="flex:1 1 44%"><span class="lbl">التكلفة</span><div class="v">' + m(t.total) + '</div></div>' +
+            '<div class="cell" style="flex:1 1 44%;border-top:1px solid var(--line-soft)"><span class="lbl">الربح</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div></div>' +
+            '<div class="cell" style="flex:1 1 44%;border-top:1px solid var(--line-soft)"><span class="lbl">المتبقي</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div></div></div>' +
+            '<div style="margin-top:9px"><div class="comp">' +
+            '<i style="width:' + t.compMats + '%;background:#8f5024"></i><i style="width:' + t.compWork + '%;background:#c08a5e"></i>' +
+            '<i style="width:' + Math.max(0, 100 - t.compMats - t.compWork) + '%;background:#3f6b39"></i></div></div></div>' +
+            accs(state.d3OpenM, 'd3accm', true) +
+            (state.toast ? '<div class="toast" style="bottom:12px">' + esc(state.toast) + '</div>' : '') +
+            '</div></div></div></div>';
+    }
+
+    // -------------------------------------------------------------- render
+    function render() {
+        document.getElementById('d1').innerHTML = design1();
+        document.getElementById('d2').innerHTML = design2();
+        document.getElementById('d3').innerHTML = design3();
+        var old = document.querySelector('.toast-desk');
+        if (old) old.remove();
+        if (state.toast) {
+            var el = document.createElement('div');
+            el.className = 'toast toast-desk';
+            el.textContent = state.toast;
+            document.body.appendChild(el);
+        }
+    }
+
+    function val(where, field) {
+        var el = document.querySelector('[data-f="' + where + '-' + field + '"]');
+        return el ? el.value.trim() : '';
+    }
+    function toPiastres(v) {
+        var n = parseFloat(v);
+        return isNaN(n) ? 0 : Math.round(n * 100);
+    }
+
+    // -------------------------------------------------------------- events
+    document.addEventListener('change', function (e) {
+        var sel = e.target.closest('select[data-act="addType"]');
+        if (!sel) return;
+        state.addType[sel.dataset.where] = sel.value;
+        render();
+    });
+
+    document.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-act]');
+        if (!b) {
+            var sw = e.target.closest('.switch [role="tab"]');
+            if (sw) {
+                Array.prototype.forEach.call(document.querySelectorAll('.switch [role="tab"]'), function (t) {
+                    var on = t === sw;
+                    t.setAttribute('aria-selected', on ? 'true' : 'false');
+                    document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+                });
+            }
+            return;
+        }
+        var act = b.dataset.act, id = Number(b.dataset.id), k = b.dataset.k, where = b.dataset.where;
+
+        if (act === 'd1tab') { state.d1Tab = k; }
+        else if (act === 'd1tabm') { state.d1TabM = k; }
+        else if (act === 'd1filter') { state.d1Filter = b.dataset.f; }
+        else if (act === 'd2filter') { state.d2Filter = b.dataset.f; }
+        else if (act === 'd3acc') { state.d3Open[k] = !state.d3Open[k]; }
+        else if (act === 'd3accm') { state.d3OpenM[k] = !state.d3OpenM[k]; }
+        else if (act === 'openAdd') { state.d3Add[where] = true; }
+        else if (act === 'closeAdd') { state.d3Add[where] = false; }
+        else if (act === 'drawer') { state.d2Drawer = (state.d2Drawer === k ? null : k); }
+        else if (act === 'closeDrawer') { state.d2Drawer = null; }
+        else if (act === 'toast') { toast(b.dataset.msg); }
+        else if (act === 'issue') {
+            var mat = DATA.materials.filter(function (x) { return x.id === id; })[0];
+            if (mat) {
+                var take = Math.min(mat.required - mat.issued, mat.stock);
+                if (take <= 0) { toast('مفيش رصيد في المخزن من ' + mat.name); }
+                else {
+                    mat.issued += take; mat.stock -= take;
+                    mat.cost += take * 40000;
+                    toast('اتصرف ' + take + ' ' + mat.unit + ' من ' + mat.name);
+                }
+            }
+        }
+        else if (act === 'issueFromDrawer') {
+            var sel = document.querySelector('[data-f="d2issue-id"]');
+            var mm = sel ? DATA.materials.filter(function (x) { return x.id === Number(sel.value); })[0] : null;
+            if (mm) {
+                var tk = Math.min(mm.required - mm.issued, mm.stock);
+                if (tk <= 0) toast('مفيش رصيد في المخزن من ' + mm.name);
+                else { mm.issued += tk; mm.stock -= tk; mm.cost += tk * 40000; toast('اتصرف ' + tk + ' ' + mm.unit + ' من ' + mm.name); }
+            }
+            state.d2Drawer = null;
+        }
+        else if (act === 'delMat') { DATA.materials = DATA.materials.filter(function (x) { return x.id !== id; }); toast('اتشالت المادة'); }
+        else if (act === 'delCost') { DATA.costs = DATA.costs.filter(function (x) { return x.id !== id; }); toast('اتشالت التكلفة'); }
+        else if (act === 'delPay') { DATA.payments = DATA.payments.filter(function (x) { return x.id !== id; }); toast('اتشالت الدفعة'); }
+        else if (act === 'addCost') {
+            var amt = toPiastres(val(where, 'amount'));
+            if (amt <= 0) { toast('اكتب مبلغ صح الأول'); }
+            else {
+                DATA.costs.push({
+                    id: Date.now(), kind: val(where, 'kind') || 'مصنعية',
+                    desc: val(where, 'desc') || 'بدون وصف', amount: amt,
+                    date: '2026-10-15', method: 'كاش'
+                });
+                state.d3Add[where] = false; state.d2Drawer = null;
+                toast('اتسجلت التكلفة — الأرقام اتحدّثت');
+            }
+        }
+        else if (act === 'addPay') {
+            var pa = toPiastres(val(where, 'amount'));
+            if (pa <= 0) { toast('اكتب مبلغ صح الأول'); }
+            else {
+                var next = String(19 + DATA.payments.length).padStart(5, '0');
+                DATA.payments.push({
+                    id: Date.now(), receipt: next, amount: pa, date: '2026-10-15',
+                    method: val(where, 'method') || 'كاش', note: val(where, 'note')
+                });
+                state.d3Add[where] = false; state.d2Drawer = null;
+                toast('اتسجلت الدفعة — المتبقي اتحدّث');
+            }
+        }
+        else if (act === 'addMat') {
+            var q = parseInt(val(where, 'qty'), 10);
+            if (!q || q <= 0) { toast('اكتب كمية صح الأول'); }
+            else {
+                var raw = (val(where, 'name') || 'مادة جديدة|قطعة').split('|');
+                DATA.materials.push({
+                    id: Date.now(), name: raw[0], type: state.addType[where] || 'خامة', unit: raw[1] || 'قطعة',
+                    required: q, issued: 0, stock: Math.max(0, q - 2), cost: 0
+                });
+                state.d3Add[where] = false;
+                toast('اتضافت ' + raw[0] + ' للغرفة');
+            }
+        }
+        else { return; }
+
+        render();
+    });
+
+    render();
+})();
+</script>
