@@ -28,26 +28,34 @@
         الكروت دي بتعرض قيمة المخزن كلها دايمًا — البحث والفلتر بيؤثروا على الجدول اللي تحت بس.
     </p>
 
+    {{--
+        A rejected inline-row save flashes its input page-wide, and the row and
+        this form post the same field names — so when a row is reopening, the
+        quick-add fields are blanked explicitly instead of echoing values the
+        user typed into the table below. The errors are already separated by
+        the `materialRow` bag.
+    --}}
+    @php $quickBlank = $reopenId > 0 ? '' : null; @endphp
+
     <x-quick-add :action="route('inventory.materials.store')" title="إضافة مادة">
-        <x-quick-field name="name" label="اسم المادة" width="w-56" required />
+        <x-quick-field name="name" label="اسم المادة" width="w-56" :value="$quickBlank" required />
         <div>
             <label for="material_type_id" class="mb-1 block text-xs font-medium text-ink-soft">نوع الخامة</label>
             <select id="material_type_id" name="material_type_id" required class="w-40 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 <option value="">اختر النوع</option>
                 @foreach ($materialTypes as $materialType)
-                    <option value="{{ $materialType->id }}" @selected((string) old('material_type_id') === (string) $materialType->id)>{{ $materialType->name }}</option>
+                    <option value="{{ $materialType->id }}" @selected($reopenId === 0 && (string) old('material_type_id') === (string) $materialType->id)>{{ $materialType->name }}</option>
                 @endforeach
             </select>
             @error('material_type_id')
                 <p class="mt-1 text-xs text-danger">{{ $message }}</p>
             @enderror
         </div>
-        <x-quick-field name="unit" label="وحدة القياس" width="w-40" placeholder="مثال: لوح، متر، قطعة" required />
-        <x-quick-field name="unit_price" label="سعر الوحدة (ج.م)" inputmode="decimal" width="w-32" placeholder="125.50" required />
-        <x-quick-field name="quantity" label="كمية مبدئية" inputmode="decimal" width="w-32" placeholder="اتركها فاضية = صفر" />
-        <x-payment-method-select />
+        <x-quick-field name="unit" label="وحدة القياس" width="w-40" :value="$quickBlank" placeholder="مثال: لوح، متر، قطعة" required />
+        <x-quick-field name="unit_price" label="سعر الوحدة (ج.م)" inputmode="numeric" width="w-32" :value="$quickBlank" placeholder="125" required />
+        <x-quick-field name="quantity" label="كمية مبدئية" inputmode="numeric" width="w-32" :value="$quickBlank" placeholder="اتركها فاضية = صفر" />
         <p class="w-full text-xs text-secondary">
-            لو كتبت كمية مبدئية، هتتسجل كشراء: بتخصم من الخزنة بالتاريخ النهارده وبطريقة الدفع المختارة.
+            لو كتبت كمية مبدئية، هتتسجل كشراء: بتخصم من الخزنة بالتاريخ النهارده وكاش.
         </p>
     </x-quick-add>
 
@@ -93,24 +101,33 @@
         :empty="$search !== '' ? 'لا توجد مادة بهذا الاسم.' : ($selectedTypeId > 0 ? 'لا توجد مادة من النوع ده.' : null)"
     >
         @foreach ($materials as $material)
-            <tr>
-                <td class="px-4 py-2">{{ $material->name }}</td>
-                <td class="px-4 py-2">{{ $material->materialType?->name ?? '—' }}</td>
-                <td class="px-4 py-2">
-                    <x-quantity :amount="(int) ($stockByMaterial[$material->id] ?? 0)" :unit="$material->unit" />
-                </td>
-                <td class="px-4 py-2"><x-money :amount="$material->unit_price" /></td>
-                {{-- Priced by InventoryService, not by the view — the
-                     quantity × price rounding has exactly one implementation. --}}
-                <td class="px-4 py-2"><x-money :amount="$valueByMaterial[$material->id] ?? 0" /></td>
-                <td class="px-4 py-2 text-end">
-                    <a href="{{ route('inventory.materials.edit', $material) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
-                    <a href="{{ route('inventory.movements.index', ['q' => $material->name]) }}" class="ms-3 text-secondary hover:text-primary hover:underline">سجل الحركة</a>
-                    <x-delete-button :action="route('inventory.materials.destroy', $material)" class="ms-3" />
-                </td>
-            </tr>
+            <x-inventory.materials.row
+                :material="$material"
+                :stock="(int) ($stockByMaterial[$material->id] ?? 0)"
+                :value="$valueByMaterial[$material->id] ?? 0"
+                :material-types="$materialTypes"
+                :reopen="$reopenId === $material->id"
+            />
         @endforeach
     </x-data-table>
+
+    {{--
+        One save form per row, parked outside the table because a <form> around
+        a <tr> gets hoisted out by the HTML parser. The row's inputs join it
+        through their `form` attribute; `editing_id` tells a failed save which
+        row to reopen.
+    --}}
+    @foreach ($materials as $material)
+        <form id="material-edit-{{ $material->id }}" method="POST" action="{{ route('inventory.materials.update', $material) }}" class="hidden">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="editing_id" value="{{ $material->id }}">
+        </form>
+    @endforeach
+
+    <p class="mt-6 rounded-lg border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-ink-soft">
+        تنبيه: تغيير الكمية في الجدول بيتحرك بمبلغ حقيقي — الزيادة بتخصم من الخزنة والنقص بيزوّدها — بالتاريخ النهارده وكاش. تغيير سعر الوحدة لوحده ما بيحرّكش فلوس، لكنه بيغيّر قيمة المخزن كلها.
+    </p>
 
     <div class="mt-4">
         {{ $materials->links() }}

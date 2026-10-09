@@ -16,17 +16,17 @@ beforeEach(function () {
 });
 
 test('setting an opening balance creates a single transaction', function () {
-    $this->cashbox->setOpeningBalance(500_000, '2026-01-01');
+    $this->cashbox->setOpeningBalance(5_000, '2026-01-01');
 
-    expect($this->cashbox->balance())->toBe(500_000);
+    expect($this->cashbox->balance())->toBe(5_000);
     expect(CashboxTransaction::query()->where('kind', CashboxTransactionKind::OpeningBalance)->count())->toBe(1);
 });
 
 test('setting the opening balance again updates the existing row instead of inserting a new one', function () {
-    $this->cashbox->setOpeningBalance(500_000, '2026-01-01');
-    $this->cashbox->setOpeningBalance(700_000, '2026-01-02');
+    $this->cashbox->setOpeningBalance(5_000, '2026-01-01');
+    $this->cashbox->setOpeningBalance(7_000, '2026-01-02');
 
-    expect($this->cashbox->balance())->toBe(700_000);
+    expect($this->cashbox->balance())->toBe(7_000);
     expect(CashboxTransaction::query()->where('kind', CashboxTransactionKind::OpeningBalance)->count())->toBe(1);
 });
 
@@ -37,23 +37,23 @@ test('the opening balance cannot be negative', function () {
 test('recordIn and recordOut update the balance and totals correctly', function () {
     $source = User::factory()->create();
 
-    $this->cashbox->recordIn($source, 100_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
-    $this->cashbox->recordOut($source, 40_000, CashboxTransactionKind::Expense, '2026-01-02');
+    $this->cashbox->recordIn($source, 1_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
+    $this->cashbox->recordOut($source, 400, CashboxTransactionKind::Expense, '2026-01-02');
 
-    expect($this->cashbox->balance())->toBe(60_000);
-    expect($this->cashbox->totalIn())->toBe(100_000);
-    expect($this->cashbox->totalOut())->toBe(40_000);
+    expect($this->cashbox->balance())->toBe(600);
+    expect($this->cashbox->totalIn())->toBe(1_000);
+    expect($this->cashbox->totalOut())->toBe(400);
 });
 
 test('summary returns the same numbers as the individual total/balance methods, in one query', function () {
     $source = User::factory()->create();
-    $this->cashbox->recordIn($source, 100_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
-    $this->cashbox->recordOut($source, 40_000, CashboxTransactionKind::Expense, '2026-01-02');
+    $this->cashbox->recordIn($source, 1_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
+    $this->cashbox->recordOut($source, 400, CashboxTransactionKind::Expense, '2026-01-02');
 
     expect($this->cashbox->summary())->toBe([
-        'total_in' => 100_000,
-        'total_out' => 40_000,
-        'balance' => 60_000,
+        'total_in' => 1_000,
+        'total_out' => 400,
+        'balance' => 600,
     ]);
 });
 
@@ -68,7 +68,7 @@ test('summary returns zeroes when there are no transactions at all', function ()
 test('recordIn links the transaction to its source via the polymorphic relation', function () {
     $source = User::factory()->create();
 
-    $transaction = $this->cashbox->recordIn($source, 100_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
+    $transaction = $this->cashbox->recordIn($source, 1_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
 
     expect($transaction->source_type)->toBe(User::class);
     expect($transaction->source_id)->toBe($source->id);
@@ -77,9 +77,9 @@ test('recordIn links the transaction to its source via the polymorphic relation'
 
 test('removeFor deletes the transaction and restores the prior balance', function () {
     $source = User::factory()->create();
-    $this->cashbox->recordIn($source, 100_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
+    $this->cashbox->recordIn($source, 1_000, CashboxTransactionKind::CustomerPayment, '2026-01-01');
 
-    expect($this->cashbox->balance())->toBe(100_000);
+    expect($this->cashbox->balance())->toBe(1_000);
 
     $this->cashbox->removeFor($source);
 
@@ -89,7 +89,7 @@ test('removeFor deletes the transaction and restores the prior balance', functio
 
 test('updateFor changes the amount of the existing transaction without creating a new one', function () {
     $source = User::factory()->create();
-    $this->cashbox->recordOut($source, 2_000, CashboxTransactionKind::Expense, '2026-01-01');
+    $this->cashbox->recordOut($source, 20, CashboxTransactionKind::Expense, '2026-01-01');
 
     $this->cashbox->updateFor($source, 2_500);
 
@@ -117,7 +117,7 @@ test('recordOut rejects a negative amount', function () {
 
 test('updateFor rejects a non-positive amount', function () {
     $source = User::factory()->create();
-    $this->cashbox->recordOut($source, 2_000, CashboxTransactionKind::Expense, '2026-01-01');
+    $this->cashbox->recordOut($source, 20, CashboxTransactionKind::Expense, '2026-01-01');
 
     $this->cashbox->updateFor($source, 0);
 })->throws(InvalidArgumentException::class);
@@ -125,11 +125,11 @@ test('updateFor rejects a non-positive amount', function () {
 test('the full reference scenario from docs/tasks.md produces the exact expected balance', function () {
     $source = User::factory()->create();
 
-    $this->cashbox->setOpeningBalance(1_000_000, '2026-01-01');
-    $this->cashbox->recordOut($source, 30_000, CashboxTransactionKind::InventoryPurchase, '2026-01-02');
-    $this->cashbox->recordOut($source, 120_000, CashboxTransactionKind::InventoryPurchase, '2026-01-03');
-    $this->cashbox->recordIn($source, 1_000_000, CashboxTransactionKind::CustomerPayment, '2026-01-04');
-    $this->cashbox->recordOut($source, 200_000, CashboxTransactionKind::Expense, '2026-01-05');
+    $this->cashbox->setOpeningBalance(10_000, '2026-01-01');
+    $this->cashbox->recordOut($source, 300, CashboxTransactionKind::InventoryPurchase, '2026-01-02');
+    $this->cashbox->recordOut($source, 1_200, CashboxTransactionKind::InventoryPurchase, '2026-01-03');
+    $this->cashbox->recordIn($source, 10_000, CashboxTransactionKind::CustomerPayment, '2026-01-04');
+    $this->cashbox->recordOut($source, 2_000, CashboxTransactionKind::Expense, '2026-01-05');
 
-    expect($this->cashbox->balance())->toBe(1_650_000);
+    expect($this->cashbox->balance())->toBe(16_500);
 });

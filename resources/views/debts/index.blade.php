@@ -3,7 +3,7 @@
 
     <x-quick-add :action="route('debts.store')" title="تسجيل دين">
         <x-quick-field name="creditor" label="لمين" width="w-48" required />
-        <x-quick-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" width="w-32" required />
+        <x-quick-field name="amount" label="المبلغ (ج.م)" type="number" step="1" min="0" width="w-32" required />
         <x-quick-field name="incurred_at" label="تاريخ الدين" type="date" width="w-40" :value="old('incurred_at', now()->toDateString())" required />
         <x-quick-field name="due_at" label="ميعاد السداد" type="date" width="w-40" />
         <x-quick-field name="note" label="ملاحظة" width="w-56" />

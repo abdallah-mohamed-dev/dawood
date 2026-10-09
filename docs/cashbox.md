@@ -5,7 +5,7 @@
 | الحقل | النوع | ملاحظات |
 |---|---|---|
 | `type` | enum | `in` (دخول) / `out` (خروج) |
-| `amount` | مبلغ (قروش) | دائمًا **موجب** — الاتجاه يُحدَّد من `type` لا من إشارة الرقم |
+| `amount` | مبلغ (جنيه، رقم صحيح) | دائمًا **موجب** — الاتجاه يُحدَّد من `type` لا من إشارة الرقم |
 | `source_type` / `source_id` | polymorphic nullable | العملية الأصلية؛ `null` للرصيد الافتتاحي فقط |
 | `kind` | نص | `opening_balance` / `customer_payment` / `inventory_purchase` / `expense` / `partner_withdrawal` / `room_labor` / `room_expense` |
 | `payment_method` | enum nullable | كاش / محفظة / انستاباي / شيك / فيزا — انظر أدناه |

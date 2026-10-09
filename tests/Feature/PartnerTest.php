@@ -23,7 +23,7 @@ test('the partner create and edit pages render', function () {
     $this->actingAs($this->admin)->get(route('partners.edit', $partner))
         ->assertOk()
         ->assertSee('تعديل شريك')
-        ->assertSee('15.00'); // prefilled percentage shown as a decimal
+        ->assertSee('15'); // prefilled percentage shown as a decimal
 });
 
 test('a partner can be created, storing its percentage scaled ×100', function () {
@@ -99,7 +99,7 @@ test('recording a withdrawal creates a partner_withdrawal cashbox outflow', func
     $partner = Partner::factory()->create(['percentage' => 2000]);
 
     $response = $this->actingAs($this->admin)->post(route('partners.withdrawals.store', $partner), [
-        'amount' => '2000.00',
+        'amount' => '2000',
         'occurred_at' => '2026-01-01',
         'note' => 'سحب شخصي',
         'payment_method' => 'cash',
@@ -108,18 +108,18 @@ test('recording a withdrawal creates a partner_withdrawal cashbox outflow', func
     $response->assertRedirect();
 
     $withdrawal = PartnerWithdrawal::query()->sole();
-    expect($withdrawal->getRawOriginal('amount'))->toBe(200_000);
+    expect($withdrawal->getRawOriginal('amount'))->toBe(2_000);
 
     $transaction = CashboxTransaction::query()->sole();
     expect($transaction->source_type)->toBe(PartnerWithdrawal::class);
     expect($transaction->source_id)->toBe($withdrawal->id);
     expect($transaction->kind)->toBe(CashboxTransactionKind::PartnerWithdrawal);
-    expect(app(CashboxService::class)->balance())->toBe(-200_000);
+    expect(app(CashboxService::class)->balance())->toBe(-2_000);
 });
 
 test('deleting a withdrawal restores the cashbox balance', function () {
     $partner = Partner::factory()->create(['percentage' => 2000]);
-    $withdrawal = PartnerWithdrawal::factory()->for($partner)->create(['amount' => 200_000]);
+    $withdrawal = PartnerWithdrawal::factory()->for($partner)->create(['amount' => 2_000]);
 
     $response = $this->actingAs($this->admin)->delete(route('partners.withdrawals.destroy', [$partner, $withdrawal]));
 
@@ -130,18 +130,18 @@ test('deleting a withdrawal restores the cashbox balance', function () {
 });
 
 test('the partner show page lists the share, withdrawals, and remaining', function () {
-    Room::factory()->completed()->create(['sale_price' => 2_500_000]);
+    Room::factory()->completed()->create(['sale_price' => 25_000]);
     $partner = Partner::factory()->create(['name' => 'أحمد', 'percentage' => 2000]);
-    PartnerWithdrawal::factory()->for($partner)->create(['amount' => 200_000]); // 2,000 EGP
+    PartnerWithdrawal::factory()->for($partner)->create(['amount' => 2_000]); // 2,000 EGP
 
     $response = $this->actingAs($this->admin)->get(route('partners.show', $partner));
 
     $response->assertOk()
         ->assertSee('أحمد')
         ->assertSee('نسبة الشريك: 20.00%')
-        ->assertSeeText('5,000.00 ج.م') // share
-        ->assertSeeText('2,000.00 ج.م') // withdrawn
-        ->assertSeeText('3,000.00 ج.م'); // remaining
+        ->assertSeeText('5,000 ج.م') // share
+        ->assertSeeText('2,000 ج.م') // withdrawn
+        ->assertSeeText('3,000 ج.م'); // remaining
 });
 
 test('deleting a partner with withdrawals is rejected', function () {
@@ -155,7 +155,7 @@ test('deleting a partner with withdrawals is rejected', function () {
 });
 
 test('the partners index shows the computed figures for each partner', function () {
-    Room::factory()->completed()->create(['sale_price' => 2_500_000]);
+    Room::factory()->completed()->create(['sale_price' => 25_000]);
     $partner = Partner::factory()->create(['name' => 'أحمد', 'percentage' => 2000]);
 
     $response = $this->actingAs($this->admin)->get(route('partners.index'));
@@ -163,7 +163,7 @@ test('the partners index shows the computed figures for each partner', function 
     $response->assertOk()
         ->assertSee('أحمد')
         ->assertSee('20.00%')
-        ->assertSeeText('5,000.00 ج.م'); // share of a 25,000 EGP net profit at 20%
+        ->assertSeeText('5,000 ج.م'); // share of a 25,000 EGP net profit at 20%
 });
 
 test('a partner can be added without an email', function () {

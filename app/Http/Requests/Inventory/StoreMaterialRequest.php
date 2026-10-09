@@ -4,7 +4,6 @@ namespace App\Http\Requests\Inventory;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
-use App\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -44,12 +43,8 @@ class StoreMaterialRequest extends FormRequest
             // can be catalogued before anything is bought for it. The pattern
             // rejects a negative quantity; zero is a legal "no stock yet".
             'quantity' => ['sometimes', 'regex:'.QuantityCast::validationPattern()],
-            // Only needed when the material actually arrives with stock, since
-            // that is the one case where money leaves the cashbox.
-            'payment_method' => [
-                Rule::requiredIf(fn (): bool => $this->openingQuantityIsPositive()),
-                Rule::enum(PaymentMethod::class),
-            ],
+            // No payment_method rule: buying stock is always cash (specs/023),
+            // so the form never asks and the controller never reads a choice.
         ];
     }
 
@@ -68,20 +63,5 @@ class StoreMaterialRequest extends FormRequest
             'unit.required' => 'حقل الوحدة مطلوب.',
             'quantity.regex' => 'قيمة الكمية غير صالحة.',
         ];
-    }
-
-    /**
-     * Whether the quick-add form is opening the material with stock in it.
-     * Input that is not a parsable decimal is left to the `quantity` rule —
-     * this must not throw, or a typo would surface as a 500 instead of a
-     * validation message.
-     */
-    private function openingQuantityIsPositive(): bool
-    {
-        $quantity = $this->input('quantity');
-
-        return is_string($quantity)
-            && preg_match(QuantityCast::validationPattern(), $quantity) === 1
-            && QuantityCast::toScaledInt($quantity) > 0;
     }
 }

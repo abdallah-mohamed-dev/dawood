@@ -20,7 +20,7 @@ test('adding a material shows it listed with its unit', function () {
         'name' => 'لوح MDF',
         'unit' => 'لوح',
         'material_type_id' => MaterialType::query()->where('name', 'خامة')->value('id'),
-        'unit_price' => '120.00',
+        'unit_price' => '120',
     ])->assertRedirect(route('inventory.materials.index'));
 
     $response = $this->actingAs($this->admin)->get(route('inventory.materials.index'));
@@ -69,15 +69,28 @@ test('a material can be edited', function () {
         'name' => 'اسم محدث',
         'unit' => 'متر',
         'material_type_id' => $material->material_type_id,
-        'unit_price' => '75.50',
+        'unit_price' => '75',
         'quantity' => '0',
-        'payment_method' => 'cash',
     ])->assertRedirect(route('inventory.materials.index'));
 
     $material->refresh();
     expect($material->name)->toBe('اسم محدث');
     expect($material->unit)->toBe('متر');
-    expect($material->unit_price)->toBe('75.50');
+    expect($material->unit_price)->toBe('75');
+});
+
+test('a unit price with piastres is rejected: money is whole pounds', function () {
+    $material = Material::factory()->create();
+
+    $this->actingAs($this->admin)->put(route('inventory.materials.update', $material), [
+        'name' => 'اسم محدث',
+        'unit' => 'متر',
+        'material_type_id' => $material->material_type_id,
+        'unit_price' => '75.50',
+        'quantity' => '0',
+    ])->assertSessionHasErrors('unit_price', null, 'materialRow');
+
+    expect($material->fresh()->name)->not->toBe('اسم محدث');
 });
 
 test('updating a material to its own current name does not fail uniqueness validation', function () {
@@ -89,7 +102,6 @@ test('updating a material to its own current name does not fail uniqueness valid
         'material_type_id' => $material->material_type_id,
         'unit_price' => '40',
         'quantity' => '0',
-        'payment_method' => 'cash',
     ]);
 
     $response->assertSessionDoesntHaveErrors();
@@ -105,10 +117,9 @@ test('renaming a material to another existing material name fails validation', f
         'material_type_id' => $material->material_type_id,
         'unit_price' => '40',
         'quantity' => '0',
-        'payment_method' => 'cash',
     ]);
 
-    $response->assertSessionHasErrors('name');
+    $response->assertSessionHasErrors('name', null, 'materialRow');
     expect($material->fresh()->name)->toBe('خشب زان');
 });
 
@@ -208,14 +219,14 @@ test('the stock column is only summed for the materials on the current page', fu
     $inventory = app(InventoryService::class);
 
     $onPageOne = Material::factory()->create(['name' => 'أ مادة أولى']);
-    $inventory->addStock($onPageOne, 5_000, 10_000, '2026-01-01');
+    $inventory->addStock($onPageOne, 5, 100, '2026-01-01');
 
     Material::factory()->count(60)->sequence(fn ($sequence) => [
         'name' => 'ب مادة '.str_pad((string) ($sequence->index + 1), 3, '0', STR_PAD_LEFT),
     ])->create();
 
     $onPageTwo = Material::factory()->create(['name' => 'ي مادة أخيرة']);
-    $inventory->addStock($onPageTwo, 7_000, 10_000, '2026-01-01');
+    $inventory->addStock($onPageTwo, 7, 100, '2026-01-01');
 
     // Page one must not pay for reading page two's quantities.
     $ids = [];

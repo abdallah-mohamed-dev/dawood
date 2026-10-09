@@ -145,19 +145,19 @@ test('completed and cancelled rooms are archived; in-progress and draft rooms ca
 
 test('work in progress carries forward at its cost', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
-    RoomCost::factory()->create(['room_id' => $room->id, 'type' => RoomCostType::Labor, 'amount' => 700_000]);
+    RoomCost::factory()->create(['room_id' => $room->id, 'type' => RoomCostType::Labor, 'amount' => 7_000]);
 
     $this->seasons->close('2026-06-30');
 
-    expect(Season::query()->where('number', 1)->toBase()->value('wip_carried_forward'))->toBe(700_000);
+    expect(Season::query()->where('number', 1)->toBase()->value('wip_carried_forward'))->toBe(7_000);
     expect(RoomCost::query()->where('room_id', $room->id)->value('season_id'))->toBeNull();
 });
 
 test('cashbox balance and stock value do not change when a season closes', function () {
     $cashbox = app(CashboxService::class);
     $inventory = app(InventoryService::class);
-    $material = Material::factory()->create(['unit_price' => 10_000]);
-    $inventory->addStock($material, 5_000, 10_000, '2026-02-01', PaymentMethod::Cash);
+    $material = Material::factory()->create(['unit_price' => 100]);
+    $inventory->addStock($material, 5, 100, '2026-02-01', PaymentMethod::Cash);
     seasonProfit(10_000_000, 4_000_000, 1_000_000, 2_000_000);
 
     $balance = $cashbox->balance();

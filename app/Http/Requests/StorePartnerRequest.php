@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Casts\MoneyCast;
+use App\Casts\PercentageCast;
 use App\Models\Partner;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -26,10 +26,10 @@ class StorePartnerRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'percentage' => [
                 'required',
-                'regex:'.MoneyCast::validationPattern(),
+                'regex:'.PercentageCast::validationPattern(),
                 function (string $attribute, mixed $value, Closure $fail): void {
                     try {
-                        $newPercentage = MoneyCast::toScaledInt((string) $value);
+                        $newPercentage = PercentageCast::toScaledInt((string) $value);
                     } catch (InvalidArgumentException) {
                         $fail('قيمة النسبة غير صالحة.');
 

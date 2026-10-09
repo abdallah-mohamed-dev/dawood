@@ -3,7 +3,7 @@
 
     <x-quick-add :action="route('capital.store')" title="إضافة بند">
         <x-quick-field name="name" label="البند" width="w-56" required />
-        <x-quick-field name="amount" label="السعر (ج.م)" type="number" step="0.01" min="0" width="w-40" required />
+        <x-quick-field name="amount" label="السعر (ج.م)" type="number" step="1" min="0" width="w-40" required />
         <x-quick-field name="occurred_at" label="التاريخ" type="date" width="w-44" required />
         <x-quick-field name="note" label="ملاحظات" width="w-64" />
     </x-quick-add>

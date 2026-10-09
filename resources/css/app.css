@@ -63,3 +63,10 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Tailwind's preflight zeroes every element's margin, which strips the
+   browser default that centers an open <dialog> (margin: auto). Restore it
+   here once instead of adding centering classes to every dialog. */
+dialog[open] {
+    margin: auto;
+}

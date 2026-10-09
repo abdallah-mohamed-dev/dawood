@@ -18,6 +18,7 @@ use App\Http\Requests\StoreRoomCostRequest;
 use App\Http\Requests\StoreRoomMaterialRequest;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomMaterialRequest;
+use App\Http\Requests\UpdateRoomRequest;
 use App\Models\ActivityLog;
 use App\Models\Customer;
 use App\Models\CustomerPayment;
@@ -126,6 +127,26 @@ class RoomController extends Controller
         ]);
 
         return redirect()->route('rooms.show', $room)->with('success', 'تم إنشاء الغرفة.');
+    }
+
+    public function update(UpdateRoomRequest $request, Room $room): RedirectResponse
+    {
+        if ($room->status === RoomStatus::Completed) {
+            return back()->with('error', 'الغرفة مكتملة، ما ينفعش تتعدل بياناتها الأساسية.');
+        }
+
+        try {
+            $salePrice = MoneyCast::toScaledInt($request->string('sale_price')->toString());
+        } catch (InvalidArgumentException) {
+            return back()->withInput()->withErrors(['sale_price' => 'قيمة سعر البيع غير صالحة.']);
+        }
+
+        $room->update([
+            'room_type' => $request->string('room_type')->toString(),
+            'sale_price' => $salePrice,
+        ]);
+
+        return back()->with('success', 'تم تحديث بيانات الغرفة.');
     }
 
     public function show(Room $room): View

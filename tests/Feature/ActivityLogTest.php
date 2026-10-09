@@ -40,15 +40,15 @@ test('renaming a customer records the old and new name', function () {
     ]);
 });
 
-test('editing a payment amount records pounds, not piastres', function () {
+test('editing a payment amount records readable pounds, not the raw column', function () {
     $room = Room::factory()->create();
-    $payment = CustomerPayment::factory()->for($room)->create(['amount' => '1000.00']);
+    $payment = CustomerPayment::factory()->for($room)->create(['amount' => '1000']);
 
-    $payment->update(['amount' => '1500.00']);
+    $payment->update(['amount' => '1500']);
 
     $log = logsFor(CustomerPayment::class, $payment->id)->where('event', 'updated')->sole();
 
-    expect($log->changes['amount'])->toBe(['old' => '1,000.00', 'new' => '1,500.00']);
+    expect($log->changes['amount'])->toBe(['old' => '1,000', 'new' => '1,500']);
 });
 
 test('deleting a customer records a deleted row with a readable label', function () {

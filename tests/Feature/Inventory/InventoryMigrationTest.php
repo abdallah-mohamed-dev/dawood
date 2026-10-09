@@ -110,15 +110,17 @@ beforeEach(function () {
 test('the material keeps what its batches still hold', function () {
     $material = DB::table('materials')->where('id', $this->materialA->id)->first();
 
-    // 1000 still left from batch A1 + 2000 from batch A2
-    expect((int) $material->quantity)->toBe(3000);
+    // 1000 still left from batch A1 + 2000 from batch A2 = 3000 thousandths,
+    // which specs/023's migration turns into 3 whole units.
+    expect((int) $material->quantity)->toBe(3);
 });
 
 test('the material takes the newest batch price', function () {
     $material = DB::table('materials')->where('id', $this->materialA->id)->first();
 
-    // batch A2 (2026-02-01) is newer than A1 (2026-01-01): 12000, not 10000
-    expect((int) $material->unit_price)->toBe(12000);
+    // batch A2 (2026-02-01) is newer than A1 (2026-01-01): 12000 piastres,
+    // not 10000 — and specs/022's migration turns that into 120 pounds.
+    expect((int) $material->unit_price)->toBe(120);
 });
 
 test('a material that never had a batch ends up at zero', function () {
@@ -128,17 +130,20 @@ test('a material that never had a batch ends up at zero', function () {
         ->and((int) $material->unit_price)->toBe(0);
 });
 
-test('the cashbox balance is identical before and after the migrations', function () {
-    expect($this->balanceBefore)->toBe(-90000)
-        ->and($this->outBefore)->toBe(90000)
-        ->and(app(CashboxService::class)->balance())->toBe($this->balanceBefore)
-        ->and(app(CashboxService::class)->totalOut())->toBe($this->outBefore);
+test('the cashbox balance survives the migrations, rescaled into whole pounds', function () {
+    // The rows went in as the batch era wrote them — piastres. specs/022's
+    // migration runs in the same batch, so every amount comes out divided by
+    // 100 and nothing else about the balance moves.
+    expect($this->balanceBefore)->toBe(-90_000)
+        ->and($this->outBefore)->toBe(90_000)
+        ->and(app(CashboxService::class)->balance())->toBe(intdiv($this->balanceBefore, 100))
+        ->and(app(CashboxService::class)->totalOut())->toBe(intdiv($this->outBefore, 100));
 });
 
 test('no cashbox row is deleted or re-amounted', function () {
     expect(DB::table('cashbox_transactions')->count())->toBe($this->rowsBefore);
 
-    foreach ([[$this->cashboxA1, 30000], [$this->cashboxA2, 60000]] as [$id, $amount]) {
+    foreach ([[$this->cashboxA1, 300], [$this->cashboxA2, 600]] as [$id, $amount]) {
         $row = DB::table('cashbox_transactions')->where('id', $id)->first();
 
         expect((int) $row->amount)->toBe($amount)
@@ -164,8 +169,9 @@ test('the movements themselves survive with their amounts', function () {
 
     $movement = DB::table('inventory_movements')->where('id', $this->movementA1)->first();
 
-    expect((int) $movement->quantity)->toBe(3000)
-        ->and((int) $movement->cost)->toBe(30000)
+    // Seeded as 3000 thousandths; specs/023's migration makes that 3 units.
+    expect((int) $movement->quantity)->toBe(3)
+        ->and((int) $movement->cost)->toBe(300)
         ->and($movement->type)->toBe('in');
 });
 

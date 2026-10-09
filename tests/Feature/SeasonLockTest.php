@@ -43,17 +43,17 @@ beforeEach(function () {
     $this->cashbox = app(CashboxService::class);
 
     // A completed room, an expense and a cost — all sealed by the close below.
-    $this->room = Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 1_000_000]);
+    $this->room = Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 10_000]);
     $this->expense = Expense::factory()->create([
         'expense_category_id' => ExpenseCategory::factory()->create()->id,
-        'amount' => 50_000,
+        'amount' => 500,
         'occurred_at' => '2026-02-01',
     ]);
-    $this->cost = RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 20_000]);
+    $this->cost = RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 200]);
     $this->requirement = RoomMaterial::factory()->create([
         'room_id' => $this->room->id,
         'material_id' => Material::factory()->create()->id,
-        'required_quantity' => 1_000,
+        'required_quantity' => 1,
         'issued_quantity' => 0,
         'cost' => 0,
     ]);
@@ -67,7 +67,7 @@ test('an expense from a closed season cannot be edited or deleted', function () 
     expect(fn () => app(ExpenseService::class)->delete($this->expense->fresh()))
         ->toThrow(SeasonClosedException::class);
 
-    expect($this->expense->fresh()->getRawOriginal('amount'))->toBe(50_000);
+    expect($this->expense->fresh()->getRawOriginal('amount'))->toBe(500);
 });
 
 test('an expense from a closed season is refused over HTTP with an Arabic message', function () {
@@ -75,7 +75,7 @@ test('an expense from a closed season is refused over HTTP with an Arabic messag
         ->put(route('expenses.update', $this->expense->fresh()), ['amount' => '990', 'payment_method' => 'cash'])
         ->assertSessionHas('error', 'الموسم ده مقفول، والبيانات دي للقراءة بس.');
 
-    expect($this->expense->fresh()->getRawOriginal('amount'))->toBe(50_000);
+    expect($this->expense->fresh()->getRawOriginal('amount'))->toBe(500);
 });
 
 test('a room cost from a closed season cannot be deleted', function () {
@@ -84,7 +84,7 @@ test('a room cost from a closed season cannot be deleted', function () {
 });
 
 test('a new cost cannot be added to a sealed room', function () {
-    expect(fn () => app(RoomCostService::class)->create($this->room->fresh(), RoomCostType::Other, 5_000, '2026-07-01'))
+    expect(fn () => app(RoomCostService::class)->create($this->room->fresh(), RoomCostType::Other, 50, '2026-07-01'))
         ->toThrow(SeasonClosedException::class);
 });
 
@@ -113,18 +113,18 @@ test('a customer payment on a completed room from a closed season still goes thr
     $balance = $this->cashbox->balance();
     $profit = $this->profit->netProfit();
 
-    $payment = app(CustomerPaymentService::class)->create($this->room->fresh(), 300_000, '2026-07-05');
+    $payment = app(CustomerPaymentService::class)->create($this->room->fresh(), 3_000, '2026-07-05');
 
     expect(CustomerPayment::query()->whereKey($payment->id)->exists())->toBeTrue();
-    expect($this->cashbox->balance())->toBe($balance + 300_000);
+    expect($this->cashbox->balance())->toBe($balance + 3_000);
     expect($this->profit->netProfit())->toBe($profit);
 });
 
 test('a customer payment on a closed season room can also be edited and deleted (ق-5)', function () {
-    $payment = app(CustomerPaymentService::class)->create($this->room->fresh(), 300_000, '2026-07-05');
+    $payment = app(CustomerPaymentService::class)->create($this->room->fresh(), 3_000, '2026-07-05');
 
-    app(CustomerPaymentService::class)->update($payment->fresh(), 250_000);
-    expect($payment->fresh()->getRawOriginal('amount'))->toBe(250_000);
+    app(CustomerPaymentService::class)->update($payment->fresh(), 2_500);
+    expect($payment->fresh()->getRawOriginal('amount'))->toBe(2_500);
 
     app(CustomerPaymentService::class)->delete($payment->fresh());
     expect(CustomerPayment::query()->whereKey($payment->id)->exists())->toBeFalse();
@@ -136,7 +136,7 @@ test('a closed season leaves the open season profit empty', function () {
 
 test('a withdrawal from a closed season cannot be deleted', function () {
     $partner = Partner::factory()->create(['percentage' => 2_000]);
-    $withdrawal = app(PartnerService::class)->withdraw($partner, 10_000, '2026-03-01');
+    $withdrawal = app(PartnerService::class)->withdraw($partner, 100, '2026-03-01');
 
     $this->seasons->close('2026-12-31');
 

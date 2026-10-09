@@ -43,7 +43,7 @@
             @enderror
         </div>
 
-        <x-quick-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" width="w-32" required />
+        <x-quick-field name="amount" label="المبلغ (ج.م)" type="number" step="1" min="0" width="w-32" required />
         <x-quick-field name="occurred_at" label="التاريخ" type="date" width="w-40" :value="old('occurred_at', now()->toDateString())" required />
         <x-quick-field name="description" label="الوصف" width="w-56" />
 

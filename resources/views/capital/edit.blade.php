@@ -6,7 +6,7 @@
         @method('PUT')
 
         <x-field name="name" label="البند" :value="old('name', $item->name)" required autofocus />
-        <x-field name="amount" label="السعر (ج.م)" type="number" step="0.01" min="0" :value="old('amount', $item->amount)" required />
+        <x-field name="amount" label="السعر (ج.م)" type="number" step="1" min="0" :value="old('amount', $item->amount)" required />
         <x-field name="occurred_at" label="التاريخ" type="date" :value="old('occurred_at', $item->occurred_at->format('Y-m-d'))" required />
         <x-field name="note" label="ملاحظات" :value="old('note', $item->note)" />
 

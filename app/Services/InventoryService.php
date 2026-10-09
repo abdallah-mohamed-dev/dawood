@@ -21,8 +21,8 @@ use InvalidArgumentException;
  * quantity and one price; there are no batches and no price layers, so every
  * quantity × price product in the system goes through cost() below.
  *
- * All quantities/costs passed in and out are raw scaled integers
- * (QuantityCast ×1000 / MoneyCast ×100), never floats.
+ * All quantities/costs passed in and out are raw integers from the casts —
+ * whole units (QuantityCast) and whole pounds (MoneyCast) — never floats.
  */
 class InventoryService
 {
@@ -48,14 +48,10 @@ class InventoryService
             throw new InvalidArgumentException('Unit price must be greater than zero.');
         }
 
-        // A tiny quantity at a tiny price (e.g. 0.001 × 0.01) can round down to
-        // exactly 0 piastres — CashboxService rejects a 0 amount, so this must
-        // be caught here with a clear message rather than letting that rejection
-        // surface confusingly from inside the transaction.
+        // No zero-cost guard here: both guards above enforce a positive whole
+        // number, and cost() is now a plain multiplication, so the cheapest
+        // purchase this method can build is 1 unit × 1 EGP = 1 EGP.
         $cost = $this->cost($quantity, $unitPrice);
-        if ($cost <= 0) {
-            throw new InvalidArgumentException('التكلفة بتقرّب لصفر — زوّد الكمية أو سعر الوحدة.');
-        }
 
         return DB::transaction(function () use ($material, $quantity, $unitPrice, $cost, $date, $method) {
             $material = $this->lockMaterial($material);
@@ -102,7 +98,7 @@ class InventoryService
 
             $amount = $this->cost($quantity, $material->getRawOriginal('unit_price'));
             if ($amount <= 0) {
-                throw new InvalidArgumentException('التكلفة بتقرّب لصفر — المادة سعرها صفر.');
+                throw new InvalidArgumentException('سعر وحدة المادة صفر، فالحركة دي قيمتها صفر.');
             }
 
             $material->update(['quantity' => $available - $quantity]);
@@ -163,7 +159,7 @@ class InventoryService
 
             $cost = $this->cost($quantity, $material->getRawOriginal('unit_price'));
             if ($cost <= 0) {
-                throw new InvalidArgumentException('التكلفة بتقرّب لصفر — المادة سعرها صفر.');
+                throw new InvalidArgumentException('سعر وحدة المادة صفر، فالحركة دي قيمتها صفر.');
             }
 
             $material->update(['quantity' => $available - $quantity]);
@@ -274,26 +270,24 @@ class InventoryService
     /**
      * The unit price a past purchase was made at, recovered from the two
      * numbers the movement actually stores (its total cost and its quantity).
-     * This is the inverse of cost(), and it lives here next to it so the
-     * mixed-scale ×1000 rule stays in one file (CLAUDE.md rule 2) instead of
-     * being re-derived in a controller.
+     * This is the inverse of cost(), and it lives here next to it so both
+     * directions of the quantity × price relationship stay in one file.
      *
-     * Note: cost() rounds to the nearest piastre on the way in, so for an
-     * awkward quantity the recovered price can differ from the typed one by
-     * a piastre. It is a faithful reading of what was stored, not a second
-     * source of truth — nothing is ever written back from it.
+     * Rounded half up, because a movement recorded before specs/023 converted
+     * quantities to whole units can hold a cost that is not an exact multiple
+     * of its quantity. It is a faithful reading of what was stored, not a
+     * second source of truth — nothing is ever written back from it.
      */
-    public function unitPriceOf(int $scaledQuantity, int $costPiastres): int
+    public function unitPriceOf(int $quantity, int $cost): int
     {
-        if ($scaledQuantity === 0) {
+        if ($quantity === 0) {
             return 0;
         }
 
-        $product = $costPiastres * 1000;
-        $whole = intdiv($product, $scaledQuantity);
-        $remainder = $product % $scaledQuantity;
+        $whole = intdiv($cost, $quantity);
+        $remainder = $cost % $quantity;
 
-        return $remainder * 2 >= $scaledQuantity ? $whole + 1 : $whole;
+        return $remainder * 2 >= $quantity ? $whole + 1 : $whole;
     }
 
     /**
@@ -356,16 +350,15 @@ class InventoryService
     }
 
     /**
-     * cost = round(scaledQuantity × unitCostPiastres / 1000), round half up.
-     * See the "mixed-scale multiplication" note in docs/inventory-costing.md —
-     * quantity is scaled ×1000, money ×100, so this division is mandatory.
+     * cost = quantity × unitPrice, exactly.
+     *
+     * Both sides are plain whole numbers now — quantities are whole units
+     * (QuantityCast) and money is whole pounds (MoneyCast) — so there is no
+     * scale to divide back out and nothing to round. The mixed-scale ×1000
+     * rule this method used to carry is gone; see specs/023.
      */
-    private function cost(int $scaledQuantity, int $unitCostPiastres): int
+    private function cost(int $quantity, int $unitPrice): int
     {
-        $product = $scaledQuantity * $unitCostPiastres;
-        $whole = intdiv($product, 1000);
-        $remainder = $product % 1000;
-
-        return $remainder * 2 >= 1000 ? $whole + 1 : $whole;
+        return $quantity * $unitPrice;
     }
 }

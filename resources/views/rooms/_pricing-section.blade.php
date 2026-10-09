@@ -13,22 +13,22 @@
         <fieldset @disabled($locked) class="grid grid-cols-1 gap-3 sm:grid-cols-5 sm:items-end">
             <div>
                 <label for="estimated_materials" class="mb-1 block text-xs font-medium text-ink-soft">الخامات (ج.م)</label>
-                <input id="estimated_materials" type="number" step="0.01" min="0" name="estimated_materials" value="{{ old('estimated_materials', $room->estimated_materials) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <input id="estimated_materials" type="number" step="1" min="0" name="estimated_materials" value="{{ old('estimated_materials', $room->estimated_materials) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_materials')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="estimated_accessories" class="mb-1 block text-xs font-medium text-ink-soft">الاكسسوارات (ج.م)</label>
-                <input id="estimated_accessories" type="number" step="0.01" min="0" name="estimated_accessories" value="{{ old('estimated_accessories', $room->estimated_accessories) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <input id="estimated_accessories" type="number" step="1" min="0" name="estimated_accessories" value="{{ old('estimated_accessories', $room->estimated_accessories) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_accessories')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="estimated_labor" class="mb-1 block text-xs font-medium text-ink-soft">المصنعية (ج.م)</label>
-                <input id="estimated_labor" type="number" step="0.01" min="0" name="estimated_labor" value="{{ old('estimated_labor', $room->estimated_labor) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <input id="estimated_labor" type="number" step="1" min="0" name="estimated_labor" value="{{ old('estimated_labor', $room->estimated_labor) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_labor')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
                 <label for="estimated_other" class="mb-1 block text-xs font-medium text-ink-soft">مصروفات أخرى (ج.م)</label>
-                <input id="estimated_other" type="number" step="0.01" min="0" name="estimated_other" value="{{ old('estimated_other', $room->estimated_other) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <input id="estimated_other" type="number" step="1" min="0" name="estimated_other" value="{{ old('estimated_other', $room->estimated_other) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_other')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>

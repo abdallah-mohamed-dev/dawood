@@ -28,7 +28,7 @@
             ['route' => 'rooms.index', 'active' => 'rooms.*', 'label' => 'الغرف', 'icon' => 'door'],
         ],
         'المخزن' => [
-            ['route' => 'inventory.materials.index', 'active' => 'inventory.materials.*', 'label' => 'الخامات', 'icon' => 'box'],
+            ['route' => 'inventory.materials.index', 'active' => 'inventory.materials.*', 'label' => 'المخزن', 'icon' => 'box'],
             ['route' => 'inventory.shortages.index', 'active' => 'inventory.shortages.*', 'label' => 'المشتريات', 'icon' => 'cart'],
             ['route' => 'inventory.movements.index', 'active' => 'inventory.movements.*', 'label' => 'حركات المخزون', 'icon' => 'arrows'],
         ],

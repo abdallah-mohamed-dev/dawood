@@ -80,17 +80,17 @@ test('the customers export streams a BOM-prefixed CSV with Arabic headers', func
 
 test('the customers export shows name, phone, room count and money in pounds', function () {
     $customer = Customer::factory()->create(['name' => 'أحمد عبد الرحمن', 'phone' => '01000000000']);
-    $room = Room::factory()->create(['customer_id' => $customer->id, 'sale_price' => 8500000]);
-    CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 2000000]);
+    $room = Room::factory()->create(['customer_id' => $customer->id, 'sale_price' => 85000]);
+    CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 20000]);
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.customers')));
 
     expect($rows[1][0])->toBe('أحمد عبد الرحمن');
     expect($rows[1][1])->toBe('01000000000');
     expect($rows[1][2])->toBe('1');
-    expect($rows[1][3])->toBe('85000.00');
-    expect($rows[1][4])->toBe('20000.00');
-    expect($rows[1][5])->toBe('65000.00');
+    expect($rows[1][3])->toBe('85000');
+    expect($rows[1][4])->toBe('20000');
+    expect($rows[1][5])->toBe('65000');
 });
 
 test('the customers export has one row per customer under the header', function () {
@@ -118,17 +118,17 @@ test('the rooms export shows the customer name and phone instead of ids', functi
 test('the rooms export writes money as pounds with two decimals', function () {
     $room = Room::factory()->create([
         'customer_id' => Customer::factory(),
-        'sale_price' => 8500000,
+        'sale_price' => 85000,
         'status' => RoomStatus::Completed,
     ]);
-    RoomMaterial::factory()->create(['room_id' => $room->id, 'cost' => 3000000]);
+    RoomMaterial::factory()->create(['room_id' => $room->id, 'cost' => 30000]);
 
     $row = csvRows($this->actingAs($this->admin)->get(route('exports.rooms')))[1];
 
-    expect($row[5])->toBe('85000.00');   // سعر البيع
-    expect($row[6])->toBe('30000.00');   // تكلفة الخامات
-    expect($row[9])->toBe('30000.00');   // إجمالي التكلفة
-    expect($row[10])->toBe('55000.00');  // الربح
+    expect($row[5])->toBe('85000');   // سعر البيع
+    expect($row[6])->toBe('30000');   // تكلفة الخامات
+    expect($row[9])->toBe('30000');   // إجمالي التكلفة
+    expect($row[10])->toBe('55000');  // الربح
 });
 
 test('the rooms export shows the status in Arabic and leaves an empty season blank', function () {
@@ -144,27 +144,27 @@ test('the rooms export shows the status in Arabic and leaves an empty season bla
     expect($row[4])->toBe('');
 });
 
-test('the materials export shows type, quantity in thousandths and unit price in pounds', function () {
+test('the materials export shows type, quantity in whole units and unit price in pounds', function () {
     $material = Material::factory()->create([
         'name' => 'خشب زان',
         'unit' => 'لوح',
-        'quantity' => 1250,
-        'unit_price' => 150000,
+        'quantity' => 12,
+        'unit_price' => 1500,
     ]);
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.materials')));
 
     expect($rows[0])->toBe(['الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة', 'قيمة المخزون']);
-    // 1.250 لوح × 1500.00 ج.م = 1875.00 ج.م
-    expect($rows[1])->toBe([$material->name, 'خامة', 'لوح', '1.250', '1500.00', '1875.00']);
+    // 12 لوح × 1500 ج.م = 18000 ج.م
+    expect($rows[1])->toBe([$material->name, 'خامة', 'لوح', '12', '1500', '18000']);
 });
 
 test('the purchases export lists only inbound stock movements', function () {
     $material = Material::factory()->create(['name' => 'خشب زان', 'unit' => 'لوح']);
     InventoryMovement::factory()->create([
         'material_id' => $material->id,
-        'quantity' => 2500,
-        'cost' => 1500000,
+        'quantity' => 25,
+        'cost' => 15000,
         'occurred_at' => '2026-10-01',
     ]);
     InventoryMovement::factory()->out()->create(['material_id' => $material->id]);
@@ -173,8 +173,8 @@ test('the purchases export lists only inbound stock movements', function () {
 
     expect($rows[0])->toBe(['التاريخ', 'الخامة', 'الكمية', 'الوحدة', 'سعر الوحدة', 'الإجمالي']);
     expect($rows)->toHaveCount(2);
-    // 15000.00 ج.م إجمالي ÷ 2.500 لوح = 6000.00 ج.م للوحدة
-    expect($rows[1])->toBe(['2026-10-01', 'خشب زان', '2.500', 'لوح', '6000.00', '15000.00']);
+    // 15000 ج.م إجمالي ÷ 25 لوح = 600 ج.م للوحدة
+    expect($rows[1])->toBe(['2026-10-01', 'خشب زان', '25', 'لوح', '600', '15000']);
 });
 
 test('the payments export shows customer, room, method and receipt number', function () {
@@ -182,49 +182,49 @@ test('the payments export shows customer, room, method and receipt number', func
     $room = Room::factory()->create(['customer_id' => $customer->id, 'room_type' => 'غرفة نوم']);
     $payment = CustomerPayment::factory()->create([
         'room_id' => $room->id,
-        'amount' => 2000000,
+        'amount' => 20000,
         'paid_at' => '2026-10-02',
         'receipt_number' => 7,
         'note' => 'عربون',
     ]);
-    app(CashboxService::class)->recordIn($payment, 2000000, CashboxTransactionKind::CustomerPayment, '2026-10-02', method: PaymentMethod::Wallet);
+    app(CashboxService::class)->recordIn($payment, 20000, CashboxTransactionKind::CustomerPayment, '2026-10-02', method: PaymentMethod::Wallet);
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.payments')));
 
     expect($rows[0])->toBe(['التاريخ', 'العميل', 'الغرفة', 'المبلغ', 'طريقة الدفع', 'رقم الإيصال', 'ملاحظة']);
-    expect($rows[1])->toBe(['2026-10-02', 'أحمد عبد الرحمن', 'غرفة نوم', '20000.00', 'محفظة', '00007', 'عربون']);
+    expect($rows[1])->toBe(['2026-10-02', 'أحمد عبد الرحمن', 'غرفة نوم', '20000', 'محفظة', '00007', 'عربون']);
 });
 
 test('the expenses export shows the category, amount, description and method', function () {
     $category = ExpenseCategory::factory()->create(['name' => 'كهرباء']);
     $expense = Expense::factory()->create([
         'expense_category_id' => $category->id,
-        'amount' => 50000,
+        'amount' => 500,
         'occurred_at' => '2026-10-03',
         'description' => 'فاتورة سبتمبر',
     ]);
-    app(CashboxService::class)->recordOut($expense, 50000, CashboxTransactionKind::Expense, '2026-10-03', method: PaymentMethod::Cash);
+    app(CashboxService::class)->recordOut($expense, 500, CashboxTransactionKind::Expense, '2026-10-03', method: PaymentMethod::Cash);
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.expenses')));
 
     expect($rows[0])->toBe(['التاريخ', 'البند', 'المبلغ', 'الوصف', 'طريقة الدفع']);
-    expect($rows[1])->toBe(['2026-10-03', 'كهرباء', '500.00', 'فاتورة سبتمبر', 'كاش']);
+    expect($rows[1])->toBe(['2026-10-03', 'كهرباء', '500', 'فاتورة سبتمبر', 'كاش']);
 });
 
 test('the cashbox export shows direction, kind and the real name of each movement', function () {
     $cashbox = app(CashboxService::class);
-    $cashbox->setOpeningBalance(7700000, '2026-10-01');
+    $cashbox->setOpeningBalance(77000, '2026-10-01');
 
     $customer = Customer::factory()->create(['name' => 'أحمد عبد الرحمن']);
     $room = Room::factory()->create(['customer_id' => $customer->id, 'room_type' => 'غرفة نوم']);
-    $payment = CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 2000000, 'paid_at' => '2026-10-02']);
-    $cashbox->recordIn($payment, 2000000, CashboxTransactionKind::CustomerPayment, '2026-10-02');
+    $payment = CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 20000, 'paid_at' => '2026-10-02']);
+    $cashbox->recordIn($payment, 20000, CashboxTransactionKind::CustomerPayment, '2026-10-02');
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.cashbox')));
 
     expect($rows[0])->toBe(['التاريخ', 'الاتجاه', 'البند', 'البيان', 'المبلغ']);
-    expect($rows[1])->toBe(['2026-10-01', 'داخل', 'رصيد افتتاحي', 'رصيد افتتاحي', '77000.00']);
-    expect($rows[2])->toBe(['2026-10-02', 'داخل', 'دفعة عميل', 'أحمد عبد الرحمن — غرفة نوم', '20000.00']);
+    expect($rows[1])->toBe(['2026-10-01', 'داخل', 'رصيد افتتاحي', 'رصيد افتتاحي', '77000']);
+    expect($rows[2])->toBe(['2026-10-02', 'داخل', 'دفعة عميل', 'أحمد عبد الرحمن — غرفة نوم', '20000']);
 });
 
 test('the partners export shows the share as a percentage and the open-season withdrawals', function () {
@@ -233,7 +233,7 @@ test('the partners export shows the share as a percentage and the open-season wi
         'email' => 'partner@example.com',
         'percentage' => 2500,
     ]);
-    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 300000]);
+    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 3000]);
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.partners')));
 
@@ -241,14 +241,14 @@ test('the partners export shows the share as a percentage and the open-season wi
     expect($rows[1][0])->toBe('محمد');
     expect($rows[1][1])->toBe('25.00%');
     expect($rows[1][2])->toBe('partner@example.com');
-    expect($rows[1][3])->toBe('3000.00');
+    expect($rows[1][3])->toBe('3000');
 });
 
 test('the withdrawals export shows date, partner, amount and note', function () {
     $partner = Partner::factory()->create(['name' => 'محمد']);
     PartnerWithdrawal::factory()->create([
         'partner_id' => $partner->id,
-        'amount' => 300000,
+        'amount' => 3000,
         'occurred_at' => '2026-10-04',
         'note' => 'مصاريف شخصية',
     ]);
@@ -256,20 +256,20 @@ test('the withdrawals export shows date, partner, amount and note', function () 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.withdrawals')));
 
     expect($rows[0])->toBe(['التاريخ', 'الشريك', 'المبلغ', 'ملاحظة']);
-    expect($rows[1])->toBe(['2026-10-04', 'محمد', '3000.00', 'مصاريف شخصية']);
+    expect($rows[1])->toBe(['2026-10-04', 'محمد', '3000', 'مصاريف شخصية']);
 });
 
 test('the purchases export recovers the unit price the purchase was made at', function () {
     $material = Material::factory()->create(['unit' => 'متر']);
 
-    // A real purchase through the service: 3.000 متر at 250.00 ج.م each.
-    app(InventoryService::class)->addStock($material, 3000, 25000, '2026-10-02');
+    // A real purchase through the service: 3 متر at 250 ج.م each.
+    app(InventoryService::class)->addStock($material, 3, 250, '2026-10-02');
 
     $row = csvRows($this->actingAs($this->admin)->get(route('exports.purchases')))[1];
 
-    expect($row[2])->toBe('3.000');    // الكمية
-    expect($row[4])->toBe('250.00');   // سعر الوحدة — نفس السعر اللي اتشتري بيه
-    expect($row[5])->toBe('750.00');   // الإجمالي
+    expect($row[2])->toBe('3');     // الكمية
+    expect($row[4])->toBe('250');   // سعر الوحدة — نفس السعر اللي اتشتري بيه
+    expect($row[5])->toBe('750');   // الإجمالي
 });
 
 test('the rooms export filters by season when asked to', function () {
@@ -325,17 +325,17 @@ test('the withdrawals export filters by season when asked to', function () {
 test('the partners export withdrawal total follows the season filter', function () {
     $season = Season::factory()->create(['number' => 1, 'status' => SeasonStatus::Closed]);
     $partner = Partner::factory()->create(['name' => 'محمد', 'percentage' => 2500]);
-    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 300000, 'season_id' => $season->id]);
-    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 100000, 'season_id' => null]);
+    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 3000, 'season_id' => $season->id]);
+    PartnerWithdrawal::factory()->create(['partner_id' => $partner->id, 'amount' => 1000, 'season_id' => null]);
 
     $all = csvRows($this->actingAs($this->admin)->get(route('exports.partners')));
-    expect($all[1][3])->toBe('4000.00');   // كل المواسم
+    expect($all[1][3])->toBe('4000');   // كل المواسم
 
     $open = csvRows($this->actingAs($this->admin)->get(route('exports.partners', ['season' => 'open'])));
-    expect($open[1][3])->toBe('1000.00');  // الموسم المفتوح بس
+    expect($open[1][3])->toBe('1000');  // الموسم المفتوح بس
 
     $closed = csvRows($this->actingAs($this->admin)->get(route('exports.partners', ['season' => $season->id])));
-    expect($closed[1][3])->toBe('3000.00'); // الموسم المقفول بس
+    expect($closed[1][3])->toBe('3000'); // الموسم المقفول بس
 });
 
 test('the rooms export runs the same number of queries whatever the number of rooms', function () {

@@ -18,7 +18,7 @@
 
     <x-quick-add :action="route('customers.rooms.store', $customer)" title="إضافة غرفة">
         <x-quick-field name="room_type" label="نوع الغرفة" width="w-56" placeholder="مثال: غرفة نوم" required />
-        <x-quick-field name="sale_price" label="سعر البيع (ج.م)" type="number" step="0.01" min="0" width="w-40" required />
+        <x-quick-field name="sale_price" label="سعر البيع (ج.م)" type="number" step="1" min="0" width="w-40" required />
     </x-quick-add>
 
     <x-data-table :headings="['نوع الغرفة', 'الحالة', 'سعر البيع', 'المتبقي', __('Actions')]" :rows="$rooms">

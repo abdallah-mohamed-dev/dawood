@@ -22,58 +22,58 @@ beforeEach(function () {
     $this->woodMaterial = Material::factory()->create(['material_type_id' => $wood]);
     $this->accessoryMaterial = Material::factory()->create(['material_type_id' => $accessory]);
 
-    $this->inventory->addStock($this->woodMaterial, 10_000, 10_000, '2026-01-01', PaymentMethod::Cash); // 100.00 EGP / unit
-    $this->inventory->addStock($this->accessoryMaterial, 10_000, 20_000, '2026-01-01', PaymentMethod::Cash); // 200.00 EGP / unit
+    $this->inventory->addStock($this->woodMaterial, 10, 100, '2026-01-01', PaymentMethod::Cash); // 100.00 EGP / unit
+    $this->inventory->addStock($this->accessoryMaterial, 10, 200, '2026-01-01', PaymentMethod::Cash); // 200.00 EGP / unit
 
     $this->room = Room::factory()->create(['status' => RoomStatus::InProgress]);
-    $wood = $this->roomMaterials->addRequirement($this->room, $this->woodMaterial, 5_000);
-    $this->roomMaterials->issue($wood, 5_000, '2026-01-02'); // 500.00 EGP
-    $accessory = $this->roomMaterials->addRequirement($this->room, $this->accessoryMaterial, 2_000);
-    $this->roomMaterials->issue($accessory, 2_000, '2026-01-02'); // 400.00 EGP
+    $wood = $this->roomMaterials->addRequirement($this->room, $this->woodMaterial, 5);
+    $this->roomMaterials->issue($wood, 5, '2026-01-02'); // 500.00 EGP
+    $accessory = $this->roomMaterials->addRequirement($this->room, $this->accessoryMaterial, 2);
+    $this->roomMaterials->issue($accessory, 2, '2026-01-02'); // 400.00 EGP
 
     $costs = app(RoomCostService::class);
-    $costs->create($this->room, RoomCostType::Labor, 300_000, '2026-01-03'); // 3000.00 EGP
-    $costs->create($this->room, RoomCostType::Other, 100_000, '2026-01-04'); // 1000.00 EGP
+    $costs->create($this->room, RoomCostType::Labor, 3_000, '2026-01-03'); // 3000.00 EGP
+    $costs->create($this->room, RoomCostType::Other, 1_000, '2026-01-04'); // 1000.00 EGP
 });
 
 test('each cost line is compared with its own estimate, with the sign kept', function () {
     $this->room->update([
         'status' => RoomStatus::Completed,
-        'estimated_materials' => 60_000,    // 600.00 — actual 500.00
-        'estimated_accessories' => 30_000,  // 300.00 — actual 400.00
+        'estimated_materials' => 600,    // 600.00 — actual 500.00
+        'estimated_accessories' => 300,  // 300.00 — actual 400.00
         'estimated_labor' => null,          // not estimated
-        'estimated_other' => 50_000,       // 500.00 — actual 1000.00
+        'estimated_other' => 500,       // 500.00 — actual 1000.00
     ]);
 
     $comparison = $this->profit->pricingComparison($this->room->fresh());
 
-    expect($comparison['materials'])->toBe(['estimated' => 60_000, 'actual' => 50_000, 'difference' => -10_000]);
-    expect($comparison['accessories'])->toBe(['estimated' => 30_000, 'actual' => 40_000, 'difference' => 10_000]);
-    expect($comparison['labor'])->toBe(['estimated' => null, 'actual' => 300_000, 'difference' => null]);
-    expect($comparison['other'])->toBe(['estimated' => 50_000, 'actual' => 100_000, 'difference' => 50_000]);
+    expect($comparison['materials'])->toBe(['estimated' => 600, 'actual' => 500, 'difference' => -100]);
+    expect($comparison['accessories'])->toBe(['estimated' => 300, 'actual' => 400, 'difference' => 100]);
+    expect($comparison['labor'])->toBe(['estimated' => null, 'actual' => 3_000, 'difference' => null]);
+    expect($comparison['other'])->toBe(['estimated' => 500, 'actual' => 1_000, 'difference' => 500]);
 });
 
 test('the total is only compared when every line was estimated', function () {
     $this->room->update([
         'status' => RoomStatus::Completed,
-        'estimated_materials' => 60_000,
-        'estimated_accessories' => 30_000,
+        'estimated_materials' => 600,
+        'estimated_accessories' => 300,
         'estimated_labor' => null,
-        'estimated_other' => 50_000,
+        'estimated_other' => 500,
     ]);
 
     $total = $this->profit->pricingComparison($this->room->fresh())['total'];
 
     expect($total['estimated'])->toBeNull();
     expect($total['difference'])->toBeNull();
-    expect($total['actual'])->toBe(490_000);
+    expect($total['actual'])->toBe(4_900);
 
-    $this->room->update(['estimated_labor' => 300_000]);
+    $this->room->update(['estimated_labor' => 3_000]);
 
     $total = $this->profit->pricingComparison($this->room->fresh())['total'];
 
     // Estimates 600 + 300 + 3000 + 500 = 4400. Actuals 500 + 400 + 3000 + 1000 = 4900.
-    expect($total)->toBe(['estimated' => 440_000, 'actual' => 490_000, 'difference' => 50_000]);
+    expect($total)->toBe(['estimated' => 4_400, 'actual' => 4_900, 'difference' => 500]);
 });
 
 test('a room with no estimates has no difference anywhere', function () {
@@ -99,8 +99,8 @@ test('materialsCostByType separates wood from accessories', function () {
     $wood = MaterialType::query()->where('name', 'خامة')->value('id');
     $accessory = MaterialType::query()->where('name', 'اكسسوار')->value('id');
 
-    expect($byType[$wood])->toBe(50_000);
-    expect($byType[$accessory])->toBe(40_000);
+    expect($byType[$wood])->toBe(500);
+    expect($byType[$accessory])->toBe(400);
 });
 
 test('the duration counts both the start and the end day', function () {

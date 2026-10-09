@@ -42,7 +42,7 @@ test('a material is added from the index without leaving it', function () {
         'name' => 'خشب زان',
         'unit' => 'لوح',
         'material_type_id' => MaterialType::query()->where('name', 'خامة')->value('id'),
-        'unit_price' => '95.00',
+        'unit_price' => '95',
     ])->assertRedirect(route('inventory.materials.index'));
 
     expect(Material::query()->sole()->name)->toBe('خشب زان');

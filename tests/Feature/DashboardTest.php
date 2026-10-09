@@ -34,7 +34,7 @@ test('the dashboard entry is gone from the sidebar menu', function () {
 test('the dashboard shows every chart figure as text too, and labels each chart image', function () {
     $customer = Customer::factory()->create();
     $room = Room::factory()->create(['customer_id' => $customer->id, 'status' => RoomStatus::InProgress]);
-    RoomMaterial::factory()->create(['room_id' => $room->id, 'issued_quantity' => 1000, 'cost' => 50000]);
+    RoomMaterial::factory()->create(['room_id' => $room->id, 'issued_quantity' => 1, 'cost' => 500]);
 
     $response = $this->actingAs($this->admin)->get(route('dashboard'))->assertOk();
 

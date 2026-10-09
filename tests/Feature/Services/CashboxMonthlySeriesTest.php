@@ -17,11 +17,11 @@ afterEach(function () {
 });
 
 /** A cashbox row with no source — the cashbox only needs the amount and the date here. */
-function movement(CashboxTransactionType $type, int $piastres, string $date): void
+function movement(CashboxTransactionType $type, int $pounds, string $date): void
 {
     CashboxTransaction::factory()->create([
         'type' => $type,
-        'amount' => $piastres,
+        'amount' => $pounds,
         'kind' => CashboxTransactionKind::Expense,
         'occurred_at' => $date,
         'source_type' => null,
@@ -31,45 +31,45 @@ function movement(CashboxTransactionType $type, int $piastres, string $date): vo
 
 test('the series ends on the same balance the cashbox reports', function () {
     // Opening balance 77,000 EGP, dated before the six-month window.
-    app(CashboxService::class)->setOpeningBalance(7700000, '2026-01-01');
+    app(CashboxService::class)->setOpeningBalance(77000, '2026-01-01');
 
     // Six months (May → October): 300,000 in and 192,750 out in total.
-    movement(CashboxTransactionType::In, 10000000, '2026-05-10');
-    movement(CashboxTransactionType::In, 5000000, '2026-06-10');
-    movement(CashboxTransactionType::Out, 9275000, '2026-07-10');
-    movement(CashboxTransactionType::In, 15000000, '2026-08-10');
-    movement(CashboxTransactionType::Out, 10000000, '2026-10-02');
+    movement(CashboxTransactionType::In, 100000, '2026-05-10');
+    movement(CashboxTransactionType::In, 50000, '2026-06-10');
+    movement(CashboxTransactionType::Out, 92750, '2026-07-10');
+    movement(CashboxTransactionType::In, 150000, '2026-08-10');
+    movement(CashboxTransactionType::Out, 100000, '2026-10-02');
 
     $series = app(CashboxService::class)->monthlySeries(6);
 
     expect($series)->toHaveCount(6);
     expect(array_column($series, 'balance_end'))->toBe([
-        17700000, 22700000, 13425000, 28425000, 28425000, 18425000,
+        177000, 227000, 134250, 284250, 284250, 184250,
     ]);
     expect(end($series)['balance_end'])->toBe(app(CashboxService::class)->balance());
-    expect(end($series)['balance_end'])->toBe(18425000);
+    expect(end($series)['balance_end'])->toBe(184250);
 });
 
 test('a month with no movements keeps the balance of the month before it', function () {
-    movement(CashboxTransactionType::In, 10000000, '2026-05-10');
+    movement(CashboxTransactionType::In, 100000, '2026-05-10');
 
     $september = collect(app(CashboxService::class)->monthlySeries(6))->firstWhere('month', '2026-09');
 
     expect($september['in'])->toBe(0);
     expect($september['out'])->toBe(0);
-    expect($september['balance_end'])->toBe(10000000);
+    expect($september['balance_end'])->toBe(100000);
 });
 
 test('movements older than the window are carried into the first month', function () {
-    movement(CashboxTransactionType::In, 50000000, '2025-01-15');
-    movement(CashboxTransactionType::Out, 20000000, '2025-12-01');
-    movement(CashboxTransactionType::In, 1000000, '2026-05-02');
+    movement(CashboxTransactionType::In, 500000, '2025-01-15');
+    movement(CashboxTransactionType::Out, 200000, '2025-12-01');
+    movement(CashboxTransactionType::In, 10000, '2026-05-02');
 
     $series = app(CashboxService::class)->monthlySeries(6);
 
     // 500,000 − 200,000 carried from 2025, then +10,000 in May.
-    expect($series[0]['balance_end'])->toBe(31000000);
-    expect($series[0]['in'])->toBe(1000000);
+    expect($series[0]['balance_end'])->toBe(310000);
+    expect($series[0]['in'])->toBe(10000);
 });
 
 test('the series reads the database in at most two queries', function () {

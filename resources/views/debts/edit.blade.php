@@ -6,7 +6,7 @@
         @method('PUT')
 
         <x-field name="creditor" label="لمين" :value="old('creditor', $debt->creditor)" required autofocus />
-        <x-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" :value="old('amount', $debt->amount)" required />
+        <x-field name="amount" label="المبلغ (ج.م)" type="number" step="1" min="0" :value="old('amount', $debt->amount)" required />
         <x-field name="incurred_at" label="تاريخ الدين" type="date" :value="old('incurred_at', $debt->incurred_at->toDateString())" required />
         <x-field name="due_at" label="ميعاد السداد" type="date" :value="old('due_at', $debt->due_at?->toDateString())" />
         <x-field name="note" label="ملاحظة" :value="old('note', $debt->note)" />

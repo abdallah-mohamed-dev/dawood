@@ -62,9 +62,9 @@ test('deleting a customer with rooms is rejected', function () {
 
 test('a room shows on its customer page with type and price', function () {
     $customer = Customer::factory()->create(['name' => 'أحمد']);
-    Room::factory()->for($customer)->create(['room_type' => 'غرفة نوم', 'sale_price' => 3_000_000]);
+    Room::factory()->for($customer)->create(['room_type' => 'غرفة نوم', 'sale_price' => 30_000]);
 
     $response = $this->actingAs($this->admin)->get(route('customers.show', $customer));
 
-    $response->assertOk()->assertSee('غرفة نوم')->assertSeeText('30,000.00 ج.م');
+    $response->assertOk()->assertSee('غرفة نوم')->assertSeeText('30,000 ج.م');
 });

@@ -9,7 +9,7 @@
         @csrf
         @method('PUT')
 
-        <x-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" :value="old('amount', $expense->amount)" required autofocus />
+        <x-field name="amount" label="المبلغ (ج.م)" type="number" step="1" min="0" :value="old('amount', $expense->amount)" required autofocus />
 
         <x-payment-method-select :selected="$expense->cashboxTransaction?->payment_method" />
 

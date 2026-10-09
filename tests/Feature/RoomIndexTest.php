@@ -105,14 +105,14 @@ test('filters survive pagination', function () {
 });
 
 test('paid and remaining amounts show the right reference numbers', function () {
-    $room = Room::factory()->create(['sale_price' => 1_000_000]); // 10,000.00
-    CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 300_000]);
-    CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 200_000]);
+    $room = Room::factory()->create(['sale_price' => 10_000]); // 10,000.00
+    CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 3_000]);
+    CustomerPayment::factory()->create(['room_id' => $room->id, 'amount' => 2_000]);
 
     $this->actingAs($this->admin)
         ->get(route('rooms.index'))
-        ->assertSee('5,000.00')   // paid 500,000 piastres
-        ->assertSee('5,000.00');  // remaining 500,000 piastres
+        ->assertSee('5,000')   // paid 500,000 piastres
+        ->assertSee('5,000');  // remaining 500,000 piastres
 });
 
 test('the number of queries does not grow with the number of rooms', function () {
@@ -138,7 +138,7 @@ test('the number of queries does not grow with the number of rooms', function ()
 
 test('the rooms index shows both charts and their figures as text', function () {
     $this->actingAs(User::factory()->create());
-    Room::factory()->create(['customer_id' => Customer::factory(), 'sale_price' => 1_000_000]);
+    Room::factory()->create(['customer_id' => Customer::factory(), 'sale_price' => 10_000]);
 
     $response = $this->get(route('rooms.index'))->assertOk();
 

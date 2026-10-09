@@ -5,7 +5,7 @@ use App\Models\User;
 test('the sidebar lists the pages in the agreed group order', function () {
     $html = $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()->getContent();
 
-    $labels = ['العملاء', 'الغرف', 'المخزن', 'الخامات', 'المشتريات', 'حركات المخزون', 'الفلوس', 'المدفوعات', 'المصروفات الإدارية', 'الديون', 'الخزنة', 'الإدارة', 'تقارير الربح', 'المصنعيات', 'المواسم', 'الشركاء', 'رأس المال'];
+    $labels = ['العملاء', 'الغرف', 'المخزن', 'المشتريات', 'حركات المخزون', 'الفلوس', 'المدفوعات', 'المصروفات الإدارية', 'الديون', 'الخزنة', 'الإدارة', 'تقارير الربح', 'المصنعيات', 'المواسم', 'الشركاء', 'رأس المال'];
 
     $nav = substr($html, strpos($html, '<nav'), strpos($html, '</nav>') - strpos($html, '<nav'));
     $positions = array_map(fn (string $label) => strpos($nav, $label), $labels);

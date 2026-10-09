@@ -53,7 +53,7 @@
                 <input
                     id="amount"
                     type="number"
-                    step="0.01"
+                    step="1"
                     min="0"
                     name="amount"
                     value="{{ old('amount', $openingBalance?->amount) }}"

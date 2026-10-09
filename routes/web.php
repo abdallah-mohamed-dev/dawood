@@ -56,7 +56,9 @@ Route::middleware('auth')->group(function () {
         ->name('cashbox.opening-balance.store');
 
     Route::prefix('inventory')->name('inventory.')->group(function () {
-        Route::resource('materials', MaterialController::class)->except(['show', 'create']);
+        // No `edit` page: a material is edited inline in its own row on the index
+        // (specs/023), so the only write routes are store/update/destroy.
+        Route::resource('materials', MaterialController::class)->except(['show', 'create', 'edit']);
         // Read-only audit log — written by InventoryService, never by a form.
         Route::get('movements', [MovementController::class, 'index'])->name('movements.index');
         Route::get('shortages', [ShortageController::class, 'index'])->name('shortages.index');
@@ -66,7 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('customers', CustomerController::class)->except('create');
     Route::resource('capital-items', CapitalItemController::class)->except(['show', 'create'])->names('capital');
 
-    Route::resource('rooms', RoomController::class)->only(['index', 'show', 'destroy']);
+    Route::resource('rooms', RoomController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::post('/customers/{customer}/rooms', [RoomController::class, 'store'])->name('customers.rooms.store');
     Route::post('/rooms/{room}/status', [RoomController::class, 'updateStatus'])->name('rooms.status.update');
     Route::post('/rooms/{room}/pricing', [RoomController::class, 'savePricing'])->name('rooms.pricing.save');
