@@ -22,7 +22,7 @@ function roomWithHistory(int $entities, int $type): Room
     for ($i = 0; $i < $entities; $i++) {
         $material = Material::factory()->create(['material_type_id' => $type]);
         RoomMaterial::factory()->create(['room_id' => $room->id, 'material_id' => $material->id]);
-        RoomCost::factory()->create(['room_id' => $room->id, 'type' => RoomCostType::Other, 'amount' => 1_000]);
+        RoomCost::factory()->create(['room_id' => $room->id, 'type' => RoomCostType::Other, 'amount' => 10]);
     }
 
     return $room;

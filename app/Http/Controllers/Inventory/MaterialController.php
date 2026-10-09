@@ -57,6 +57,10 @@ class MaterialController extends Controller
             'search' => $search,
             'selectedTypeId' => $typeId,
             'materialTypes' => MaterialType::query()->orderBy('position')->get(),
+            // Which row reopens in edit mode: the one whose save just failed.
+            // old() is shared by the whole page, so without this every row
+            // would redisplay the rejected values as if they were its own.
+            'reopenId' => (int) old('editing_id', 0),
         ]);
     }
 
@@ -79,9 +83,9 @@ class MaterialController extends Controller
             }
         }
 
-        $method = $request->filled('payment_method')
-            ? PaymentMethod::from($request->string('payment_method')->toString())
-            : PaymentMethod::Cash;
+        // Buying stock is always cash (specs/023): the form does not ask, so
+        // there is nothing to read and nothing to default to.
+        $method = PaymentMethod::Cash;
 
         try {
             // One transaction: the material and the stock that paid for it are
@@ -105,18 +109,10 @@ class MaterialController extends Controller
             // addStock() refuses a quantity × price that rounds to zero —
             // CashboxService would reject a 0 amount from inside the
             // transaction and surface it as a raw 500.
-            return back()->withInput()->withErrors(['quantity' => 'الكمية مع سعر الوحدة دول مع بعض تكلفتهم بتقرّب لصفر.']);
+            return back()->withInput()->withErrors(['quantity' => 'سعر وحدة المادة صفر، فالحركة دي قيمتها صفر.']);
         }
 
         return redirect()->route('inventory.materials.index')->with('success', 'تم إضافة المادة.');
-    }
-
-    public function edit(Material $material): View
-    {
-        return view('inventory.materials.edit', [
-            'material' => $material,
-            'materialTypes' => MaterialType::query()->orderBy('position')->get(),
-        ]);
     }
 
     public function update(UpdateMaterialRequest $request, Material $material): RedirectResponse
@@ -124,16 +120,17 @@ class MaterialController extends Controller
         try {
             $unitPrice = MoneyCast::toScaledInt($request->string('unit_price')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['unit_price' => 'قيمة سعر الوحدة غير صالحة.']);
+            return back()->withInput()->withErrors(['unit_price' => 'قيمة سعر الوحدة غير صالحة.'], 'materialRow');
         }
 
         try {
             $newQuantity = QuantityCast::toScaledInt($request->string('quantity')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['quantity' => 'قيمة الكمية غير صالحة.']);
+            return back()->withInput()->withErrors(['quantity' => 'قيمة الكمية غير صالحة.'], 'materialRow');
         }
 
-        $method = PaymentMethod::from($request->string('payment_method')->toString());
+        // Same as store(): a stock correction always moves cash.
+        $method = PaymentMethod::Cash;
 
         try {
             DB::transaction(function () use ($request, $material, $unitPrice, $newQuantity, $method) {
@@ -172,9 +169,9 @@ class MaterialController extends Controller
             // Outside the transaction on purpose — returning from inside it
             // would COMMIT the price change above and leave the box re-priced
             // for a quantity edit that failed.
-            return back()->withInput()->withErrors(['quantity' => 'الكمية المتاحة في المخزن أقل من الكمية المطلوبة.']);
+            return back()->withInput()->withErrors(['quantity' => 'الكمية المتاحة في المخزن أقل من الكمية المطلوبة.'], 'materialRow');
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['quantity' => 'الكمية مع سعر الوحدة دول مع بعض تكلفتهم بتقرّب لصفر.']);
+            return back()->withInput()->withErrors(['quantity' => 'سعر وحدة المادة صفر، فالحركة دي قيمتها صفر.'], 'materialRow');
         }
 
         return redirect()->route('inventory.materials.index')->with('success', 'تم تعديل المادة.');

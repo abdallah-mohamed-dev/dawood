@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Casts\MoneyCast;
+use App\Casts\PercentageCast;
 use App\Enums\PaymentMethod;
 use App\Http\Requests\StorePartnerRequest;
 use App\Http\Requests\StoreWithdrawalRequest;
@@ -54,7 +55,7 @@ class PartnerController extends Controller
     public function store(StorePartnerRequest $request): RedirectResponse
     {
         try {
-            $percentage = MoneyCast::toScaledInt($request->string('percentage')->toString());
+            $percentage = PercentageCast::toScaledInt($request->string('percentage')->toString());
         } catch (InvalidArgumentException) {
             return back()->withInput()->withErrors(['percentage' => 'قيمة النسبة غير صالحة.']);
         }
@@ -103,7 +104,7 @@ class PartnerController extends Controller
     public function update(UpdatePartnerRequest $request, Partner $partner): RedirectResponse
     {
         try {
-            $percentage = MoneyCast::toScaledInt($request->string('percentage')->toString());
+            $percentage = PercentageCast::toScaledInt($request->string('percentage')->toString());
         } catch (InvalidArgumentException) {
             return back()->withInput()->withErrors(['percentage' => 'قيمة النسبة غير صالحة.']);
         }

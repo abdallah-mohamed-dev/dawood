@@ -42,7 +42,7 @@ test('a material saved with a type shows that type on the stock page', function 
             'name' => 'مفصلات',
             'unit' => 'قطعة',
             'material_type_id' => $this->accessory->id,
-            'unit_price' => '18.00',
+            'unit_price' => '18',
         ])
         ->assertRedirect(route('inventory.materials.index'));
 
@@ -50,7 +50,7 @@ test('a material saved with a type shows that type on the stock page', function 
 
     $this->actingAs($this->admin)
         ->get(route('inventory.materials.index'))
-        ->assertSeeHtml('<td class="px-4 py-2">اكسسوار</td>');
+        ->assertSeeHtml('<span x-show="! editing">اكسسوار</span>');
 });
 
 test('renaming a type from the settings page shows the new name on the stock page', function () {
@@ -64,7 +64,7 @@ test('renaming a type from the settings page shows the new name on the stock pag
 
     $this->actingAs($this->admin)
         ->get(route('inventory.materials.index'))
-        ->assertSeeHtml('<td class="px-4 py-2">خامات الأخشاب</td>');
+        ->assertSeeHtml('<span x-show="! editing">خامات الأخشاب</span>');
 });
 
 test('a duplicate type name is rejected under that type\'s own error bag', function () {

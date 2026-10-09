@@ -59,14 +59,14 @@ test('adding an item does not change net profit or revenue', function () {
 test('editing and deleting an item leaves the cashbox and profit untouched', function () {
     $cashbox = app(CashboxService::class);
     $profit = app(ProfitService::class);
-    $item = CapitalItem::factory()->create(['amount' => 500_000]);
+    $item = CapitalItem::factory()->create(['amount' => 5_000]);
     $balance = $cashbox->balance();
     $net = $profit->netProfit();
 
     $this->actingAs($this->admin)
         ->put(route('capital.update', $item), capitalPayload(['amount' => '7000']))
         ->assertRedirect(route('capital.index'));
-    expect($item->fresh()->getRawOriginal('amount'))->toBe(700_000);
+    expect($item->fresh()->getRawOriginal('amount'))->toBe(7_000);
 
     $this->actingAs($this->admin)->delete(route('capital.destroy', $item))->assertRedirect(route('capital.index'));
     expect(CapitalItem::query()->count())->toBe(0);
@@ -76,24 +76,24 @@ test('editing and deleting an item leaves the cashbox and profit untouched', fun
 });
 
 test('the total is correct and reflects the date filter', function () {
-    CapitalItem::factory()->create(['amount' => 500_000, 'occurred_at' => '2026-01-10']);
-    CapitalItem::factory()->create(['amount' => 300_000, 'occurred_at' => '2026-03-10']);
+    CapitalItem::factory()->create(['amount' => 5_000, 'occurred_at' => '2026-01-10']);
+    CapitalItem::factory()->create(['amount' => 3_000, 'occurred_at' => '2026-03-10']);
 
     $this->actingAs($this->admin)
         ->get(route('capital.index'))
-        ->assertSee('8,000.00');
+        ->assertSee('8,000');
 
     $this->actingAs($this->admin)
         ->get(route('capital.index', ['from' => '2026-03-01']))
-        ->assertSee('3,000.00');
+        ->assertSee('3,000');
 });
 
 test('the total covers every matching row, not only the visible page', function () {
-    CapitalItem::factory()->count(30)->create(['amount' => 10_000, 'occurred_at' => '2026-03-01']);
+    CapitalItem::factory()->count(30)->create(['amount' => 100, 'occurred_at' => '2026-03-01']);
 
     $this->actingAs($this->admin)
         ->get(route('capital.index'))
-        ->assertSee('3,000.00');
+        ->assertSee('3,000');
 });
 
 test('zero or negative amounts are rejected', function (string $amount) {
@@ -102,7 +102,7 @@ test('zero or negative amounts are rejected', function (string $amount) {
         ->assertSessionHasErrors(['amount']);
 
     expect(CapitalItem::query()->count())->toBe(0);
-})->with(['0', '0.00', '-5']);
+})->with(['0', '0', '-5']);
 
 test('an item without a name is rejected in Arabic', function () {
     $this->actingAs($this->admin)

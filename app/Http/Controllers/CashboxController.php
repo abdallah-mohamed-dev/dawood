@@ -53,6 +53,7 @@ class CashboxController extends Controller
             'totalIn' => $summary['total_in'],
             'totalOut' => $summary['total_out'],
             'breakdown' => $this->cashbox->breakdownByMethod(),
+            'series' => $this->cashbox->monthlySeries(6),
             'incomingMonthlyTotals' => $this->monthlyTotals(CashboxTransactionType::In, $filters),
             'outgoingMonthlyTotals' => $this->monthlyTotals(CashboxTransactionType::Out, $filters),
             'methods' => PaymentMethod::cases(),

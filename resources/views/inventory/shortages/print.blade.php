@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>أمر شراء — {{ $room->room_type }}</title>
     @vite(['resources/css/app.css'])
+    {{ Vite::fonts('ibm-plex-sans-arabic') }}
     <style>
         @media print {
             .no-print { display: none !important; }
@@ -12,7 +13,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-bg p-8 font-sans text-gray-900 antialiased">
+<body class="min-h-screen bg-bg p-8 font-sans text-ink antialiased">
     <div class="mx-auto max-w-3xl rounded-xl border border-border bg-surface p-8 shadow-sm">
         <div class="mb-6 flex items-start justify-between gap-4">
             <div>

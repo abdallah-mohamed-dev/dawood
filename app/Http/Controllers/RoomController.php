@@ -18,6 +18,7 @@ use App\Http\Requests\StoreRoomCostRequest;
 use App\Http\Requests\StoreRoomMaterialRequest;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomMaterialRequest;
+use App\Http\Requests\UpdateRoomRequest;
 use App\Models\ActivityLog;
 use App\Models\Customer;
 use App\Models\CustomerPayment;
@@ -84,6 +85,20 @@ class RoomController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        // One row per status, over the full filtered set (not just this page),
+        // for the two summary charts below the filters.
+        $byStatus = (clone $matching)
+            ->selectRaw('status, COUNT(*) as cnt, SUM(sale_price) as sale_total')
+            ->groupBy('status')
+            ->get()
+            ->keyBy(fn ($row) => $row->status->value);
+
+        $paidByStatus = (clone $matching)
+            ->withSum('customerPayments as paid_total', 'amount')
+            ->get(['id', 'status'])
+            ->groupBy(fn ($room) => $room->status->value)
+            ->map(fn ($rooms) => (int) $rooms->sum('paid_total'));
+
         return view('rooms.index', [
             'rooms' => $rooms,
             'filters' => $filters,
@@ -91,6 +106,8 @@ class RoomController extends Controller
             'seasons' => Season::query()->orderByDesc('number')->get(),
             'statuses' => RoomStatus::cases(),
             'customers' => Customer::query()->orderBy('name')->get(),
+            'byStatus' => $byStatus,
+            'paidByStatus' => $paidByStatus,
         ]);
     }
 
@@ -110,6 +127,26 @@ class RoomController extends Controller
         ]);
 
         return redirect()->route('rooms.show', $room)->with('success', 'تم إنشاء الغرفة.');
+    }
+
+    public function update(UpdateRoomRequest $request, Room $room): RedirectResponse
+    {
+        if ($room->status === RoomStatus::Completed) {
+            return back()->with('error', 'الغرفة مكتملة، ما ينفعش تتعدل بياناتها الأساسية.');
+        }
+
+        try {
+            $salePrice = MoneyCast::toScaledInt($request->string('sale_price')->toString());
+        } catch (InvalidArgumentException) {
+            return back()->withInput()->withErrors(['sale_price' => 'قيمة سعر البيع غير صالحة.']);
+        }
+
+        $room->update([
+            'room_type' => $request->string('room_type')->toString(),
+            'sale_price' => $salePrice,
+        ]);
+
+        return back()->with('success', 'تم تحديث بيانات الغرفة.');
     }
 
     public function show(Room $room): View

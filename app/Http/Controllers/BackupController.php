@@ -57,7 +57,9 @@ class BackupController extends Controller
 
     public function index(): View
     {
-        return view('backup.index');
+        return view('backup.index', [
+            'seasons' => Season::query()->orderByDesc('number')->get(),
+        ]);
     }
 
     public function downloadDatabase(): BinaryFileResponse

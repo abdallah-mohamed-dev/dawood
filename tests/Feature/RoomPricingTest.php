@@ -31,10 +31,10 @@ test('a pricing for an in-progress room is saved in piastres', function () {
         ->assertSessionHasNoErrors();
 
     $room = $this->room->fresh();
-    expect($room->getRawOriginal('estimated_materials'))->toBe(60_000);
-    expect($room->getRawOriginal('estimated_accessories'))->toBe(30_000);
+    expect($room->getRawOriginal('estimated_materials'))->toBe(600);
+    expect($room->getRawOriginal('estimated_accessories'))->toBe(300);
     expect($room->getRawOriginal('estimated_labor'))->toBeNull();
-    expect($room->getRawOriginal('estimated_other'))->toBe(5_000);
+    expect($room->getRawOriginal('estimated_other'))->toBe(50);
     expect($room->expected_duration_days)->toBe(8);
 });
 
@@ -50,13 +50,13 @@ test('priced_at is set the first time and kept on later edits', function () {
 });
 
 test('a completed room refuses a pricing in Arabic and keeps the old values', function () {
-    $this->room->update(['status' => RoomStatus::Completed, 'estimated_materials' => 10_000]);
+    $this->room->update(['status' => RoomStatus::Completed, 'estimated_materials' => 100]);
 
     $this->actingAs($this->admin)
         ->post(route('rooms.pricing.save', $this->room), ['estimated_materials' => '999'])
         ->assertSessionHas('error', 'الغرفة مكتملة، التسعير مقفول.');
 
-    expect($this->room->fresh()->getRawOriginal('estimated_materials'))->toBe(10_000);
+    expect($this->room->fresh()->getRawOriginal('estimated_materials'))->toBe(100);
 });
 
 test('all estimates empty is a valid pricing', function () {
@@ -134,9 +134,9 @@ test('going straight from draft to completed leaves the start empty', function (
 });
 
 test('the activity section lists recent changes to the room', function () {
-    $this->room->update(['sale_price' => 123_000]);
+    $this->room->update(['sale_price' => 1_230]);
     $material = Material::factory()->create();
-    app(RoomMaterialService::class)->addRequirement($this->room, $material, 1_000);
+    app(RoomMaterialService::class)->addRequirement($this->room, $material, 1);
 
     $this->actingAs($this->admin)
         ->get(route('rooms.show', $this->room))

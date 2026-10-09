@@ -90,13 +90,24 @@ class ActivityLogService
     }
 
     /**
-     * "اسم الحقل: قديم ← جديد" لكل حقل اتغيّر، مفصولة بسطر جديد.
+     * "اسم الحقل: قديم ← جديد" لكل حقل اتغيّر، واحدة لكل حقل.
+     *
+     * @return list<string>
      */
-    public static function detailsText(ActivityLog $log): string
+    public static function detailsList(ActivityLog $log): array
     {
         return collect($log->changes ?? [])
             ->map(fn (array $change, string $field) => self::fieldLabel($field).': '.$change['old'].' ← '.$change['new'])
-            ->implode("\n");
+            ->values()
+            ->all();
+    }
+
+    /**
+     * نفس السطور، مفصولة بسطر جديد — للتصدير ولأي مكان بيعرضها تحت بعضها.
+     */
+    public static function detailsText(ActivityLog $log): string
+    {
+        return implode("\n", self::detailsList($log));
     }
 
     public function record(Model $model, string $event): void

@@ -9,14 +9,14 @@ use App\Services\CashboxService;
 beforeEach(function () {
     $this->admin = User::factory()->create();
     $this->cashbox = app(CashboxService::class);
-    $this->cashbox->setOpeningBalance(500_000, '2026-01-01');
+    $this->cashbox->setOpeningBalance(5_000, '2026-01-01');
 });
 
 function debtPayload(array $overrides = []): array
 {
     return array_merge([
         'creditor' => 'مورد الخشب',
-        'amount' => '1500.00',
+        'amount' => '1500',
         'incurred_at' => '2026-10-01',
         'due_at' => null,
         'note' => null,
@@ -129,14 +129,14 @@ test('a zero or negative amount is rejected', function () {
 
 test('the cashbox box shows only outstanding debts, checked against a hand-computed figure', function () {
     // Outstanding 1000.00, settled 500.00 → the box must show 1,000.00 and never 1,500.00.
-    Debt::factory()->create(['amount' => 100_000, 'is_paid' => false]);
-    Debt::factory()->create(['amount' => 50_000, 'is_paid' => true, 'paid_at' => '2026-10-02']);
+    Debt::factory()->create(['amount' => 1_000, 'is_paid' => false]);
+    Debt::factory()->create(['amount' => 500, 'is_paid' => true, 'paid_at' => '2026-10-02']);
 
     $this->actingAs($this->admin)
         ->get(route('cashbox.index'))
         ->assertSee('إجمالي الديون القائمة')
-        ->assertSee('1,000.00 ج.م')
-        ->assertDontSee('1,500.00 ج.م');
+        ->assertSeeText('1,000 ج.م')
+        ->assertDontSeeText('1,500 ج.م');
 });
 
 test('the cashbox box explains that debts are not part of the balance', function () {

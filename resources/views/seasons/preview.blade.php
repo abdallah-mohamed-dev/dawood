@@ -1,5 +1,5 @@
 <x-app-layout title="معاينة إقفال الموسم">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">معاينة إقفال الموسم</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">معاينة إقفال الموسم</h1>
 
     @if ($data === null)
         <p class="text-secondary">مفيش موسم مفتوح دلوقتي.</p>
@@ -8,10 +8,10 @@
 
         <form method="GET" action="{{ route('seasons.preview') }}" class="mb-6 flex flex-wrap items-end gap-3">
             <div>
-                <label for="ends_at" class="mb-1 block text-xs font-medium text-gray-700">تاريخ نهاية الموسم</label>
-                <input id="ends_at" type="date" name="ends_at" value="{{ $data['ends_at'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm">
+                <label for="ends_at" class="mb-1 block text-xs font-medium text-ink-soft">تاريخ نهاية الموسم</label>
+                <input id="ends_at" type="date" name="ends_at" value="{{ $data['ends_at'] }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm">
             </div>
-            <button type="submit" class="rounded-lg border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">حدّث المعاينة</button>
+            <button type="submit" class="rounded-lg border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">حدّث المعاينة</button>
         </form>
 
         @if ($data['warnings']['owed_exceeds_cashbox'])
@@ -25,8 +25,7 @@
             </div>
         @endif
 
-        <div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <h2 class="mb-3 text-sm font-semibold text-gray-900">الربح والخسارة المُدوَّرة</h2>
+        <x-panel title="الربح والخسارة المُدوَّرة" class="mb-6">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>الإيراد: <x-money :amount="$data['revenue']" /></div>
                 <div>تكلفة الخامات: <x-money :amount="$data['cost_of_materials']" /></div>
@@ -35,22 +34,20 @@
                 <div>المصروفات الإدارية: <x-money :amount="$data['admin_expenses']" /></div>
                 <div class="font-bold">صافي ربح الموسم: <x-money :amount="$data['net_profit']" /></div>
             </div>
-            <p class="mt-4 text-sm text-gray-700">
+            <p class="mt-4 text-sm text-ink-soft">
                 الخسارة المُدوَّرة الداخلة <x-money :amount="$data['loss_carried_in']" />
                 ⇐ القابل للتوزيع <x-money :amount="$data['distributable']" />
                 ⇐ الخسارة المُدوَّرة الخارجة <x-money :amount="$data['loss_carried_out']" />
             </p>
-        </div>
+        </x-panel>
 
         <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <div class="text-sm text-secondary">الغرف اللي هتتأرشف (مكتملة وملغاة)</div>
-                <div class="mt-1 font-bold">{{ $data['archived_rooms']['count'] }} غرفة — <x-money :amount="$data['archived_rooms']['value']" /></div>
-            </div>
-            <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                <div class="text-sm text-secondary">الغرف اللي هتترحّل (تحت التنفيذ ومسودة)</div>
-                <div class="mt-1 font-bold">{{ $data['wip']['count'] }} غرفة — تكلفتها المتراكمة <x-money :amount="$data['wip']['cost']" /></div>
-            </div>
+            <x-stat label="الغرف اللي هتتأرشف (مكتملة وملغاة)" size="sm">
+                {{ $data['archived_rooms']['count'] }} غرفة — <x-money :amount="$data['archived_rooms']['value']" />
+            </x-stat>
+            <x-stat label="الغرف اللي هتترحّل (تحت التنفيذ ومسودة)" size="sm">
+                {{ $data['wip']['count'] }} غرفة — تكلفتها المتراكمة <x-money :amount="$data['wip']['cost']" />
+            </x-stat>
         </div>
 
         <div class="mb-6 overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
@@ -78,8 +75,8 @@
             </table>
         </div>
 
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <p class="mb-3 text-sm text-gray-700">
+        <x-panel>
+            <p class="mb-3 text-sm text-ink-soft">
                 الخزنة دلوقتي <x-money :amount="$data['cashbox_balance']" />. الباقي بيترحّل كما هو، والمخزون بقيمة <x-money :amount="$data['stock_value']" /> بيترحّل كمان.
             </p>
             <form method="POST" action="{{ route('seasons.close') }}" onsubmit="return confirm('تقفل الموسم ده؟ الإقفال مش بيتراجع تلقائي، ولازم تاخد نسخة احتياطية.');">
@@ -88,6 +85,6 @@
                 <button type="submit" class="rounded-lg bg-danger px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-90">أكّد إقفال الموسم</button>
                 <a href="{{ route('seasons.index') }}" class="ms-3 text-sm text-secondary hover:underline">رجوع</a>
             </form>
-        </div>
+        </x-panel>
     @endif
 </x-app-layout>

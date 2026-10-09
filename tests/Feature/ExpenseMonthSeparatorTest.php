@@ -21,13 +21,17 @@ function expensesTable(array $query = []): string
         ->assertOk()
         ->getContent();
 
-    return substr($html, strpos($html, 'overflow-x-auto rounded-xl'));
+    $table = substr($html, strpos($html, 'overflow-x-auto rounded-xl'));
+
+    // Tags stripped: the currency lives in its own span, so "1,500 ج.م" is
+    // only one string once the markup is gone.
+    return strip_tags($table);
 }
 
 test('a separator row appears once between two different months', function () {
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-15', 'amount' => 50_000]);
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-01', 'amount' => 100_000]);
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-08-20', 'amount' => 200_000]);
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-15', 'amount' => 500]);
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-01', 'amount' => 1_000]);
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-08-20', 'amount' => 2_000]);
 
     $table = expensesTable();
 
@@ -36,8 +40,8 @@ test('a separator row appears once between two different months', function () {
 });
 
 test('no separator appears between two rows in the same month', function () {
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-15', 'amount' => 50_000]);
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-01', 'amount' => 100_000]);
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-15', 'amount' => 500]);
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-01', 'amount' => 1_000]);
 
     $table = expensesTable();
 
@@ -47,41 +51,41 @@ test('no separator appears between two rows in the same month', function () {
 });
 
 test('the separator shows the correct total for its month', function () {
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-15', 'amount' => 100_000]); // 1,000.00
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-01', 'amount' => 50_000]);  // 500.00
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-08-20', 'amount' => 999_999]); // must not bleed into September's total
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-15', 'amount' => 1_000]); // 1,000.00
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-09-01', 'amount' => 500]);  // 500.00
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-08-20', 'amount' => 10_000]); // must not bleed into September's total
 
     $table = expensesTable();
 
     expect($table)->toContain('سبتمبر 2026');
-    expect($table)->toContain('1,500.00 ج.م');
+    expect($table)->toContain('1,500 ج.م');
 });
 
 test('a month split across two pages shows its true total on each page, not a partial one', function () {
     // 30 expenses in the same month, one page holds 25.
     Expense::factory()->for($this->category, 'category')->count(30)->sequence(fn ($sequence) => [
         'occurred_at' => '2026-09-'.str_pad((string) ($sequence->index + 1), 2, '0', STR_PAD_LEFT),
-        'amount' => 10_000, // 100.00 EGP each — total 3,000.00
+        'amount' => 100, // 100.00 EGP each — total 3,000.00
     ])->create();
 
     $pageOne = expensesTable();
     $pageTwo = expensesTable(['page' => 2]);
 
-    expect($pageOne)->toContain('3,000.00 ج.م');
-    expect($pageTwo)->toContain('3,000.00 ج.م');
+    expect($pageOne)->toContain('3,000 ج.م');
+    expect($pageTwo)->toContain('3,000 ج.م');
 
     // Guard against the bug this exists to prevent: a total computed from
     // only the visible rows would show 2,500.00 on page one and 500.00 on
     // page two instead of the true 3,000.00 on both.
-    expect($pageOne)->not->toContain('2,500.00');
-    expect($pageTwo)->not->toContain('500.00 ج.م');
+    expect($pageOne)->not->toContain('2,500');
+    expect($pageTwo)->not->toContain('500 ج.م');
 });
 
 test('an expense with no month siblings still gets its own separator with its own total', function () {
-    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-05-10', 'amount' => 75_000]);
+    Expense::factory()->for($this->category, 'category')->create(['occurred_at' => '2026-05-10', 'amount' => 750]);
 
     $table = expensesTable();
 
     expect($table)->toContain('مايو 2026');
-    expect(substr_count($table, '750.00 ج.م'))->toBe(2); // the separator total and the single row's own amount happen to match
+    expect(substr_count($table, '750 ج.م'))->toBe(2); // the separator total and the single row's own amount happen to match
 });

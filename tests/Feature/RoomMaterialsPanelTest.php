@@ -18,22 +18,24 @@ beforeEach(function () {
     $this->accessory = MaterialType::query()->where('name', 'اكسسوار')->value('id');
 });
 
-test('materials are split into a wood box and an accessories box', function () {
+test('materials from both types appear in one table', function () {
     Material::factory()->create(['name' => 'خشب بلوط', 'material_type_id' => $this->wood]);
     Material::factory()->create(['name' => 'مفصلة نحاس', 'material_type_id' => $this->accessory]);
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
 
     $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
 
-    $accessoriesBox = strpos($html, 'الاكسسوارات');
-    expect(strpos($html, 'data-label="خشب بلوط'))->toBeLessThan($accessoriesBox);
-    expect(strpos($html, 'data-label="مفصلة نحاس'))->toBeGreaterThan($accessoriesBox);
+    expect($html)->toContain('data-label="خشب بلوط')
+        ->toContain('data-label="مفصلة نحاس')
+        // the segmented type filter above the single table
+        ->toContain('خامات')
+        ->toContain('اكسسوارات');
 });
 
 test('a completed room disables edit, issue and delete with the lock reason', function () {
     $room = Room::factory()->create(['status' => RoomStatus::Completed]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    RoomMaterial::factory()->create(['room_id' => $room->id, 'material_id' => $material->id, 'required_quantity' => 5_000]);
+    RoomMaterial::factory()->create(['room_id' => $room->id, 'material_id' => $material->id, 'required_quantity' => 5]);
 
     $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
 
@@ -43,7 +45,7 @@ test('a completed room disables edit, issue and delete with the lock reason', fu
 test('an in-progress room keeps its buttons working', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    RoomMaterial::factory()->create(['room_id' => $room->id, 'material_id' => $material->id, 'required_quantity' => 5_000]);
+    RoomMaterial::factory()->create(['room_id' => $room->id, 'material_id' => $material->id, 'required_quantity' => 5]);
 
     $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
 
@@ -53,9 +55,9 @@ test('an in-progress room keeps its buttons working', function () {
 test('a fully issued material is green and says so, not red', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    $this->inventory->addStock($material, 1_000, 10_000, '2026-01-01', PaymentMethod::Cash);
-    $requirement = $this->roomMaterials->addRequirement($room, $material, 1_000);
-    $this->roomMaterials->issue($requirement, 1_000, '2026-01-02');
+    $this->inventory->addStock($material, 1, 100, '2026-01-01', PaymentMethod::Cash);
+    $requirement = $this->roomMaterials->addRequirement($room, $material, 1);
+    $this->roomMaterials->issue($requirement, 1, '2026-01-02');
 
     $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
 
@@ -67,7 +69,7 @@ test('a fully issued material is green and says so, not red', function () {
 test('a material short of stock is red with the shortage message', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    $this->roomMaterials->addRequirement($room, $material, 5_000);
+    $this->roomMaterials->addRequirement($room, $material, 5);
 
     $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
 
@@ -78,9 +80,9 @@ test('a material short of stock is red with the shortage message', function () {
 test('a fully issued and short material is green, not red', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    $this->inventory->addStock($material, 1_000, 10_000, '2026-01-01', PaymentMethod::Cash);
-    $requirement = $this->roomMaterials->addRequirement($room, $material, 1_000);
-    $this->roomMaterials->issue($requirement, 1_000, '2026-01-02');
+    $this->inventory->addStock($material, 1, 100, '2026-01-01', PaymentMethod::Cash);
+    $requirement = $this->roomMaterials->addRequirement($room, $material, 1);
+    $this->roomMaterials->issue($requirement, 1, '2026-01-02');
 
     // Stock is now 0 and everything is issued — "short" must not win.
     $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
@@ -91,26 +93,26 @@ test('a fully issued and short material is green, not red', function () {
 test('editing a requirement over HTTP saves it', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    $requirement = $this->roomMaterials->addRequirement($room, $material, 5_000);
+    $requirement = $this->roomMaterials->addRequirement($room, $material, 5);
 
     $this->actingAs($this->admin)
         ->patch(route('rooms.materials.update', [$room, $requirement]), ['required_quantity' => '7'])
         ->assertSessionHasNoErrors();
 
-    expect($requirement->fresh()->getRawOriginal('required_quantity'))->toBe(7_000);
+    expect($requirement->fresh()->getRawOriginal('required_quantity'))->toBe(7);
 });
 
 test('lowering a requirement below what was issued shows the Arabic reason on its own row', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
-    $this->inventory->addStock($material, 10_000, 10_000, '2026-01-01', PaymentMethod::Cash);
-    $requirement = $this->roomMaterials->addRequirement($room, $material, 5_000);
-    $this->roomMaterials->issue($requirement, 3_000, '2026-01-02');
+    $this->inventory->addStock($material, 10, 100, '2026-01-01', PaymentMethod::Cash);
+    $requirement = $this->roomMaterials->addRequirement($room, $material, 5);
+    $this->roomMaterials->issue($requirement, 3, '2026-01-02');
 
     $this->actingAs($this->admin)
         ->from(route('rooms.show', $room))
         ->patch(route('rooms.materials.update', [$room, $requirement]), ['required_quantity' => '1'])
         ->assertSessionHasErrors(['required_quantity' => 'الخامة دي اتصرف منها 3 بالفعل، ومينفعش المطلوب يبقى أقل من كده.'], errorBag: 'edit_'.$requirement->id);
 
-    expect($requirement->fresh()->getRawOriginal('required_quantity'))->toBe(5_000);
+    expect($requirement->fresh()->getRawOriginal('required_quantity'))->toBe(5);
 });

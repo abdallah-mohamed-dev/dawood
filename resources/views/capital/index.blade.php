@@ -1,24 +1,24 @@
 <x-app-layout title="رأس المال">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">رأس المال</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">رأس المال</h1>
 
     <x-quick-add :action="route('capital.store')" title="إضافة بند">
         <x-quick-field name="name" label="البند" width="w-56" required />
-        <x-quick-field name="amount" label="السعر (ج.م)" type="number" step="0.01" min="0" width="w-40" required />
+        <x-quick-field name="amount" label="السعر (ج.م)" type="number" step="1" min="0" width="w-40" required />
         <x-quick-field name="occurred_at" label="التاريخ" type="date" width="w-44" required />
         <x-quick-field name="note" label="ملاحظات" width="w-64" />
     </x-quick-add>
 
     <form method="GET" action="{{ route('capital.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
         <div class="relative w-full max-w-xs">
-            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالبند أو الملاحظة" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالبند أو الملاحظة" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <div>
-            <label for="from" class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
-            <input id="from" type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label for="from" class="mb-1 block text-xs font-medium text-ink-soft">من تاريخ</label>
+            <input id="from" type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <div>
-            <label for="to" class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
-            <input id="to" type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label for="to" class="mb-1 block text-xs font-medium text-ink-soft">إلى تاريخ</label>
+            <input id="to" type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
         @if ($search !== '' || $from !== '' || $to !== '')
@@ -50,7 +50,7 @@
     </div>
 
     <div class="mt-6 flex items-center justify-between rounded-xl border border-border bg-surface px-6 py-4 shadow-sm">
-        <span class="text-base font-semibold text-gray-900">إجمالي رأس المال</span>
+        <span class="text-base font-semibold text-ink">إجمالي رأس المال</span>
         <span class="text-xl font-bold text-primary"><x-money :amount="$total" /></span>
     </div>
     <p class="mt-2 text-xs text-secondary">رأس المال للتسجيل والعرض فقط ولا يدخل في رصيد الخزنة ولا في حساب الربح.</p>

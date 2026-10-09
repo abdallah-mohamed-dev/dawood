@@ -1,0 +1,2452 @@
+<html>
+
+<head><!-- frame-runtime -->
+    <script>window.__FRAME_PREAMBLE = { "v": 1, "cred": "cookie", "capabilities": { "artifact": "artifact.w_ePPE-a.js", "assets": "assets.DOAjpBS9.js", "comments": "comments.BcqPhVn7.js", "db": "db.zFlAA4qL.js", "dictation": "dictation.f3j7VXQ8.js", "downloads": "downloads.axDW2QAi.js", "embed": "embed.SWCZLzn6.js", "endpoints": "endpoints.BPfoKaE1.js", "files": "files.IkpCjcgM.js", "mcp": "mcp.kl0G36TA.js", "network": "network.B5UA9Su4.js", "permissions": "permissions.BHAs_S4o.js", "reads": "reads.Bgov9hIw.js", "room": "room.Dy3vHyq9.js", "sample": "sample.t8BQC4US.js", "self": "artifact.w_ePPE-a.js", "user": "user.CB0zJsP2.js" }, "transforms": "_transforms.OOT2SKiU.js", "comments": "_comments.CVOoGJSh.js", "translate": "_translate.DqxC5ek1.js", "ldx": "_ldx.B4FSryPi.js" }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     </script>
+    <script>(function () { "use strict"; function fr(t) { return t === "cookie" || t === "query" ? t : void 0 } function dr(t) { return typeof t == "number" && Number.isSafeInteger(t) && t > 0 ? t : void 0 } var eo = 3e5; function hr(t, e) { try { const r = t("navigation")[0], n = [r.responseStart, r.redirectEnd - r.redirectStart, r.domContentLoadedEventStart, e(), r.connectEnd - r.domainLookupStart, r.responseStart - r.requestStart]; r.requestStart > 0 || (n.length = 4); for (let a = 0; a < n.length; a++)if (n[a] >= 0 && n[a] <= 3e5) n[a] = n[a] | 0; else { if (a < 4) return; n.length = 4 } return n } catch { return } } var pr = ["light", "dark", "system"], mr = /^[A-Za-z0-9_-]{1,64}$/, Tt = /^[a-zA-Z_:][a-zA-Z0-9_:.-]{0,127}$/, vr = new Set(["class", "hidden", "value", "checked", "style", "title", "alt", "placeholder", "lang", "dir", "role", "tabindex", "disabled", "readonly", "contenteditable", "open", "colspan", "rowspan"]); function _r(t) { const e = t.toLowerCase(); return e.startsWith("data-") || e.startsWith("aria-") || vr.has(e) } var Lt = "data-ldx-props"; function yr(t, e) { if (e.toLowerCase() === Lt) return !0; const r = t.getAttribute(Lt); if (r === null) return !1; try { const n = JSON.parse(r); if (n === null || typeof n != "object" || Array.isArray(n)) return !0; const a = e.toLowerCase(); return Object.keys(n).some(s => s.toLowerCase() === a) } catch { return !0 } } var to = "http://www.w3.org/1999/xhtml", gr = "http://www.w3.org/2000/svg", wr = new Set(["script", "style", "iframe", "noscript", "noframes", "noembed", "xmp", "plaintext", "template", "title", "textarea", "object", "embed"]), br = new Set(["script", "style"]); function Er(t) { const e = t.localName.toLowerCase(); return t.namespaceURI === "http://www.w3.org/1999/xhtml" ? !wr.has(e) : t.namespaceURI === gr ? !br.has(e) : !1 } function tt(t, e) { return t === e || (t === 160 || t === 32) && (e === 160 || e === 32) } function Sr(t, e) { const r = t.length, n = e.length; let a = 0; for (; a < r && a < n && tt(t.charCodeAt(a), e.charCodeAt(a));)a++; let s = 0; for (; s < r - a && s < n - a && tt(t.charCodeAt(r - 1 - s), e.charCodeAt(n - 1 - s));)s++; return { p: a, s } } function Ar(t, e) { const r = t.firstChild; if (t.childNodes.length !== 1 || r === null || r.nodeType !== Node.TEXT_NODE) { t.textContent = e; return } const n = r.data, a = n.length, s = e.length, { p: l, s: u } = Sr(n, e); l === a && u === 0 && a === s || r.replaceData(l, a - l - u, e.slice(l, s - u)); const O = r.data, k = t.ownerDocument.getSelection?.() ?? null, E = k !== null && k.rangeCount > 0 && (k.anchorNode === r || k.focusNode === r) ? { anchor: k.anchorNode, anchorOffset: k.anchorOffset, focus: k.focusNode, focusOffset: k.focusOffset } : null; let h = -1, S = -1; for (let p = 0; p < O.length && p < e.length; p++) { const F = O.charCodeAt(p), R = e.charCodeAt(p); F !== R && tt(F, R) && (h < 0 && (h = p), S = p) } const L = h >= 0; if (L && r.replaceData(h, S - h + 1, e.slice(h, S + 1)), L && E !== null && E.anchor !== null && E.focus !== null) try { k.setBaseAndExtent(E.anchor, E.anchorOffset, E.focus, E.focusOffset) } catch { } } var kr = new Set(["html", "head", "body", "frameset"]); function Rr(t) { return t.namespaceURI === "http://www.w3.org/1999/xhtml" && kr.has(t.localName) } function Tr(t) { if (t === null || typeof t != "object") return !1; const e = t; if (typeof e.target != "string" || !mr.test(e.target) || e.text !== void 0 && typeof e.text != "string") return !1; if (e.attrsSet !== void 0) { if (e.attrsSet === null || typeof e.attrsSet != "object") return !1; for (const [r, n] of Object.entries(e.attrsSet)) if (!Tt.test(r) || typeof n != "string") return !1 } if (e.attrsRemoved !== void 0) { if (!Array.isArray(e.attrsRemoved)) return !1; for (const r of e.attrsRemoved) if (typeof r != "string" || !Tt.test(r)) return !1 } return !0 } function Lr(t, e) { if (t === null || typeof t != "object") return !1; const { seq: r, elements: n } = t; if (typeof r != "number" || !Number.isSafeInteger(r) || !Array.isArray(n) || n.length === 0 || n.length > 64) return !1; for (let a = 0; a < n.length; a++)if (!e(n[a])) return !1; return !0 } function Or(t) { return t === null || typeof t != "object" ? !1 : Lr(t.__frame_patch, Tr) } function Mr(t) { if (t === null || typeof t != "object") return !1; const e = t.__frame_init; return e !== null && typeof e == "object" } function Pr(t) { return t !== null && typeof t == "object" && t.__frame_size_poke === !0 } function Nr(t) { if (t === null || typeof t != "object") return !1; const e = t.__frame_host_visible; return e !== null && typeof e == "object" && typeof e.visible == "boolean" } function Cr(t) { if (t === null || typeof t != "object") return !1; const e = t.__frame_theme; if (e === null || typeof e != "object") return !1; const r = e.theme; return typeof r == "string" && pr.includes(r) } var Fr = ["ok", "empty", "snapshot_error", "snapshot_timeout", "unclonable", "oversize", "unavailable", "restore_error", "withheld"], jr = ["TypeError", "RangeError", "ReferenceError", "SyntaxError", "DataCloneError", "QuotaExceededError", "AbortError", "TimeoutError", "SecurityError", "Error", "other"]; function xr(t) { return typeof t == "string" && jr.includes(t) ? t : "other" } var Ir = Object.freeze({ until: null, now: !1 }), Dr = "__claude_hot", Hr = "__claude_hot_in", Br = /^__claude_hot(?:_in)?(?::|$)/, Ot = /^[0-9a-z]{1,32}$/, rt = t => t === void 0 ? Dr : "__claude_hot:" + t, Le = t => t === void 0 ? Hr : "__claude_hot_in:" + t; function qr(t, e) { const r = []; for (let n = 0; n < t.length; n++) { const a = t.key(n); a !== null && a !== e && Br.test(a) && r.push(a) } for (const n of r) t.removeItem(n) } function Ur(t) { let e = null; try { e = q(JSON.parse(t)?.hot) } catch { return null } return e === null || typeof e.k != "string" || !Ot.test(e.k) ? null : he(e.g) ? { k: e.k, g: e.g } : { k: e.k } } var ro = 262144, Kr = 3e3, Gr = 5e3, Mt = /^[a-z0-9._:-]{1,64}$/, $r = ["none", "hot-restart", "hard-reload"], zr = ["asset", "doc", "added", "removed"], Vr = 1500, Wr = /^[0-9a-f]{64}$/; function q(t) { return t !== null && typeof t == "object" ? t : null } function he(t) { return typeof t == "number" && Number.isInteger(t) && t >= 0 && t < 2 ** 31 } function Pt(t) { return t === void 0 || typeof t == "number" && Number.isFinite(t) } function Xr(t) { return t === void 0 || typeof t == "string" && Mt.test(t) } function Nt(t) { const e = q(t); return e !== null && (e.until === null || typeof e.until == "number" && Number.isFinite(e.until)) && typeof e.now == "boolean" } function nt(t) { const e = q(t); return e !== null && typeof e.ver == "string" && e.ver.length <= 128 && Pt(e.seq) && typeof e.handoff == "string" && Fr.includes(e.handoff) && Xr(e.note) } function Ct(t) { const e = q(t); return e !== null && he(e.gen) && (e.phase === "final" || e.phase === "pending") && (e.from === null || nt(e.from)) } function Yr(t) { const e = q(t); return e !== null && e.kv === 1 && he(e.gen) && nt(e.from) && Object.hasOwn(e, "data") } function Jr(t) { const e = q(t); return e !== null && e.__frame_hot_snapshot === !0 && he(e.gen) && typeof e.timeoutMs == "number" && e.timeoutMs >= 0 && e.timeoutMs <= 6e4 && (e.handoff === void 0 || typeof e.handoff == "boolean") && (e.deadline === void 0 || Nt(e.deadline)) && Pt(e.seq) && (e.note === void 0 || typeof e.note == "string") && (e.key === void 0 || typeof e.key == "string") } function Zr(t) { const e = q(t); return e !== null && e.__frame_hot_start === !0 && he(e.gen) && nt(e.from) } function Qr(t) { return typeof t == "string" && t.length >= 1 && t.length <= 128 } function Ft(t) { return q(t) !== null && !Array.isArray(t) } function en(t) { const e = q(t); return e !== null && e.__frame_cap_grant === !0 && typeof e.cap == "string" && Qr(e.ver) && (e.grant === void 0 || Ft(e.grant)) && (e.budgets === void 0 || Ft(e.budgets) && Object.values(e.budgets).every(Number.isFinite)) && (e.brokerGen === void 0 || he(e.brokerGen)) } function tn(t) { const e = q(t); return e !== null && e.__frame_cap_rewired === !0 && (e.caps === void 0 || Array.isArray(e.caps) && e.caps.every(r => typeof r == "string")) && (e.brokerGen === void 0 || he(e.brokerGen)) } function Ge(t) { const e = q(t); return e !== null && typeof e.ver == "string" && e.ver.length <= 128 && Number.isFinite(e.seq) } function jt(t) { if (t == null || typeof t == "string") return !0; const e = q(t); return e !== null && typeof e.doc == "string" && typeof e.profile == "string" } function rn(t) { const e = q(t); return e !== null && typeof e.path == "string" && zr.includes(e.kind) && jt(e.from) && jt(e.to) } function nn(t) { return t === null ? null : Object.freeze(t.filter(rn)) } function on(t) { const e = q(t); return e !== null && e.__frame_hot_update === !0 && Number.isFinite(e.id) && Ge(e.from) && Ge(e.to) && (e.changed === null || Array.isArray(e.changed)) && $r.includes(e.required) && Nt(e.deadline) && typeof e.verdictTimeoutMs == "number" && e.verdictTimeoutMs >= 0 && e.verdictTimeoutMs <= 6e4 && (e.preflight === void 0 || typeof e.preflight == "string" && Wr.test(e.preflight)) } function an(t) { const e = q(t); return e !== null && e.__frame_hot_readdress === !0 && Ge(e.from) && Ge(e.to) } var pe = /^[\w.-]+\.js$/; function sn(t, e, r) { return r ? "inert" : typeof e == "string" && pe.test(e) ? t ? [e] : "inert" : t ? "inert" : "framed" } var xt = Object.freeze({ [Symbol("claude.hot.restart")]: !0 }); function It(t, e) { let r; try { r = t ?? sessionStorage } catch { return null } const n = rt(e?.k), a = Le(e?.k); let s = null; try { s = r.getItem(n) } catch { } try { r.removeItem(n) } catch { } try { qr(r, a) } catch { } let l = null; if (s !== null && !(e !== null && e.g === void 0)) try { const u = JSON.parse(s); Yr(u) && (e === null || u.gen === e.g) && (l = u) } catch { } if (l === null) try { r.removeItem(a) } catch { } return l } function Dt() { const t = /^\/_f\/([^/]{1,128})\//.exec(location.pathname); return t ? t[1] : "" } var ln = /^[^/\\?#]{1,128}$/, ot = t => ln.test(t) && t !== "." && t !== ".."; function Ht(t, e, r) { const n = new URL(t), a = "/_f/" + e + "/"; if (!e || !n.pathname.startsWith(a) || !ot(r)) return null; const s = n.search.slice(1).split("&").filter(l => !/^__frame_t(?:=|$)/.test(l)).join("&"); return n.origin + "/_f/" + r + "/" + n.pathname.slice(a.length) + (s ? "?" + s : "") + n.hash } var $e = "{}"; function Oe(t) { if (!t) return null; const e = { ver: t.ver, handoff: t.handoff }; return t.seq !== void 0 && (e.seq = t.seq), t.note !== void 0 && (e.note = t.note), e } function Bt(t, e) { return t !== null && t.note === void 0 && e?.note !== void 0 ? { ...t, note: e.note } : t } function qt(t) { const e = t?.k; return e !== null && typeof e == "object" ? e : void 0 } function cn(t, e, r, n = null) { const a = setTimeout, s = clearTimeout, l = queueMicrotask, u = performance.now.bind(performance), O = new TextEncoder; let k = null, E = null; try { k = history, E = k.replaceState.bind(k) } catch { } const h = (...o) => { try { console.warn(...o) } catch { } }; let S = Dt(), L = null; try { L = sessionStorage } catch { } const p = { storage: L, fetch: typeof fetch == "function" ? fetch.bind(globalThis) : null, entry: location.origin + location.pathname + location.search, ver: S, priors: [], key: n?.k }; let F = n?.k; const R = typeof requestAnimationFrame == "function" ? requestAnimationFrame : o => a(() => o(u()), 16); let _ = e?.data ?? {}, y = Oe(e?.from), j = e?.gen ?? 0, I = e !== null, B = !1, G = !1, D = null, be = !1; const Fe = new AbortController; let je = null, U = null, Ee = null, xe = !1, le = () => { }; const ce = new Promise(o => { le = o }); let ve = !1, c = !1, g = !1, v, A = null, H = !1, X = !1, K = !1, te = !1, Y = !1, _e = !1; const ye = o => { for (const f of [rt(o), Le(o)]) try { L?.removeItem(f) } catch { } }, $ = (o, f) => { try { f !== null && r.post(o, f) } catch { } }, Ie = () => Y ||= K && (U === null || te), J = () => { const o = { __frame_hot: !0, ready: U !== null, accept: Ee !== null, demand: !0 }; _e = !Y, _e && (o.booting = !0), ve && (o.readData = !0), g && (o.threw = !0), A?.assess && (o.preflight = !0), $(o, D) }; let De = !1, re = !1, ue = !1, He = !1; const Je = () => { De || !be || ue || (De = !0, $({ __frame_reveal_hold: !0 }, "*")) }, Se = () => new Promise(o => { let f, d = 0; const m = M => { if (f === void 0) f = M; else if (M !== f || ++d >= 8) { o(); return } try { R(m) } catch { o() } }; try { R(m) } catch { o() } }), Be = () => { ue = !0, $({ __frame_reveal_ready: !0 }, "*") }, qe = o => { re || (re = !0, o.then(f => { if (f === !1) return; let d = null; try { d = A?.settle?.() ?? null } catch { } return (d === null ? Se() : new Promise(m => { a(m, 50), Promise.resolve(d).then(m, m) }).then(Se)).then(Be) })) }, yt = () => { if (He || !ue) return; He = !0; const o = () => { try { A?.afterReveal?.() } catch { } }; o(), Se().then(() => { o(), Be() }) }, ee = (o = !1) => { if (xe || U === null || !I || !G) return; xe = !0; const f = U, d = _; l(() => { let m; try { m = f(d) } catch (P) { throw le(!1), P } let M = !1; try { M = typeof m?.then == "function" } catch { } if (!M) { le(!0); return } Promise.resolve(m).then(() => le(!0), P => { le(!1), l(() => { throw P }) }) }), qe(o ? ce : r.dcl.then(() => ce)) }, fe = o => typeof o == "string" && Mt.test(o) ? o : void 0, Ae = o => { const f = { __frame_hot_restart: !0 }, d = fe(o?.note); d !== void 0 && (f.note = d), o?.required === "hard-reload" && (f.required = "hard-reload"), $(f, D) }, Ue = Object.freeze({ get data() { return G || (c = !0), !I && !ve && (ve = !0, G && J()), _ }, get from() { return y }, get gen() { return j }, signal: Fe.signal, snapshot(o) { typeof o == "function" && (je = o) }, ready(o) { typeof o != "function" || U !== null || (U = o, Je(), J(), B && $({ __frame_hot_ready: !0, gen: j }, D), ee()) }, accept(o) { typeof o == "function" && (Ee = o, J()) }, restart(o) { const f = { note: o?.note, required: o?.required }; if (G) { Ae(f); return } const d = v; v = { note: fe(d?.note) ?? f.note, required: d?.required === "hard-reload" || f.required === "hard-reload" ? "hard-reload" : void 0 } } }); let i = null, w = () => { }; const b = new Promise(o => { w = o }); let N = null; const Z = () => N ??= r.dcl.then(() => { let o = !1; try { o = i !== null && i.expect() } catch { } if (!o) return; const f = i.maxMs; return new Promise(d => { b.then(d), a(d, f) }) }), Q = () => { if (!H || X || A === null) return; X = !0; const o = A; Z().then(() => { try { ue || o.afterStart(qt(e), !1) } catch { } }) }, de = o => { e !== null && c && (ve = !0), _ = {}, y = null, j = 0; try { L?.removeItem(Le(n?.k)) } catch { } e !== null && !o && qe(r.dcl.then(() => U !== null ? ce : void 0)) }, Gn = () => { H = !0, qe(Z().then(() => U !== null ? ce : void 0)), Q() }; try { addEventListener("error", () => { g || U !== null || (g = !0, J()) }) } catch { } const sr = () => { a(() => { !Y && Ie() && _e && J() }, 0) }; try { K = document.readyState === "complete", K || addEventListener("load", () => { K = !0, sr() }, { once: !0 }) } catch { K = !0 } Ie(), ce.then(() => { te = !0, sr() }); let ge = -1, gt, wt, Ke = !0, bt = !1, Et, Ze = null; const St = o => { const f = Ze === null; Ze = Ke && o[0] !== "withheld" ? o : ["withheld", o[1], $e]; let d = o[0]; if (Ke && d !== "withheld") { const M = { ver: S, handoff: d }; gt !== void 0 && (M.seq = gt), wt !== void 0 && (M.note = wt); try { if (L === null) throw new Error("no storage"); L.setItem(rt(F), '{"kv":1,"gen":' + ge + ',"from":' + JSON.stringify(M) + (Et !== void 0 ? ',"k":' + JSON.stringify(Et) : "") + ',"data":' + (d === "ok" ? o[2] : $e) + "}") } catch { d = "unavailable" } } else { d = "withheld", ye(F); try { A?.release?.() } catch { } } const m = { __frame_hot_snapshotted: !0, gen: ge, handoff: d, bytes: o[1] }; o[3] !== void 0 && (m.errName = o[3]), $(m, D), f && (d === "snapshot_error" || d === "unclonable" || d === "oversize") && h("claude.hot: snapshot", d, o[3]) }, ke = o => { try { return xr(o?.name) } catch { return "other" } }, Re = (o, f, d = 0) => St(f === void 0 ? [o, d, $e] : [o, d, $e, ke(f)]), $n = o => { if (o.gen <= ge) return; const f = ge >= 0; if (ge = o.gen, gt = o.seq, wt = fe(o.note), typeof o.key == "string" && Ot.test(o.key) && o.key !== F && (ye(F), F = o.key), Ke &&= o.handoff !== !1, f) { Ze !== null ? St(Ze) : bt && $({ __frame_hot_held: !0, gen: ge }, D); return } Fe.abort(); const d = Object.freeze({ handoff: Ke, timeoutMs: o.timeoutMs, deadline: o.deadline ?? Ir }), m = je, M = () => { if (Ke) try { Et = A?.capture() } catch { } if (m === null) { Re("empty"); return } let T = !1; const z = a(() => { T || (T = !0, Re("snapshot_timeout")) }, Math.max(0, d.timeoutMs)); Promise.resolve().then(() => m(d)).then(Te => { if (T) return; T = !0, s(z); let ne; try { ne = JSON.stringify(Te) } catch (At) { Re("unclonable", At); return } if (typeof ne != "string") { Re("unclonable"); return } let oe = ne.length; try { oe = O.encode(ne).length } catch { } if (oe > 262144) { Re("oversize", void 0, oe); return } St(["ok", oe, ne]) }, Te => { T || (T = !0, s(z), Re("snapshot_error", Te)) }) }; let P = null; try { P = A?.holdForIme() ?? null } catch { } if (P === null) M(); else { bt = !0, $({ __frame_hot_held: !0, gen: ge }, D); const T = () => { bt = !1, M() }; P.then(T, T) } }, zn = o => { if (!B || I || U === null || o.gen !== j) return; let f = null; try { f = It(L, n && { k: n.k, g: o.gen }) } catch { } if (f !== null && f.gen !== o.gen) { f = null; try { L?.removeItem(Le(n?.k)) } catch { } } _ = f?.data ?? {}, y = Bt(Oe(f?.from ?? o.from), Oe(o.from)), f !== null && (j = f.gen), I = !0, B = !1; const d = qt(f); ce.then(m => { try { m && A?.afterStart(d, !0) } catch { } }), ee(!0) }, ir = o => { const f = S, d = p.entry; let m = "", M, P = null; try { if (m = location.href, M = k.state, P = Ht(m, f, o), P !== null) if (E(M, "", P), location.pathname.startsWith("/_f/" + o + "/")) P = location.href; else return { failed: "navigate event canceled" } } catch (T) { return { failed: ke(T) } } S = p.ver = o, p.priors.push(f) > 8 && p.priors.splice(1, 1); try { p.entry = Ht(d, f, o) ?? d } catch { } return [P, f, d, m, M] }, Vn = ({ from: o, to: f }) => { let d, m; if (!ot(f.ver)) d = "adopt_failed", m = "not a version path segment"; else if (f.ver === S) d = "adopted"; else if (!S || o.ver !== S) d = "stale"; else { const P = ir(f.ver); "failed" in P ? (d = "adopt_failed", m = P.failed) : d = P[0] === null ? "adopt_skipped" : "adopted" } m !== void 0 && h(`claude.hot: could not move this page's URL to its new version folder /_f/${f.ver}/ (${m})`); const M = { __frame_hot_readdressed: !0, to: f.ver, at: S, outcome: d }; $(M, D) }; let Qe = 0; const Wn = o => { const f = Ee; if (f === null || o.id <= Qe) return; Qe = o.id; const d = A?.assess; if (o.preflight === void 0 || d === void 0) { lr(o, f); return } let m = !1; const M = z => { m || (m = !0, s(T), o.id === Qe && lr(o, f, z)) }, P = () => M(d.timeout(o)), T = a(P, Vr + 100); d.run(o, window).then(M, P) }, lr = (o, f, d) => { let m, M = !1, P = !1, T, z, Te = null; const ne = C => { if (P) return !1; if (T !== void 0 && T !== C) return h(`claude.hot: u.${C}() ignored - u.${T}() was called first`), !1; const ae = T === void 0; return T = C, ae }, oe = C => { T = "restart", h(`claude.hot: ${C} - restarting`) }, At = () => { if (!ne("adopt") || o.id !== Qe) return; const C = o.to.ver; if (et.required !== "none") { oe(`u.adopt() needs required 'none', it is '${et.required}'`); return } if (!ot(C)) { oe("u.adopt() cannot address this version"); return } if (!S || C === S) return; const ae = ir(C); if ("failed" in ae) { z = "adopt_failed", oe(`adopt_failed ${ae.failed}; URL not changed`); return } const [V, Rt, Jn, ur, Zn] = ae; V === null ? (z = "adopt_skipped", h(`claude.hot: adopt_skipped - page already left /_f/${Rt}/; URL not changed, update still applied`)) : z = "adopted", Te = () => { if (S === C) { if (V !== null) try { if (location.href !== V) h("claude.hot: adopt_revert_skipped - update not applied; URL left where the page navigated"); else { if (E(Zn, "", ur), location.href !== ur) { h("claude.hot: adopt_revert_failed navigate event canceled - URL still at the new version"); return } z = "adopt_reverted", h("claude.hot: adopt_reverted - adopt() was called but the handler threw; URL restored") } } catch (Qn) { h(`claude.hot: adopt_revert_failed ${ke(Qn)} - URL still at the new version`); return } S = p.ver = Rt, p.entry = Jn, p.priors[p.priors.length - 1] === Rt && p.priors.pop(), V === null && (z = void 0) } } }, et = Object.freeze({ from: { ver: o.from.ver, seq: o.from.seq }, to: { ver: o.to.ver, seq: o.to.seq }, changed: nn(o.changed), required: o.required, deadline: o.deadline, adopt: At, defer() { return ne("defer") && et.deadline.now && oe("u.defer() past the deadline"), xt }, restart(C) { return ne("restart"), T === "restart" && !P && (m ??= fe(C?.note), M ||= C?.required === "hard-reload"), xt }, ...d?.update }), Xn = (C, ae) => { P = !0, C === "threw" ? (Te?.(), m ??= ke(ae).toLowerCase()) : T === void 0 && h(C === "timeout" ? "claude.hot: accept handler did not answer in time - restarting" : "claude.hot: accept handler settled without defer/restart/adopt - restarting"); const V = { __frame_hot_verdict: !0, id: o.id }; V.verdict = C === "threw" || T === void 0 || T === "restart" ? "restart" : T === "adopt" ? "applied" : "deferred", V.verdict === "restart" && (M && (V.required = "hard-reload"), m !== void 0 && (V.note = m)), z !== void 0 && (V.verdict === "applied" || z !== "adopted") && (V.adopt = z), $(Object.assign(V, d?.verdict), D) }; let cr = !1; const kt = (C, ae) => cr ? !1 : (cr = !0, s(Yn), Xn(C, ae), !0), Yn = a(() => kt("timeout"), o.verdictTimeoutMs); Promise.resolve().then(() => f(et)).then(() => kt("settled"), C => { !kt("threw", C) && T === "adopt" && Ae({ note: ke(C).toLowerCase() }), h("claude.hot: accept", ke(C)) }) }; try { t.hot === void 0 && Object.defineProperty(t, "hot", { value: Ue, writable: !1, configurable: !1, enumerable: !1 }) } catch { } return { hot: Ue, boot: p, afterConnect() { be = !0, (e !== null || U !== null) && Je() }, onInit(o, f) { D = f, G = !0; const d = Ct(o) ? o : null; d?.phase === "final" && e !== null && e.gen === d.gen ? (I = !0, y = Bt(y, Oe(d.from)), Gn()) : (B = d?.phase === "pending", de(B), I = !B, j = d?.gen ?? 0, y = Oe(d?.from)), J(), _e && a(() => { Y || (Y = !0, J()) }, Gr), B && U !== null && $({ __frame_hot_ready: !0, gen: j }, f), v !== void 0 && (Ae(v), v = void 0), ee() }, onNoInit() { G = !0, de(!1), I = !0, ee() }, onShell(o) { return o?.__frame_revealed === !0 ? (yt(), !1) : Jr(o) ? ($n(o), !0) : Zr(o) ? (zn(o), !0) : on(o) ? (Wn(o), !0) : an(o) ? (Vn(o), !0) : !1 }, attachExtras(o) { A = o, Q(), o.assess && J() }, inSlot: () => Le(F), hydration(o, f) { i ??= { expect: o, maxMs: f } }, hydrated() { w() }, carried() { return I ? _ : {} }, presented: () => ue } } var no = "frame_ldx_runtime", un = "frame_ldx_build", oo = "script#an-form", fn = 256; function Ut(t, e, r) { for (const n of t) r(n) && t.delete(n); t.size >= fn && !t.has(e) && t.delete(t.values().next().value), t.add(e) } function Me(t, e, r, n) { try { const a = t[e]; if (typeof a != "function") return; t[e] = function (...s) { if (n) { let u; try { u = n(this) } catch { } if (u !== void 0) return u } const l = a.apply(this, s); try { r?.(this) } catch { } return l } } catch { } } var at; function dn() { if (at) return at; const t = { media: new Set, contexts: new Set, gate: null, onStart: null, onStop: null }; at = t; const e = l => t.gate?.(l), r = l => { t.onStop?.(l) }, n = window.HTMLMediaElement?.prototype; n && (Me(n, "play", l => { Ut(t.media, l, u => u.paused), t.onStart?.(l) }, e), Me(n, "pause", r)); const a = window.AudioContext, s = window.AudioNode?.prototype; return a && s && (Me(s, "connect", l => { const u = l.context; u instanceof a && (Ut(t.contexts, u, O => O.state === "closed"), t.onStart?.(u)) }), Me(a.prototype, "resume", void 0, e), Me(a.prototype, "suspend", r)), t } function hn(t) { let e = window; for (let r = 0; e.parent && e.parent !== e && r < 8; r++)if (e = e.parent, t(e)) return !0; return !1 } function pn() { let t = null; const e = () => t ?? parent, r = n => t ? n === t : hn(a => a === n); return { post(n, a) { if (t) { e().postMessage(n, a); return } let s = parent; for (let l = 0; l < 8 && (s.postMessage(n, a), !(!s.parent || s.parent === s)); l++)s = s.parent }, on(n) { const a = s => { const l = s.source; r(l) && n(s.data, s.origin, s.isTrusted, () => { t ??= l }) }; return addEventListener("message", a), () => removeEventListener("message", a) }, port: n => ({ post(a, s) { if (s?.activation) { e().postMessage(a, { targetOrigin: n, includeUserActivation: !0 }); return } if (s?.transfer) { e().postMessage(a, n, s.transfer); return } e().postMessage(a, n) }, on(a, s) { const l = u => { r(u.source) && u.origin === n && a(u.data, u) }; return addEventListener("message", l, s), () => removeEventListener("message", l, s) } }) } } function mn() { const t = { post: () => { }, on: () => () => { } }; return { ...t, port: () => t } } var vn = 500, _n = 2e4, yn = "data-token-reads", gn = "data-frame-refused-watch", wn = "data-frame-unsupported", bn = /(?:^|\s)stylesheet(?:\s|$)/i; function En(t, e) { let r = ""; if (t instanceof HTMLScriptElement ? r = t.src : t instanceof HTMLLinkElement && bn.test(t.rel) && (r = t.href), !r) return null; try { const n = new URL(r); return n.origin === location.origin && n.pathname.startsWith(e) ? n.origin + n.pathname : null } catch { return null } } function Sn(t, e, r) { if (!t || e !== "query") return; const n = "/_f/" + t + "/"; document.documentElement.setAttribute(gn, ""); const a = location.href, s = fetch, l = setTimeout, u = { method: "HEAD", cache: "no-store", credentials: "same-origin" }, O = p => p.ok || p.status === 304; let k = !1, E = !1; const h = () => removeEventListener("error", L, !0), S = async p => { const F = await s(p, u); if (O(F)) E = !0; else if (F.status === 403) { const R = await s(a, u); if (O(R)) { const _ = (await s(p, u)).status; _ === 403 ? (E = !0, document.documentElement.setAttribute(wn, ""), r()) : _ < 500 && (E = !0) } else R.status >= 400 && R.status < 500 && (E = !0) } }, L = p => { if (E || k) return; if (document.documentElement.hasAttribute(yn)) { E = !0, h(); return } const F = En(p.target, n); F && (k = !0, l(() => { S(F).catch(() => { }).finally(() => { k = !1, E && h() }) }, vn)) }; addEventListener("error", L, !0), addEventListener("load", h, { once: !0 }), l(h, _n) } var st = "__frame_scroll", An = 150, kn = 310, Rn = 160, Tn = 3e4, Kt = "p,h1,h2,h3,h4,h5,h6,li,pre,blockquote,tr,dt,dd,figcaption,summary", Gt = () => innerWidth <= kn && innerHeight <= Rn, $t = t => { const e = document.createTreeWalker(t, NodeFilter.SHOW_TEXT); let r = ""; for (; r.length < 600 && e.nextNode();)r += e.currentNode.nodeValue.slice(0, 600 - r.length); const n = r.replace(/\s+/g, " ").trim().slice(0, 120); let a = 2166136261; for (let s = 0; s < n.length; s++)a = Math.imul(a ^ n.charCodeAt(s), 16777619); return n.length > 11 ? a >>> 0 || 1 : 0 }, zt = t => { for (let e = t; e && e !== document.scrollingElement; e = e.parentElement) { const r = getComputedStyle(e).position; if (r === "fixed" || r === "sticky" || e !== t && e.scrollTop) return !1 } return !0 }, Ln = () => { const t = [], e = []; try { for (let r = 0; r < 16; r++) { const n = document.elementFromPoint(innerWidth / (r % 2 ? 4 : 2), innerHeight * (r >> 1) / 8 + 1); let a = n?.closest(Kt) ?? n; for (; a && !a.matches(Kt) && ![...a.childNodes].some(l => l.nodeType === 3 && l.nodeValue?.trim());)a = a.parentElement; const s = a && !e.includes(a) ? $t(a) : 0; s && !t.some(l => l[0] === s && l[2] === a.tagName) && zt(a) && (e.push(a), t.push([s, Math.round(a.getBoundingClientRect().top), a.tagName])) } } catch { } return t.sort((r, n) => +(r[1] < 0) - +(n[1] < 0)), t.length ? t.slice(0, 3) : void 0 }, On = t => { try { for (const [e, r, n] of t.a ?? []) { const a = document.getElementsByTagName(n); let s; for (let u = 0; u < a.length && a.length < 5e3; u++)$t(a[u]) === e && (s = s === void 0 || s?.contains(a[u]) ? a[u] : null); const l = s?.getBoundingClientRect(); if (l?.height && s.checkVisibility?.() !== !1 && zt(s) && isFinite(r)) return Math.max(0, Math.round(scrollY + l.top - r)) } } catch { } return t.y }; function Mn() { let t = 0, e = !1, r = !1, n = !1, a = { y: 0 }, s = null; const l = y => { try { sessionStorage.setItem(st, JSON.stringify(y)) } catch { } }, u = y => { if (clearTimeout(t), s === null) return; const j = s; s = null, l({ y: j, a: y && j > 0 ? Ln() : void 0 }) }, O = () => { if (e) { e = !1; return } r = !0, s = scrollY, clearTimeout(t), t = setTimeout(u, An, !0) }; try { addEventListener("scroll", O, { passive: !0 }), addEventListener("pagehide", () => u()) } catch { } const k = () => { let y; try { y = sessionStorage.getItem(st) } catch { return null } if (y === null) return null; let j; try { j = JSON.parse(y) } catch { j = null } const { y: I, a: B } = j ?? {}; if (!(typeof I == "number" && Number.isFinite(I) && I >= 0)) { try { sessionStorage.removeItem(st) } catch { } return null } const G = D => Array.isArray(D) && typeof D[0] == "number" && Number.isFinite(D[1]) && typeof D[2] == "string"; return { y: I, a: Array.isArray(B) && B.length < 4 && B.every(G) ? B : void 0 } }; let E = !1, h = -1; const S = y => { try { const j = scrollY, I = On(y); scrollTo({ top: I, left: 0, behavior: "instant" }), a = Gt() ? y : { y: I, a: y.a }, n = !0, clearTimeout(t), s = null, l(a), h = scrollY, h !== j && (e = !0); const B = I !== y.y && document.readyState !== "complete"; (h !== I || B) && !E && (E = !0, addEventListener("load", () => { try { scrollY === h && S(k() ?? a) } catch { } }, { once: !0 })) } catch { } }, L = () => { try { return !!location.hash } catch { return !0 } }; let p = !1; const F = () => { try { if (p || !Gt()) return; p = !0; const y = Date.now(), j = () => { try { removeEventListener("resize", j) } catch { } Date.now() - y > Tn || r || L() || S(k() ?? a) }; addEventListener("resize", j) } catch { } }; let R = !1, _ = !1; return { restore() { if (R || (R = !0, L())) return; const y = k(); y !== null && (S(y), F()) }, promoted() { if (_ || (_ = !0, L())) return; const y = k(); y !== null ? (S(y), F()) : n && S(a) } } } function Pn(t, e, r, n) { let a = null; try { a = window.trustedTypes?.createPolicy("frame-runtime", { createScriptURL: O => O }) ?? null } catch { } const s = window.Worker, l = s?.prototype, u = Object.freeze({ Worker: s, workerOn: l?.addEventListener, workerPost: l?.postMessage, workerTerminate: l?.terminate, fetch: window.fetch.bind(window), preventDefault: Event.prototype.preventDefault, now: Date.now, policy: a, origins: e }); r(t).then(O => O?.bootTopLevel ? O.bootTopLevel(u, n) : n.settle()).catch(() => n.settle()) } var ao = "modulepreload", so = function (t) { return "/" + t }, io = {}, Nn = function (e, r, n) { let a = Promise.resolve(); function s(l) { const u = new Event("vite:preloadError", { cancelable: !0 }); if (u.payload = l, window.dispatchEvent(u), !u.defaultPrevented) throw l } return a.then(l => { for (const u of l || []) u.status === "rejected" && s(u.reason); return e().catch(s) }) }, Cn = window === top, Vt = Object.getOwnPropertyDescriptor(window, "claude"), ze = sn(Cn, window.__FRAME_PREAMBLE?.topLevel, Vt?.writable === !1), it = typeof ze == "object" && ze[0], x = it ? mn() : pn(); (function () { const t = Object.defineProperty, e = globalThis, r = ["RTCPeerConnection", "webkitRTCPeerConnection", "RTCDataChannel", "RTCIceCandidate", "RTCSessionDescription", "RTCRtpSender", "RTCRtpReceiver"]; let n = 0; for (let a = 0; a < r.length; a++) { const s = r[a]; try { t(e, s, { value: void 0, writable: !1, configurable: !1 }) } catch { try { delete e[s] } catch { } try { t(e, s, { value: void 0, writable: !1, configurable: !0 }) } catch { } } typeof e[s] == "function" && n++ } if (n && ze === "framed") try { x.post({ __frame_rtc_lockdown_failed: n }, "*") } catch { } })(); var Wt = 1e4, Fn = 2e3, lt = 2e3, ct = Object.freeze([...window.__FRAME_PREAMBLE?.origins ?? ["https://claude.ai", "https://preview.claude.ai"]]); function Xt(t) { for (const e of ct) if (e.endsWith(":*")) try { const r = new URL(t); if (`${r.protocol}//${r.hostname}:*` === e) return !0 } catch { } else if (t === e) return !0; return !1 } var Pe = Object.freeze({ ...window.__FRAME_PREAMBLE?.capabilities }), Ne = window.__FRAME_PREAMBLE?.transforms, ut = window.__FRAME_PREAMBLE?.comments, ft = window.__FRAME_PREAMBLE?.translate, me = window.__FRAME_PREAMBLE?.ldx, Ve = fr(window.__FRAME_PREAMBLE?.cred), Yt = (() => { try { const [t] = performance.getEntriesByType("navigation"), e = t?.serverTiming?.find(r => r.name === "frame-cred-exp"); return e !== void 0 && /^\d{1,15}$/.test(e.description) ? dr(Number(e.description)) : void 0 } catch { return } })(); function Jt(t) { return Nn(() => import("/_runtime/" + t), void 0) } var Ce = new Set, Zt = setTimeout, jn = fetch, xn = AbortController, In = 800 + 800 * Math.random(), Dn = 3e3, We = null, Qt = new Map; function Hn(t, e) { let r = Qt.get(t); return r || Qt.set(t, r = Bn(t, e)), r } function Bn(t, e) { if (We?.has(t)) return Promise.resolve("csp"); if (navigator.onLine === !1) return Promise.resolve("offline"); const r = new xn; let n = !1; return Zt(() => { n = !0, r.abort() }, Dn), jn("/_runtime/" + t, { signal: r.signal }).then(a => (r.abort(), a.ok ? /javascript/i.test(a.headers.get("content-type") ?? "") ? e instanceof Error && /:\d+:\d+\)?$/m.test(e.stack ?? "") ? "eval" : "served" : "mime" : "http"), () => n ? "timeout" : We?.has(t) ? "csp" : "net") } function se(t) { if (!We) { const e = We = new Set; try { document.addEventListener("securitypolicyviolation", r => { const n = /\/_runtime\/([^/?#]+)/.exec(r.blockedURI); n && r.disposition !== "report" && e.add(n[1]) }) } catch { } } return Jt(t).catch(() => new Promise(e => Zt(e, In)).then(() => Jt(t + "?r=1")).then(e => (e !== void 0 && Ce.add(t), e))) } function er(t, e, r) { return { contract: t.contract, changes: new Set(t.changes ?? []), flags: new Set(t.flags ?? []), capabilities: t.capabilities ?? {}, capBudgets: t.capBudgets ?? {}, brokerGen: t.brokerGen, transforms: new Map, shellOrigin: e, shell: r, mount: _t, hooks: Xe, pipe: () => ({ wrap: (n, a) => (...s) => { try { return a(...s) } catch (l) { return Promise.reject(l) } } }) } } var we = null, W = null; function tr(t, e, r) { try { Object.defineProperty(t, e, { value: r, writable: !1, configurable: !1, enumerable: !0 }) } catch { try { Object.defineProperty(t, e, { value: r, writable: !1, configurable: !0, enumerable: !0 }) } catch { } } } var dt = !1, Xe = { editBefore: null, edit: null }; function qn(t, e, r = !1) { const n = []; let a; if (r) try { Xe.editBefore?.(t) } catch { } for (const s of t.elements) { const l = document.querySelector(`[data-id="${s.target}"]`); if (!l) { a = s.target; break } if ([...Object.keys(s.attrsSet ?? {}), ...s.attrsRemoved ?? []].some(u => !_r(u) || yr(l, u))) { a = s.target; break } if (s.text !== void 0 && (!Er(l) || Rr(l))) { a = s.target; break } for (const [u, O] of Object.entries(s.attrsSet ?? {})) if (!nr(l, u)) { try { l.setAttribute(u, O) } catch { } rr(l, u, O) } for (const u of s.attrsRemoved ?? []) nr(l, u) || (l.removeAttribute(u), rr(l, u, null)); typeof s.text == "string" && Ar(l, s.text), n.push(s.target) } if (r) try { Xe.edit?.(t.seq, n, a) } catch { } if (a !== void 0) { x.post({ __frame_patch_miss: { seq: t.seq } }, e); return } try { document.dispatchEvent(new CustomEvent("claude:edit", { detail: { seq: t.seq, targets: n } })) } catch { } } function rr(t, e, r) { if (!(t instanceof HTMLInputElement)) return; const n = e.toLowerCase(); n === "checked" ? t.checked = r !== null : n === "value" && t.type !== "file" && (t.value = r ?? "") } function nr(t, e) { const r = e.toLowerCase(), n = t; return r === "data-id" || (r === "value" || r === "checked") && (n.__artifactSecret === !0 || /^(password|hidden|file)$/.test(n.type ?? "") || /(^|\s)(cc-|one-time-code|current-password|new-password)/i.test(`${t.getAttribute("autocomplete") ?? ""} ${n.autocomplete ?? ""}`)) } function or(t) { const e = document.documentElement; t === "light" || t === "dark" ? (e.dataset.theme = t, e.style.colorScheme = t, dt = !0) : dt && (delete e.dataset.theme, e.style.colorScheme = "", dt = !1) } var ie = new Map, ht = null; function pt() { let t; const e = { u: new Promise(r => { t = r }), r: r => { e.done = !0, t(r) }, done: !1, nulled: !1 }; return e } function Ye(t, e) { t.nulled = !0, t.ver = e, t.r(null) } function mt(t, e) { for (const [r, n] of ie) n.done || (e && n.asked ? e(r, n) : Ye(n, t)) } function Un() { for (const t of ie.values()) if (t.asked && !t.done) return !0; return !1 } var Kn = Object.freeze(Object.assign(Object.create(null), { call: Function.prototype.call, apply: Function.prototype.apply, bind: Function.prototype.bind })), vt = !1, _t = (t, e) => { let r = ie.get(t); if (r?.nulled && vt) r = pt(), ie.set(t, r); else if (!r || r.done) { r?.nulled && W && x.post({ __frame_cap_telemetry: { kind: "cap-load-error", cap: t, phase: "install" } }, W); return } const n = typeof e == "function" ? Object.setPrototypeOf(e, Kn) : Object.assign(Object.create(null), e); typeof n.then == "function" && delete n.then, r.want = void 0, r.r(Object.freeze(n)) }; function ar() { const t = Vt?.value ?? {}; tr(window, "claude", t); for (const e of Object.keys(Pe)) { if (t[e] !== void 0) { tr(t, e, t[e]); continue } ie.set(e, pt()) } if (t.use === void 0) { const e = r => { if (typeof r != "string" || !Object.hasOwn(Pe, r)) return Promise.resolve(null); let n = ie.get(r); return n ? (ht && (n.nulled || n.want !== void 0) && (n = ht(r, n)), n.asked = !0, n.u) : Promise.resolve(t[r] ?? null) }; try { Object.defineProperty(t, "use", { value: e, writable: !0, configurable: !0, enumerable: !1 }) } catch { } } return t } if (ze === "framed") { let t; const e = Ne && pe.test(Ne) ? se(Ne).catch(c => { t = { f: Ne, e: c } }) : Promise.resolve(void 0), r = c => { if (c.type === "auxclick" && c.button !== 1) return; const g = c.target, v = g && g.closest ? g.closest("a[href],area[href]") : null; if (!v) return; const A = v.getAttribute("href"); if (!A) return; let H; try { H = new URL(A, document.baseURI) } catch { return } if ((H.protocol === "http:" || H.protocol === "https:") && H.origin !== location.origin) { c.preventDefault(); const X = (v.getAttribute("target") ?? "").toLowerCase(), K = c.type === "auxclick" || c.metaKey || c.ctrlKey || c.shiftKey || c.altKey || !["", "_self", "_top", "_parent"].includes(X); x.post({ __frame_nav: !0, url: H.href, newTab: K }, "*") } }; addEventListener("click", r, !0), addEventListener("auxclick", r, !0); const n = {}, a = c => { c.isTrusted && (n.pointer = !0) }, s = c => { c.isTrusted && (n.click = !0) }; addEventListener("pointermove", a, { capture: !0, passive: !0 }), addEventListener("click", s, { capture: !0, passive: !0 }); const l = { cb: null }; addEventListener("keydown", c => l.cb?.(c), !0); const u = { cb: null }; addEventListener("keydown", c => u.cb?.(c)); const O = dn(); e.then(c => c?.installEscapeForward?.(l, g => { W && x.post(g, W) })), e.then(c => { try { c?.installFocusKeep?.() } catch { } }), e.then(c => { if (!c?.wireNav) return; const g = x.port("*"); c.wireNav(g), removeEventListener("click", r, !0), removeEventListener("auxclick", r, !0), removeEventListener("pointermove", a, !0), removeEventListener("click", s, !0), c.wireEngagement?.(n, g, O) }); let k = null; try { k = Mn() } catch { } const E = document.readyState === "loading" ? new Promise(c => document.addEventListener("DOMContentLoaded", () => c(), { once: !0 })) : Promise.resolve(); let h = "dcl", S = !1; E.then(() => { S = !0 }); let L = null, p = null; try { p = Ur(window.name), L = It(null, p) } catch { } const F = ar(); let R = null; try { R = cn(F, L, { post: (c, g) => x.post(c, g), dcl: E }, p) } catch { } e.then(c => { try { R && c?.installHotExtras?.(R) } catch { } }); let _ = null; const y = () => Array.isArray(_?.flags) && _.flags.includes("frame_ldx_runtime") && !!me && pe.test(me) && document.querySelector("script#an-form") !== null; try { R?.hydration(y, Kr) } catch { } let j = null, I = 0; const B = x.on((c, g, v, A) => { Xt(g) && Mr(c) && (A(), _ = c.__frame_init, W = g, B(), clearTimeout(I), j?.()) }); if (Ve) { const c = Yt === void 0 ? { __frame_cred: Ve } : { __frame_cred: Ve, exp: Yt }; for (const g of ct) try { g.endsWith(":*") || x.post(c, g) } catch { } } x.post({ __frame_connect: !0 }, "*"); try { R?.afterConnect() } catch { } const G = setTimeout, D = clearTimeout; let be = () => NaN, Fe = () => []; try { be = performance.now.bind(performance), Fe = performance.getEntriesByType.bind(performance) } catch { } let je = 0; const U = () => { try { x.post({ __frame_alive: !0 }, "*") } catch { } je = G(U, Fn) }, Ee = () => D(je); U(), addEventListener("load", Ee, { once: !0 }); const xe = new Promise(c => { j = c, I = setTimeout(() => { B(), c() }, Wt) }), le = new WeakSet; addEventListener("error", c => { c.target && le.add(c.target) }, !0); try { Sn(Dt(), Ve, () => { e.then(c => { try { c?.drawRefusedNotice?.() } catch { } }) }) } catch { } const ce = () => { let c = []; try { c = [...document.querySelectorAll("link[rel~=stylesheet]:not([rel~=alternate])")].filter(v => !v.sheet && !v.disabled && !le.has(v) && v.getAttribute("href") && URL.canParse(v.href) && (!v.media || matchMedia(v.media).matches)) } catch { } let g = c.length; return g === 0 ? Promise.resolve() : new Promise(v => { try { const A = lt - be(); A > 0 && (h = "sheets"); const H = G(v, A > 0 ? A < lt ? A : lt : 0), X = () => { --g === 0 && (D(H), v()) }; for (const K of c) K.addEventListener("load", X, { once: !0 }), K.addEventListener("error", X, { once: !0 }) } catch { v() } }) }; E.then(() => { try { k?.restore() } catch { } }), Promise.all([xe, E, e]).then(([, , c]) => { if (_?.hostOverlays !== !0 || !W) return; let g = !1; try { g = c?.declaresCover?.() === !0 } catch { } x.post({ __frame_layout: { cover: g } }, W) }); const ve = { cb: null }; x.on((c, g) => { if (Xt(g) && Pr(c)) { try { k?.promoted() } catch { } ve.cb?.() } }), xe.then(async () => { if (!_ || !W) { mt(); try { R?.onNoInit() } catch { } return } if (or(_.theme), _.hostVisible === !1 && e.then(i => i?.applyHostVisible?.(!1, O)), _.hostKeys !== void 0) { const i = W, w = _.hostKeys; e.then(b => b?.installHostKeyForward?.(u, w, N => x.post(N, i))) } try { R?.onInit(_.hot, W) } catch { } let c; const g = () => { try { !c && me && y() && (c = se(me), c.then(i => i?.prefetch?.()).catch(() => { })) } catch { } }; g(), E.then(g); const v = W, A = x.port(v), H = (i, w) => x.post({ __frame_cap_telemetry: { kind: "cap-load-error", cap: i, phase: w } }, v), X = (i, w, b) => { new Promise(N => N(Hn(w, b))).then(N => H(i, N), () => H(i)) }, K = i => x.post({ __frame_cap_recovered: { cap: i } }, v); let te = _.brokerGen; const Y = () => R?.boot.ver ?? "", _e = Y(), ye = (i, w) => { const b = Y(); D(w.t), w.want = b, w.t = G(() => { w.done || Ye(w, b) }, Wt), x.post({ __frame_cap_want: !0, cap: i, ver: b }, v) }, $ = (i, w) => { const b = ie.get(i.cap), N = Pe[i.cap]; if (!w || !b || b.done || b.want !== i.ver || !pe.test(N)) return; if (D(b.t), b.want = void 0, te = i.brokerGen ?? te, i.ver !== Y()) { ye(i.cap, b); return } if (!i.grant || i.cap === "network") { Ye(b, i.ver); return } const Z = we, Q = we = { ...Z, capabilities: { ...Z.capabilities, [i.cap]: i.grant }, capBudgets: { ...Z.capBudgets, [i.cap]: { ...Z.capBudgets[i.cap], ...i.budgets } } }; se(N).then(de => { Ce.has(N) && K(i.cap), Q.brokerGen = te, vt = !0; try { de?.install?.(Q) } catch { H(i.cap, "install") } finally { vt = !1 } }, de => X(i.cap, N, de)).then(() => { b.done || Ye(b, i.ver) }) }; let Ie = !1, J = !1; x.on((i, w, b) => { if (w !== v) return; try { if (R?.onShell(i)) return } catch { } if (Cr(i) && or(i.__frame_theme.theme), en(i) && $(i, b), b && tn(i) && (te = i.brokerGen ?? te), Nr(i)) { const Q = i.__frame_host_visible.visible; e.then(de => de?.applyHostVisible?.(Q, O)) } Or(i) && qn(i.__frame_patch, v, b); const N = i?.__fc_mode; N && typeof N == "object" && !Ie && ut && pe.test(ut) && (Ie = !0, se(ut).then(Q => Q.install?.(v, N.on === !0, A)).catch(() => { })); const Z = i?.__ft_cmd; Z && typeof Z == "object" && !J && ft && pe.test(ft) && (J = !0, se(ft).then(Q => Q.install?.(v, Z, A)).catch(() => { })) }); const De = Object.keys(_.capabilities ?? {}).filter(i => Object.hasOwn(Pe, i)).map(i => [i, Pe[i]]).filter(i => typeof i[1] == "string" && pe.test(i[1])), re = v; let ue = !1, He = () => { }; const Je = new Promise(i => { He = () => { ue = !0, i() } }), Se = () => (ue || (h = "caps"), Je), Be = L !== null || Ct(_.hot) || _.hostVisible === !1 || _.hostOverlays === !0; S && (h = "init"); const qe = E.then(() => Be ? Se() : new Promise(i => G(i, 0))).then(ce).then(() => { let i = !0; try { i = Be || Un() } catch { } return i ? Se() : void 0 }).then(() => { Ee(); const i = hr(Fe, be); x.post(i ? { __frame_ready: !0, nav: i, gate: h } : { __frame_ready: !0, gate: h }, re), e.then(w => { w?.installSizeReporter?.(re, ve, A), w?.installPaintReporter?.(A) }) }), yt = await Promise.allSettled(De.map(([, i]) => se(i))), ee = await e; if (ee?.buildBoot || (t ? X("_transforms", t.f, t.e) : H("_transforms")), ee?.buildBoot) try { we = ee.buildBoot(_, ee.TRANSFORMS ?? {}, { shellOrigin: re, mount: _t, hooks: Xe, shell: A }, i => x.post({ __frame_cap_telemetry: i }, re)) } catch { H("_transforms", "install"), we = er(_, re, A) } else we = er(_, re, A); ee?.buildBoot && Ce.has(Ne ?? "") && K("_transforms"); const fe = we; fe.brokerGen = te, yt.forEach((i, w) => { const [b, N] = De[w]; if (i.status !== "fulfilled") { X(b, N, i.reason); return } Ce.has(N) && K(b); try { i.value?.install?.(fe) } catch { H(b, "install") } }); const Ae = _.capWants === !0; Ae && (ht = (i, w) => { const b = Y(); if (!b) return w; if (!w.nulled) return w.want !== b && ye(i, w), w; if (b === w.ver) return w; const N = pt(); return ie.set(i, N), ye(i, N), N }), mt(_e, Ae && Y() !== _e ? ye : void 0), He(), await qe; let Ue = !1; try { Ue = y() } catch { } me && Ue ? (c ?? se(me)).then(i => i?.boot?.({ shellOrigin: v, build: fe.flags.has(un), hot: R?.hot ?? null, carried: R?.carried(), presented: () => R?.presented() ?? !0 })).catch(() => !1).then(i => { R?.hydrated(), i !== !0 ? H("_ldx") : Ce.has(me) && K("_ldx") }) : R?.hydrated() }) } else it && (ar(), Pn(it, ct, se, { settle: mt, mount: _t })) })();</script>
+    <!-- /frame-runtime -->
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <style>
+        :root {
+            color-scheme: light;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font: 14px -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #faf9f5;
+            color: #141413
+        }
+
+        img {
+            max-width: 100%
+        }
+
+        [hidden]:not([hidden=until-found i]) {
+            display: none !important
+        }
+    </style>
+    <style id="hb-stylesheet"></style>
+    <style>
+        .flipX video::-webkit-media-text-track-display {
+            transform: matrix(-1, 0, 0, 1, 0, 0) !important;
+        }
+
+        .flipXY video::-webkit-media-text-track-display {
+            transform: matrix(-1, 0, 0, -1, 0, 0) !important;
+        }
+
+        .flipXYX video::-webkit-media-text-track-display {
+            transform: matrix(1, 0, 0, -1, 0, 0) !important;
+        }
+    </style>
+    <style>
+        @keyframes blinkWarning {
+            0% {
+                color: red;
+            }
+
+            100% {
+                color: white;
+            }
+        }
+
+        @-webkit-keyframes blinkWarning {
+            0% {
+                color: red;
+            }
+
+            100% {
+                color: white;
+            }
+        }
+
+        .blinkWarning {
+            -webkit-animation: blinkWarning 1s linear infinite;
+            -moz-animation: blinkWarning 1s linear infinite;
+            animation: blinkWarning 1s linear infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <title>صفحة الغرفة — ثلاث تصميمات</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+
+    <style>
+        /* Layout: a chooser at the top, then each design on a desktop canvas beside a
+   phone shell. Light only, like the app: white surfaces on a near-white
+   neutral ground, copper kept for accents alone. */
+        :root {
+            color-scheme: light;
+
+            --page: #f1f0ee;
+            --bg: #f7f6f4;
+            --surface: #ffffff;
+            --surface-2: #fbfaf9;
+            --surface-3: #f2f1ef;
+            --ink: #1a1a18;
+            --ink-soft: #46443f;
+            --muted: #6e6b65;
+            --line: #e3e2de;
+            --line-soft: #eeedea;
+            --accent: #9c5a2c;
+            --accent-dark: #85491f;
+            --accent-wash: #9c5a2c14;
+            --good: #3f6b39;
+            --good-wash: #3f6b3914;
+            --bad: #b03a26;
+            --bad-wash: #b03a2614;
+            --warn: #8a6a16;
+            --warn-wash: #8a6a1614;
+            --frame: #2b2a27;
+            --shadow: 0 1px 2px #1a1a1810, 0 10px 28px #1a1a180d;
+            --radius: 14px;
+            --font: 'IBM Plex Sans Arabic', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--page);
+            color: var(--ink);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.5;
+            direction: rtl;
+        }
+
+        .wrap {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding-block: 28px 64px;
+            padding-inline: 16px;
+        }
+
+        .lede {
+            max-width: 64ch;
+        }
+
+        .lede h1 {
+            margin: 0 0 6px;
+            font-size: clamp(22px, 3.2vw, 30px);
+            font-weight: 700;
+            letter-spacing: -.02em;
+            text-wrap: balance;
+        }
+
+        .lede p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14.5px;
+        }
+
+        .switch {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 22px 0 10px;
+        }
+
+        .switch button {
+            font: inherit;
+            font-weight: 600;
+            font-size: 13.5px;
+            padding: 9px 16px;
+            border-radius: 999px;
+            cursor: pointer;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink-soft);
+            transition: background .15s, color .15s, border-color .15s;
+        }
+
+        .switch button:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .switch button[aria-selected="true"] {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #fff;
+        }
+
+        .switch button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .fixes {
+            margin: 0 0 22px;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: var(--surface);
+        }
+
+        .fixes h2 {
+            margin: 0 0 8px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .04em;
+            color: var(--muted);
+        }
+
+        .fixes ul {
+            margin: 0;
+            padding-inline-start: 18px;
+            color: var(--ink-soft);
+            font-size: 13.5px;
+        }
+
+        .fixes li {
+            margin-bottom: 3px;
+        }
+
+        .fixes li:last-child {
+            margin-bottom: 0;
+        }
+
+        .hint {
+            margin: 10px 0 0;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .stage {
+            display: grid;
+            gap: 26px;
+            grid-template-columns: minmax(0, 1fr);
+            align-items: start;
+        }
+
+        @media (min-width: 1120px) {
+            .stage {
+                grid-template-columns: minmax(0, 1fr) 392px;
+            }
+        }
+
+        .frame-label {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin: 0 0 9px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .06em;
+            color: var(--muted);
+        }
+
+        .frame-label span {
+            font-weight: 500;
+            letter-spacing: 0;
+            font-size: 12px;
+        }
+
+        .screen {
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--bg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .screen-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 12px;
+            background: var(--surface-3);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #d9d8d4;
+        }
+
+        .screen-body {
+            padding: 16px;
+            min-width: 0;
+            max-height: 720px;
+            overflow-y: auto;
+        }
+
+        .phone {
+            width: 392px;
+            max-width: 100%;
+            border: 9px solid var(--frame);
+            border-radius: 30px;
+            background: var(--bg);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+
+        .phone-notch {
+            height: 20px;
+            background: var(--frame);
+        }
+
+        .phone-body {
+            height: 680px;
+            overflow-y: auto;
+            padding: 12px;
+            background: var(--bg);
+            position: relative;
+        }
+
+        .screen-body::-webkit-scrollbar,
+        .phone-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .screen-body::-webkit-scrollbar-thumb,
+        .phone-body::-webkit-scrollbar-thumb {
+            background: #d4d3cf;
+            border-radius: 3px;
+        }
+
+        /* ---------- atoms ---------- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font: inherit;
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1;
+            padding: 7px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid var(--line);
+            background: var(--surface);
+            color: var(--ink-soft);
+            transition: background .14s, border-color .14s, color .14s, transform .08s;
+        }
+
+        .btn:hover {
+            background: var(--surface-3);
+            border-color: var(--muted);
+            color: var(--ink);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            border-color: var(--accent-dark);
+            color: #fff;
+        }
+
+        .btn-ghost {
+            border-color: transparent;
+            background: transparent;
+        }
+
+        .btn-ghost:hover {
+            background: var(--surface-3);
+            border-color: transparent;
+        }
+
+        .btn-sm {
+            padding: 5px 9px;
+            font-size: 11.5px;
+        }
+
+        .btn-danger {
+            color: var(--bad);
+        }
+
+        .btn-danger:hover {
+            background: var(--bad-wash);
+            border-color: var(--bad);
+            color: var(--bad);
+        }
+
+        .btn[disabled] {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        .btn[disabled]:hover {
+            background: var(--surface);
+            border-color: var(--line);
+            color: var(--ink-soft);
+            transform: none;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+        }
+
+        .pill::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .pill-prog {
+            background: var(--warn-wash);
+            color: var(--warn);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--surface-3);
+            color: var(--muted);
+            white-space: nowrap;
+        }
+
+        .chip-short {
+            background: var(--bad-wash);
+            color: var(--bad);
+        }
+
+        .chip-done {
+            background: var(--good-wash);
+            color: var(--good);
+        }
+
+        .num {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .cur {
+            font-size: .8em;
+            font-weight: 400;
+            color: var(--muted);
+        }
+
+        .lbl {
+            font-size: 11.5px;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th {
+            text-align: start;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .03em;
+            color: var(--muted);
+            padding: 8px 10px;
+            background: var(--surface-3);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 9px 10px;
+            border-top: 1px solid var(--line-soft);
+            vertical-align: middle;
+        }
+
+        tbody tr:hover {
+            background: var(--surface-2);
+        }
+
+        tfoot td {
+            background: var(--surface-3);
+            font-weight: 700;
+            border-top: 1px solid var(--line);
+        }
+
+        .t-wrap {
+            overflow-x: auto;
+        }
+
+        .t-end {
+            text-align: end;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+        }
+
+        .empty {
+            padding: 20px 12px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12.5px;
+        }
+
+        input,
+        select {
+            font: inherit;
+            font-size: 13px;
+            color: var(--ink);
+            padding: 7px 10px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--surface);
+            width: 100%;
+            min-width: 0;
+        }
+
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--accent-wash);
+            border-color: var(--accent);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        label.f {
+            display: block;
+        }
+
+        label.f>span {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .comp {
+            display: flex;
+            height: 9px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--surface-3);
+        }
+
+        .comp i {
+            display: block;
+            height: 100%;
+        }
+
+        .comp-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 14px;
+            margin-top: 7px;
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+
+        .comp-legend b {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .comp-legend b::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            background: var(--k);
+        }
+
+        .bar {
+            height: 6px;
+            border-radius: 999px;
+            background: var(--surface-3);
+            overflow: hidden;
+        }
+
+        .bar>i {
+            display: block;
+            height: 100%;
+            background: var(--good);
+            border-radius: 999px;
+        }
+
+        .addrow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: end;
+            padding: 12px;
+            background: var(--surface-2);
+            border: 1px dashed var(--line);
+            border-radius: 9px;
+            margin-top: 11px;
+        }
+
+        .addrow label.f {
+            flex: 1 1 120px;
+            min-width: 0;
+        }
+
+        .addrow .acts {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* ---------- design 1 ---------- */
+        .d-head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 14px;
+            padding: 13px 15px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px 12px 0 0;
+            border-bottom: 0;
+        }
+
+        .d-head h2 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: -.01em;
+        }
+
+        .d-head .sub {
+            color: var(--muted);
+            font-size: 12.5px;
+        }
+
+        .d-head .sub a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .d-head .sub a:hover {
+            text-decoration: underline;
+        }
+
+        .d-head .spacer {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .stats {
+            display: grid;
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-bottom: 0;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        @media (min-width: 620px) {
+            .stats {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        .stat {
+            background: var(--surface);
+            padding: 11px 13px;
+        }
+
+        .stat .lbl {
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .stat .v {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -.01em;
+        }
+
+        .stat .n {
+            margin-top: 3px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 2px;
+            overflow-x: auto;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            padding: 0 8px;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tabs button {
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 11px 13px;
+            border: 0;
+            background: none;
+            cursor: pointer;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            transition: color .14s, border-color .14s;
+        }
+
+        .tabs button:hover {
+            color: var(--ink);
+        }
+
+        .tabs button[aria-selected="true"] {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tabs button:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
+        .tabs .count {
+            font-size: 10.5px;
+            font-weight: 600;
+            background: var(--surface-3);
+            color: var(--muted);
+            border-radius: 999px;
+            padding: 1px 6px;
+            margin-inline-start: 5px;
+        }
+
+        .pane {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-top: 0;
+            border-radius: 0 0 12px 12px;
+            padding: 14px;
+        }
+
+        .pane-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 11px;
+        }
+
+        .pane-bar .search {
+            flex: 1 1 150px;
+            min-width: 0;
+        }
+
+        /* ---------- design 2 ---------- */
+        .ws {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        @media (min-width: 900px) {
+            .ws {
+                grid-template-columns: minmax(0, 1fr) 278px;
+            }
+        }
+
+        .rail {
+            display: grid;
+            gap: 10px;
+            align-content: start;
+            position: sticky;
+            top: 0;
+        }
+
+        .rail-card {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 13px;
+        }
+
+        .rail-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 6px 0;
+        }
+
+        .rail-row+.rail-row {
+            border-top: 1px solid var(--line-soft);
+        }
+
+        .rail-row .k {
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .rail-row .v {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .rail-hero .lbl {
+            display: block;
+        }
+
+        .rail-hero .v {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -.02em;
+            margin-top: 2px;
+        }
+
+        .quick {
+            display: grid;
+            gap: 7px;
+        }
+
+        .quick .btn {
+            width: 100%;
+            padding: 9px;
+            font-size: 13px;
+        }
+
+        .sec {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .sec+.sec {
+            margin-top: 12px;
+        }
+
+        .sec-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 13px;
+            border-bottom: 1px solid var(--line-soft);
+        }
+
+        .sec-head h3 {
+            margin: 0;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        .sec-head .tot {
+            margin-inline-start: auto;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .filters {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            padding: 10px 13px;
+            border-bottom: 1px solid var(--line-soft);
+            align-items: center;
+        }
+
+        .seg {
+            display: flex;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .seg button {
+            font: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border: 0;
+            background: var(--surface);
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .seg button+button {
+            border-inline-start: 1px solid var(--line);
+        }
+
+        .seg button[aria-pressed="true"] {
+            background: var(--accent-wash);
+            color: var(--accent);
+        }
+
+        .filters .search {
+            flex: 1 1 140px;
+            min-width: 0;
+        }
+
+        .drawer {
+            border: 1px solid var(--accent);
+            background: var(--accent-wash);
+            border-radius: 12px;
+            padding: 13px;
+            margin-bottom: 12px;
+        }
+
+        .drawer h3 {
+            margin: 0 0 10px;
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        .drawer .grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: end;
+        }
+
+        .drawer .grid label.f {
+            flex: 1 1 120px;
+            min-width: 0;
+        }
+
+        /* ---------- design 3 ---------- */
+        .ledger {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 13px 15px;
+        }
+
+        .ledger-top {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px 12px;
+        }
+
+        .ledger-top h2 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .ledger-strip {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            border: 1px solid var(--line-soft);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .ledger-strip .cell {
+            flex: 1 1 108px;
+            min-width: 0;
+            padding: 9px 12px;
+            background: var(--surface);
+            border-inline-end: 1px solid var(--line-soft);
+        }
+
+        .ledger-strip .cell:last-child {
+            border-inline-end: 0;
+        }
+
+        .ledger-strip .cell .lbl {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .ledger-strip .cell .v {
+            font-size: 15.5px;
+            font-weight: 700;
+        }
+
+        .acc {
+            margin-top: 10px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .acc-head {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 14px;
+            border: 0;
+            background: var(--surface);
+            cursor: pointer;
+            font: inherit;
+            text-align: start;
+            color: var(--ink);
+        }
+
+        .acc-head:hover {
+            background: var(--surface-2);
+        }
+
+        .acc-head:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: -2px;
+        }
+
+        .acc-head .t {
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        .acc-head .meta {
+            margin-inline-start: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .caret {
+            transition: transform .18s;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .acc-head[aria-expanded="true"] .caret {
+            transform: rotate(180deg);
+        }
+
+        .acc-body {
+            padding: 13px 14px 14px;
+            border-top: 1px solid var(--line-soft);
+        }
+
+        /* ---------- mobile bits ---------- */
+        .m-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .m-stat {
+            background: var(--surface);
+            padding: 9px 11px;
+        }
+
+        .m-stat .lbl {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 11px;
+        }
+
+        .m-stat .v {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .m-list {
+            display: grid;
+            gap: 8px;
+        }
+
+        .m-item {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 11px;
+        }
+
+        .m-item .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .m-item .nm {
+            font-size: 13.5px;
+            font-weight: 600;
+        }
+
+        .m-item .kv {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px 14px;
+            margin-top: 7px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .m-item .kv b {
+            font-weight: 600;
+            color: var(--ink-soft);
+        }
+
+        .m-item .acts {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .m-item .acts .btn {
+            flex: 1;
+        }
+
+        .m-bottom {
+            position: sticky;
+            bottom: -12px;
+            margin: 12px -12px -12px;
+            padding: 9px 12px;
+            background: var(--surface);
+            border-top: 1px solid var(--line);
+            display: flex;
+            gap: 7px;
+        }
+
+        .m-bottom .btn {
+            flex: 1;
+        }
+
+        .toast {
+            position: absolute;
+            inset-inline: 12px;
+            bottom: 64px;
+            z-index: 5;
+            background: var(--ink);
+            color: #fff;
+            border-radius: 9px;
+            padding: 9px 12px;
+            font-size: 12.5px;
+            font-weight: 500;
+            box-shadow: var(--shadow);
+        }
+
+        .toast-desk {
+            position: fixed;
+            inset-inline-start: 50%;
+            transform: translateX(50%);
+            bottom: 24px;
+            inset-inline-end: auto;
+            z-index: 50;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+    </style>
+
+    <div class="wrap">
+        <div class="lede">
+            <h1>صفحة الغرفة — ثلاث تصميمات</h1>
+            <p>بروتوتايب شغال على بيانات غرفة حقيقية: التبويبات والأقسام والزراير كلها تشتغل، والإضافة بتضيف فعلًا
+                والأرقام بتتحدّث معاها. كل تصميم معروض على الديسكتوب والموبايل.</p>
+        </div>
+
+        <div class="switch" role="tablist" aria-label="اختيار التصميم">
+            <button role="tab" aria-selected="true" aria-controls="d1" id="t1">١ · تبويبات</button>
+            <button role="tab" aria-selected="false" aria-controls="d2" id="t2">٢ · عمود جانبي ثابت</button>
+            <button role="tab" aria-selected="false" aria-controls="d3" id="t3">٣ · سجل مضغوط</button>
+        </div>
+
+        <section id="d2" role="tabpanel" aria-labelledby="t2" hidden="">
+            <div class="fixes">
+                <h2>فكرة التصميم</h2>
+                <ul>
+                    <li>عمود جانبي ثابت فيه فلوس الغرفة كلها — بيفضل قدامك وانت بتشتغل في أي قسم.</li>
+                    <li>الخامات والاكسسوارات جدول واحد بفلتر، بدل بوكسين بنفس الكلام متكرر.</li>
+                    <li>المصنعية والمصروفات جدول واحد بعمود «النوع»، بدل فورمين متطابقين.</li>
+                    <li>زراير الإجراءات السريعة بتفتح فورم صغير فوق، والفورم بيتقفل بعد ما تضيف.</li>
+                </ul>
+                <p class="hint">جرّب: اضغط «تسجيل دفعة» أو «صرف خامة» من العمود الجانبي — الفورم هيفتح والأرقام هتتحدّث.
+                </p>
+            </div>
+            <div class="stage">
+                <div>
+                    <p class="frame-label">ديسكتوب <span>— العمود الجانبي ثابت مع السكرول</span></p>
+                    <div class="screen">
+                        <div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div>
+                        <div class="screen-body">
+                            <div class="d-head"
+                                style="border-radius:12px;border-bottom:1px solid var(--line);margin-bottom:14px">
+                                <div>
+                                    <h2>صالون</h2>
+                                    <div class="sub">العميل: <a href="#d2">مقى كمال</a> · أُنشئت 2026-10-05</div>
+                                </div><span class="pill pill-prog">تحت التنفيذ</span>
+                                <div class="spacer"></div><select aria-label="حالة الغرفة" style="width:auto">
+                                    <option>تحت التنفيذ</option>
+                                    <option>مكتملة</option>
+                                </select><button class="btn btn-danger" data-act="toast"
+                                    data-msg="هيفتح تأكيد حذف الغرفة">حذف الغرفة</button>
+                            </div>
+                            <div class="ws">
+                                <div>
+                                    <div class="sec">
+                                        <div class="sec-head">
+                                            <h3>مواد الغرفة</h3><span class="tot">5 مواد · 1 ناقصة</span>
+                                        </div>
+                                        <div class="filters">
+                                            <div class="seg"><button aria-pressed="true" data-act="d2filter"
+                                                    data-f="all">الكل</button><button aria-pressed="false"
+                                                    data-act="d2filter" data-f="خامة">خامةات</button><button
+                                                    aria-pressed="false" data-act="d2filter"
+                                                    data-f="اكسسوار">اكسسوارات</button></div><input class="search"
+                                                type="search" placeholder="ابحث…" aria-label="بحث"><button
+                                                class="btn btn-primary" data-act="openAdd" data-where="d2mat">+
+                                                إضافة</button>
+                                        </div>
+                                        <div class="t-wrap">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>المادة</th>
+                                                        <th>المطلوب</th>
+                                                        <th>المصروف</th>
+                                                        <th>المخزن</th>
+                                                        <th>التكلفة</th>
+                                                        <th class="t-end">إجراءات</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <div style="font-weight:600">خشب زان</div><span
+                                                                class="chip">خامة</span>
+                                                        </td>
+                                                        <td class="num">12 لوح</td>
+                                                        <td class="num">8 لوح</td>
+                                                        <td class="num">4 لوح</td>
+                                                        <td><span class="num">3,200.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                        <td>
+                                                            <div class="row-actions"><button class="btn btn-sm"
+                                                                    data-act="toast"
+                                                                    data-msg="فتح تعديل كمية خشب زان">تعديل</button><button
+                                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                                    data-id="1">صرف</button><button
+                                                                    class="btn btn-sm btn-danger" data-act="delMat"
+                                                                    data-id="1">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <div style="font-weight:600">أبلكاش 18مم</div><span
+                                                                class="chip">خامة</span> <span
+                                                                class="chip chip-done">اتصرفت كاملة</span>
+                                                        </td>
+                                                        <td class="num">6 لوح</td>
+                                                        <td class="num">6 لوح</td>
+                                                        <td class="num">10 لوح</td>
+                                                        <td><span class="num">1,500.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                        <td>
+                                                            <div class="row-actions"><button class="btn btn-sm"
+                                                                    data-act="toast"
+                                                                    data-msg="فتح تعديل كمية أبلكاش 18مم">تعديل</button><button
+                                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                                    data-id="2" disabled="">صرف</button><button
+                                                                    class="btn btn-sm btn-danger" data-act="delMat"
+                                                                    data-id="2">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <div style="font-weight:600">ورنيش</div><span
+                                                                class="chip">خامة</span>
+                                                        </td>
+                                                        <td class="num">3 لتر</td>
+                                                        <td class="num">2 لتر</td>
+                                                        <td class="num">1 لتر</td>
+                                                        <td><span class="num">360.00 <span class="cur">ج.م</span></span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="row-actions"><button class="btn btn-sm"
+                                                                    data-act="toast"
+                                                                    data-msg="فتح تعديل كمية ورنيش">تعديل</button><button
+                                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                                    data-id="3">صرف</button><button
+                                                                    class="btn btn-sm btn-danger" data-act="delMat"
+                                                                    data-id="3">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <div style="font-weight:600">مفصلات</div><span
+                                                                class="chip">اكسسوار</span> <span
+                                                                class="chip chip-done">اتصرفت كاملة</span>
+                                                        </td>
+                                                        <td class="num">24 قطعة</td>
+                                                        <td class="num">24 قطعة</td>
+                                                        <td class="num">40 قطعة</td>
+                                                        <td><span class="num">480.00 <span class="cur">ج.م</span></span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="row-actions"><button class="btn btn-sm"
+                                                                    data-act="toast"
+                                                                    data-msg="فتح تعديل كمية مفصلات">تعديل</button><button
+                                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                                    data-id="4" disabled="">صرف</button><button
+                                                                    class="btn btn-sm btn-danger" data-act="delMat"
+                                                                    data-id="4">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <div style="font-weight:600">مقابض</div><span
+                                                                class="chip">اكسسوار</span> <span
+                                                                class="chip chip-short">ناقص 7 قطعة</span>
+                                                        </td>
+                                                        <td class="num">12 قطعة</td>
+                                                        <td class="num">0 قطعة</td>
+                                                        <td class="num">5 قطعة</td>
+                                                        <td><span class="num">0.00 <span class="cur">ج.م</span></span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="row-actions"><button class="btn btn-sm"
+                                                                    data-act="toast"
+                                                                    data-msg="فتح تعديل كمية مقابض">تعديل</button><button
+                                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                                    data-id="5">صرف</button><button
+                                                                    class="btn btn-sm btn-danger" data-act="delMat"
+                                                                    data-id="5">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="4">إجمالي تكلفة الخامات</td>
+                                                        <td colspan="2"><span class="num">5,540.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="sec">
+                                        <div class="sec-head">
+                                            <h3>تكاليف الغرفة</h3><span class="tot">مصنعية 3,700.00 · مصروفات
+                                                350.00</span><button class="btn btn-sm btn-primary" data-act="drawer"
+                                                data-k="cost">+ تكلفة</button>
+                                        </div>
+                                        <div class="t-wrap">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>التاريخ</th>
+                                                        <th>النوع</th>
+                                                        <th>الوصف</th>
+                                                        <th>طريقة الدفع</th>
+                                                        <th>المبلغ</th>
+                                                        <th class="t-end"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="num">2026-10-08</td>
+                                                        <td><span class="chip">مصنعية</span></td>
+                                                        <td>نجارة الهيكل</td>
+                                                        <td>كاش</td>
+                                                        <td><span class="num">2,500.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                        <td>
+                                                            <div class="row-actions"><button
+                                                                    class="btn btn-sm btn-danger" data-act="delCost"
+                                                                    data-id="1">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="num">2026-10-14</td>
+                                                        <td><span class="chip">مصنعية</span></td>
+                                                        <td>تجميع وتركيب</td>
+                                                        <td>انستاباي</td>
+                                                        <td><span class="num">1,200.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                        <td>
+                                                            <div class="row-actions"><button
+                                                                    class="btn btn-sm btn-danger" data-act="delCost"
+                                                                    data-id="2">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="num">2026-10-09</td>
+                                                        <td><span class="chip">مصروف</span></td>
+                                                        <td>نقل من الورشة</td>
+                                                        <td>كاش</td>
+                                                        <td><span class="num">350.00 <span class="cur">ج.م</span></span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="row-actions"><button
+                                                                    class="btn btn-sm btn-danger" data-act="delCost"
+                                                                    data-id="3">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="4">مصنعية 3,700.00 · مصروفات 350.00</td>
+                                                        <td colspan="2"><span class="num">4,050.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="sec">
+                                        <div class="sec-head">
+                                            <h3>الدفعات</h3><span class="tot">محصَّل 8,000.00 من 18,500.00</span><button
+                                                class="btn btn-sm btn-primary" data-act="drawer" data-k="pay">+
+                                                دفعة</button>
+                                        </div>
+                                        <div class="t-wrap">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>الإيصال</th>
+                                                        <th>التاريخ</th>
+                                                        <th>طريقة الدفع</th>
+                                                        <th>ملاحظة</th>
+                                                        <th>المبلغ</th>
+                                                        <th class="t-end"></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td class="num">00012</td>
+                                                        <td class="num">2026-10-05</td>
+                                                        <td>كاش</td>
+                                                        <td style="color:var(--muted)">عربون</td>
+                                                        <td><span class="num">5,000.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                        <td>
+                                                            <div class="row-actions"><button
+                                                                    class="btn btn-sm btn-danger" data-act="delPay"
+                                                                    data-id="1">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="num">00018</td>
+                                                        <td class="num">2026-10-12</td>
+                                                        <td>انستاباي</td>
+                                                        <td style="color:var(--muted)">—</td>
+                                                        <td><span class="num">3,000.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                        <td>
+                                                            <div class="row-actions"><button
+                                                                    class="btn btn-sm btn-danger" data-act="delPay"
+                                                                    data-id="2">حذف</button></div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="4">محصَّل 43٪ من سعر البيع</td>
+                                                        <td colspan="2"><span class="num">8,000.00 <span
+                                                                    class="cur">ج.م</span></span></td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="sec">
+                                        <div class="sec-head">
+                                            <h3>التسعير التقديري مقابل الفعلي</h3>
+                                        </div>
+                                        <div style="padding:13px">
+                                            <div class="t-wrap">
+                                                <table>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>البند</th>
+                                                            <th>التقدير</th>
+                                                            <th>الفعلي</th>
+                                                            <th class="t-end">الفرق</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>الخامات</td>
+                                                            <td><span class="num">5,000.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td><span class="num">5,060.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td class="t-end" style="color:var(--bad)">+60.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>الاكسسوارات</td>
+                                                            <td><span class="num">800.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td><span class="num">480.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td class="t-end" style="color:var(--good)">-320.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>المصنعية</td>
+                                                            <td><span class="num">3,500.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td><span class="num">3,700.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td class="t-end" style="color:var(--bad)">+200.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>مصروفات أخرى</td>
+                                                            <td><span class="num">400.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td><span class="num">350.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td class="t-end" style="color:var(--good)">-50.00</td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td>الإجمالي</td>
+                                                            <td><span class="num">9,700.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td><span class="num">9,590.00 <span
+                                                                        class="cur">ج.م</span></span></td>
+                                                            <td class="t-end" style="color:var(--good)">-110.00</td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                            <p class="hint">المدة المتوقعة 14 يوم · بدأ التنفيذ 2026-10-07. الفرق الأحمر
+                                                معناه التكلفة زادت عن التقدير.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <aside class="rail">
+                                    <div class="rail-card rail-hero"><span class="lbl">المتبقي للتحصيل</span>
+                                        <div class="v" style="color:var(--bad)"><span class="num">10,500.00 <span
+                                                    class="cur">ج.م</span></span></div>
+                                        <div class="bar" style="margin-top:9px"><i style="width:43%"></i></div>
+                                        <div class="lbl" style="margin-top:6px">محصَّل 43٪ · 8,000.00 من 18,500.00</div>
+                                    </div>
+                                    <div class="rail-card">
+                                        <div class="rail-row"><span class="k">سعر البيع</span><span class="v"><span
+                                                    class="num">18,500.00 <span class="cur">ج.م</span></span></span>
+                                        </div>
+                                        <div class="rail-row"><span class="k">تكلفة الخامات</span><span class="v"><span
+                                                    class="num">5,540.00 <span class="cur">ج.م</span></span></span>
+                                        </div>
+                                        <div class="rail-row"><span class="k">مصنعية + أخرى</span><span class="v"><span
+                                                    class="num">4,050.00 <span class="cur">ج.م</span></span></span>
+                                        </div>
+                                        <div class="rail-row"><span class="k">إجمالي التكلفة</span><span class="v"><span
+                                                    class="num">9,590.00 <span class="cur">ج.م</span></span></span>
+                                        </div>
+                                        <div class="rail-row"><span class="k">الربح المتوقع</span><span class="v"
+                                                style="color:var(--good)"><span class="num">8,910.00 <span
+                                                        class="cur">ج.م</span></span></span></div>
+                                        <div class="comp" style="margin-top:10px"><i
+                                                style="width:30%;background:#8f5024"></i><i
+                                                style="width:22%;background:#c08a5e"></i><i
+                                                style="width:48%;background:#3f6b39"></i></div>
+                                        <div class="comp-legend"><b style="--k:#8f5024">خامات 30٪</b><b
+                                                style="--k:#3f6b39">ربح 48٪</b></div>
+                                    </div>
+                                    <div class="rail-card quick"><button class="btn btn-primary" data-act="drawer"
+                                            data-k="issue">صرف خامة</button><button class="btn" data-act="drawer"
+                                            data-k="pay">تسجيل دفعة</button><button class="btn" data-act="drawer"
+                                            data-k="cost">إضافة مصنعية</button></div>
+                                </aside>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="frame-label">موبايل <span>— العمود بيتحول كارت فوق</span></p>
+                    <div class="phone">
+                        <div class="phone-notch"></div>
+                        <div class="phone-body">
+                            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                                <div>
+                                    <div style="font-size:17px;font-weight:700">صالون</div>
+                                    <div style="font-size:12px;color:var(--muted)">مقى كمال</div>
+                                </div><span class="pill pill-prog">تحت التنفيذ</span>
+                            </div>
+                            <div class="rail-card rail-hero" style="margin-top:11px"><span class="lbl">المتبقي
+                                    للتحصيل</span>
+                                <div class="v" style="color:var(--bad)"><span class="num">10,500.00 <span
+                                            class="cur">ج.م</span></span></div>
+                                <div class="bar" style="margin-top:9px"><i style="width:43%"></i></div>
+                                <div class="lbl" style="margin-top:6px">محصَّل 43٪ · 8,000.00 من 18,500.00</div>
+                            </div>
+                            <div class="rail-card" style="margin-top:9px">
+                                <div class="rail-row"><span class="k">سعر البيع</span><span class="v"><span
+                                            class="num">18,500.00 <span class="cur">ج.م</span></span></span></div>
+                                <div class="rail-row"><span class="k">تكلفة الخامات</span><span class="v"><span
+                                            class="num">5,540.00 <span class="cur">ج.م</span></span></span></div>
+                                <div class="rail-row"><span class="k">مصنعية + أخرى</span><span class="v"><span
+                                            class="num">4,050.00 <span class="cur">ج.م</span></span></span></div>
+                                <div class="rail-row"><span class="k">إجمالي التكلفة</span><span class="v"><span
+                                            class="num">9,590.00 <span class="cur">ج.م</span></span></span></div>
+                                <div class="rail-row"><span class="k">الربح المتوقع</span><span class="v"
+                                        style="color:var(--good)"><span class="num">8,910.00 <span
+                                                class="cur">ج.م</span></span></span></div>
+                                <div class="comp" style="margin-top:10px"><i style="width:30%;background:#8f5024"></i><i
+                                        style="width:22%;background:#c08a5e"></i><i
+                                        style="width:48%;background:#3f6b39"></i></div>
+                                <div class="comp-legend"><b style="--k:#8f5024">خامات 30٪</b><b
+                                        style="--k:#c08a5e">مصنعية وأخرى 22٪</b><b style="--k:#3f6b39">ربح 48٪</b></div>
+                            </div>
+                            <div class="sec" style="margin-top:11px">
+                                <div class="sec-head">
+                                    <h3>مواد الغرفة</h3><span class="tot">5</span>
+                                </div>
+                                <div style="padding:11px">
+                                    <div class="m-list">
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">خشب زان</span><span> <span
+                                                        class="chip">خامة</span></span></div>
+                                            <div class="kv"><span>مطلوب <b class="num">12 لوح</b></span><span>مصروف <b
+                                                        class="num">8</b></span><span>بالمخزن <b
+                                                        class="num">4</b></span><span>تكلفة <b><span
+                                                            class="num">3,200.00 <span
+                                                                class="cur">ج.م</span></span></b></span></div>
+                                            <div class="acts"><button class="btn btn-sm" data-act="toast"
+                                                    data-msg="تعديل خشب زان">تعديل</button><button
+                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                    data-id="1">صرف</button><button class="btn btn-sm btn-danger"
+                                                    data-act="delMat" data-id="1">حذف</button></div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">أبلكاش 18مم</span><span><span
+                                                        class="chip chip-done">اتصرفت كاملة</span> <span
+                                                        class="chip">خامة</span></span></div>
+                                            <div class="kv"><span>مطلوب <b class="num">6 لوح</b></span><span>مصروف <b
+                                                        class="num">6</b></span><span>بالمخزن <b
+                                                        class="num">10</b></span><span>تكلفة <b><span
+                                                            class="num">1,500.00 <span
+                                                                class="cur">ج.م</span></span></b></span></div>
+                                            <div class="acts"><button class="btn btn-sm" data-act="toast"
+                                                    data-msg="تعديل أبلكاش 18مم">تعديل</button><button
+                                                    class="btn btn-sm btn-primary" data-act="issue" data-id="2"
+                                                    disabled="">صرف</button><button class="btn btn-sm btn-danger"
+                                                    data-act="delMat" data-id="2">حذف</button></div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">ورنيش</span><span> <span
+                                                        class="chip">خامة</span></span></div>
+                                            <div class="kv"><span>مطلوب <b class="num">3 لتر</b></span><span>مصروف <b
+                                                        class="num">2</b></span><span>بالمخزن <b
+                                                        class="num">1</b></span><span>تكلفة <b><span class="num">360.00
+                                                            <span class="cur">ج.م</span></span></b></span></div>
+                                            <div class="acts"><button class="btn btn-sm" data-act="toast"
+                                                    data-msg="تعديل ورنيش">تعديل</button><button
+                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                    data-id="3">صرف</button><button class="btn btn-sm btn-danger"
+                                                    data-act="delMat" data-id="3">حذف</button></div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">مفصلات</span><span><span
+                                                        class="chip chip-done">اتصرفت كاملة</span> <span
+                                                        class="chip">اكسسوار</span></span></div>
+                                            <div class="kv"><span>مطلوب <b class="num">24 قطعة</b></span><span>مصروف <b
+                                                        class="num">24</b></span><span>بالمخزن <b
+                                                        class="num">40</b></span><span>تكلفة <b><span class="num">480.00
+                                                            <span class="cur">ج.م</span></span></b></span></div>
+                                            <div class="acts"><button class="btn btn-sm" data-act="toast"
+                                                    data-msg="تعديل مفصلات">تعديل</button><button
+                                                    class="btn btn-sm btn-primary" data-act="issue" data-id="4"
+                                                    disabled="">صرف</button><button class="btn btn-sm btn-danger"
+                                                    data-act="delMat" data-id="4">حذف</button></div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">مقابض</span><span><span
+                                                        class="chip chip-short">ناقص 7 قطعة</span> <span
+                                                        class="chip">اكسسوار</span></span></div>
+                                            <div class="kv"><span>مطلوب <b class="num">12 قطعة</b></span><span>مصروف <b
+                                                        class="num">0</b></span><span>بالمخزن <b
+                                                        class="num">5</b></span><span>تكلفة <b><span class="num">0.00
+                                                            <span class="cur">ج.م</span></span></b></span></div>
+                                            <div class="acts"><button class="btn btn-sm" data-act="toast"
+                                                    data-msg="تعديل مقابض">تعديل</button><button
+                                                    class="btn btn-sm btn-primary" data-act="issue"
+                                                    data-id="5">صرف</button><button class="btn btn-sm btn-danger"
+                                                    data-act="delMat" data-id="5">حذف</button></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sec" style="margin-top:9px">
+                                <div class="sec-head">
+                                    <h3>التكاليف</h3><span class="tot">4,050.00</span>
+                                </div>
+                                <div style="padding:11px">
+                                    <div class="m-list">
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">نجارة الهيكل</span><span
+                                                    class="chip">مصنعية</span></div>
+                                            <div class="kv"><span>2026-10-08</span><span>كاش</span><span><b><span
+                                                            class="num">2,500.00 <span
+                                                                class="cur">ج.م</span></span></b></span></div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">تجميع وتركيب</span><span
+                                                    class="chip">مصنعية</span></div>
+                                            <div class="kv"><span>2026-10-14</span><span>انستاباي</span><span><b><span
+                                                            class="num">1,200.00 <span
+                                                                class="cur">ج.م</span></span></b></span></div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm">نقل من الورشة</span><span
+                                                    class="chip">مصروف</span></div>
+                                            <div class="kv"><span>2026-10-09</span><span>كاش</span><span><b><span
+                                                            class="num">350.00 <span
+                                                                class="cur">ج.م</span></span></b></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="sec" style="margin-top:9px">
+                                <div class="sec-head">
+                                    <h3>الدفعات</h3><span class="tot">8,000.00</span>
+                                </div>
+                                <div style="padding:11px">
+                                    <div class="m-list">
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm"><span class="num">5,000.00 <span
+                                                            class="cur">ج.م</span></span></span><span
+                                                    class="chip">كاش</span></div>
+                                            <div class="kv"><span>إيصال <b
+                                                        class="num">00012</b></span><span>2026-10-05</span><span>عربون</span>
+                                            </div>
+                                        </div>
+                                        <div class="m-item">
+                                            <div class="top"><span class="nm"><span class="num">3,000.00 <span
+                                                            class="cur">ج.م</span></span></span><span
+                                                    class="chip">انستاباي</span></div>
+                                            <div class="kv"><span>إيصال <b
+                                                        class="num">00018</b></span><span>2026-10-12</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="m-bottom"><button class="btn btn-primary" data-act="drawer" data-k="issue">صرف
+                                    خامة</button><button class="btn" data-act="drawer" data-k="pay">+ دفعة</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ---------------------------------------------------------------- data
+            // One room, shared by the three designs, so the same figures appear in all.
+            var DATA = {
+                room: { name: 'صالون', customer: 'مقى كمال', created: '2026-10-05', started: '2026-10-07', salePrice: 1850000, status: 'تحت التنفيذ' },
+                materials: [
+                    { id: 1, name: 'خشب زان', type: 'خامة', unit: 'لوح', required: 12, issued: 8, stock: 4, cost: 320000 },
+                    { id: 2, name: 'أبلكاش 18مم', type: 'خامة', unit: 'لوح', required: 6, issued: 6, stock: 10, cost: 150000 },
+                    { id: 3, name: 'ورنيش', type: 'خامة', unit: 'لتر', required: 3, issued: 2, stock: 1, cost: 36000 },
+                    { id: 4, name: 'مفصلات', type: 'اكسسوار', unit: 'قطعة', required: 24, issued: 24, stock: 40, cost: 48000 },
+                    { id: 5, name: 'مقابض', type: 'اكسسوار', unit: 'قطعة', required: 12, issued: 0, stock: 5, cost: 0 }
+                ],
+                costs: [
+                    { id: 1, kind: 'مصنعية', desc: 'نجارة الهيكل', amount: 250000, date: '2026-10-08', method: 'كاش' },
+                    { id: 2, kind: 'مصنعية', desc: 'تجميع وتركيب', amount: 120000, date: '2026-10-14', method: 'انستاباي' },
+                    { id: 3, kind: 'مصروف', desc: 'نقل من الورشة', amount: 35000, date: '2026-10-09', method: 'كاش' }
+                ],
+                payments: [
+                    { id: 1, receipt: '00012', amount: 500000, date: '2026-10-05', method: 'كاش', note: 'عربون' },
+                    { id: 2, receipt: '00018', amount: 300000, date: '2026-10-12', method: 'انستاباي', note: '' }
+                ],
+                pricing: { materials: 500000, accessories: 80000, labor: 350000, other: 40000, days: 14 },
+                log: [
+                    { at: '2026-10-14 16:20', what: 'تكلفة غرفة', ev: 'أُضيفت', det: 'تجميع وتركيب — 1,200.00 ج.م' },
+                    { at: '2026-10-12 11:05', what: 'دفعة عميل', ev: 'أُضيفت', det: 'إيصال 00018 — 3,000.00 ج.م' },
+                    { at: '2026-10-09 09:40', what: 'خامة غرفة', ev: 'صُرفت', det: 'مفصلات — 24 قطعة' },
+                    { at: '2026-10-07 08:15', what: 'غرفة', ev: 'تعدّلت', det: 'الحالة: مسودة ← تحت التنفيذ' }
+                ]
+            };
+
+            var state = {
+                d1Tab: 'materials', d1TabM: 'materials',
+                d1Filter: 'all', d2Filter: 'all',
+                d2Drawer: null,
+                d3Open: { materials: true, costs: false, payments: false, pricing: false, log: false },
+                d3OpenM: { materials: true, costs: false, payments: false, pricing: false, log: false },
+                d3Add: {}, addType: {},
+                toast: null
+            };
+            var toastTimer = null;
+
+            // ------------------------------------------------------------- helpers
+            function money(p) {
+                var neg = p < 0, v = Math.abs(p);
+                var s = (Math.floor(v / 100)).toLocaleString('en-US') + '.' + String(v % 100).padStart(2, '0');
+                return (neg ? '-' : '') + s;
+            }
+            function m(p) { return '<span class="num">' + money(p) + ' <span class="cur">ج.م</span></span>'; }
+            function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+
+            function totals() {
+                var mats = DATA.materials.reduce(function (a, x) { return a + x.cost; }, 0);
+                var labor = DATA.costs.filter(function (c) { return c.kind === 'مصنعية'; }).reduce(function (a, x) { return a + x.amount; }, 0);
+                var other = DATA.costs.filter(function (c) { return c.kind !== 'مصنعية'; }).reduce(function (a, x) { return a + x.amount; }, 0);
+                var paid = DATA.payments.reduce(function (a, x) { return a + x.amount; }, 0);
+                var total = mats + labor + other;
+                var sale = DATA.room.salePrice;
+                var short = DATA.materials.filter(function (x) { return Math.max(0, x.required - x.issued) > x.stock; }).length;
+                return {
+                    mats: mats, labor: labor, other: other, total: total, paid: paid,
+                    sale: sale, profit: sale - total, remaining: sale - paid,
+                    pct: sale > 0 ? Math.round(paid * 100 / sale) : 0,
+                    shortCount: short,
+                    compMats: sale > 0 ? Math.round(mats * 100 / sale) : 0,
+                    compWork: sale > 0 ? Math.round((labor + other) * 100 / sale) : 0
+                };
+            }
+
+            function shortOf(x) { return Math.max(0, Math.max(0, x.required - x.issued) - x.stock); }
+
+            function matChip(x) {
+                var s = shortOf(x);
+                if (s > 0) return '<span class="chip chip-short">ناقص ' + s + ' ' + esc(x.unit) + '</span>';
+                if (x.issued >= x.required) return '<span class="chip chip-done">اتصرفت كاملة</span>';
+                return '';
+            }
+
+            function compBar(t) {
+                var profitPct = Math.max(0, 100 - t.compMats - t.compWork);
+                return '<div class="comp" role="img" aria-label="تركيب سعر البيع: خامات ' + t.compMats + '٪، مصنعية وأخرى ' + t.compWork + '٪، ربح ' + profitPct + '٪">' +
+                    '<i style="width:' + t.compMats + '%;background:#8f5024"></i>' +
+                    '<i style="width:' + t.compWork + '%;background:#c08a5e"></i>' +
+                    '<i style="width:' + profitPct + '%;background:#3f6b39"></i></div>' +
+                    '<div class="comp-legend">' +
+                    '<b style="--k:#8f5024">خامات ' + money(t.mats) + ' (' + t.compMats + '٪)</b>' +
+                    '<b style="--k:#c08a5e">مصنعية وأخرى ' + money(t.labor + t.other) + ' (' + t.compWork + '٪)</b>' +
+                    '<b style="--k:#3f6b39">الربح ' + money(t.profit) + ' (' + profitPct + '٪)</b></div>';
+            }
+
+            function toast(msg) {
+                state.toast = msg;
+                if (toastTimer) clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () { state.toast = null; render(); }, 2200);
+            }
+
+            // ------------------------------------------------- shared content blocks
+            function materialsTable(filter) {
+                var rows = DATA.materials.filter(function (x) { return filter === 'all' || x.type === filter; });
+                if (!rows.length) return '<div class="empty">مفيش مواد في التصنيف ده.</div>';
+                return '<div class="t-wrap"><table><thead><tr>' +
+                    '<th>المادة</th><th>المطلوب</th><th>المصروف</th><th>المخزن</th><th>التكلفة</th><th class="t-end">إجراءات</th>' +
+                    '</tr></thead><tbody>' +
+                    rows.map(function (x) {
+                        return '<tr><td><div style="font-weight:600">' + esc(x.name) + '</div>' +
+                            '<span class="chip">' + esc(x.type) + '</span> ' + matChip(x) + '</td>' +
+                            '<td class="num">' + x.required + ' ' + esc(x.unit) + '</td>' +
+                            '<td class="num">' + x.issued + ' ' + esc(x.unit) + '</td>' +
+                            '<td class="num">' + x.stock + ' ' + esc(x.unit) + '</td>' +
+                            '<td>' + m(x.cost) + '</td>' +
+                            '<td><div class="row-actions">' +
+                            '<button class="btn btn-sm" data-act="toast" data-msg="فتح تعديل كمية ' + esc(x.name) + '">تعديل</button>' +
+                            '<button class="btn btn-sm btn-primary" data-act="issue" data-id="' + x.id + '"' + (x.issued >= x.required ? ' disabled' : '') + '>صرف</button>' +
+                            '<button class="btn btn-sm btn-danger" data-act="delMat" data-id="' + x.id + '">حذف</button>' +
+                            '</div></td></tr>';
+                    }).join('') +
+                    '</tbody><tfoot><tr><td colspan="4">إجمالي تكلفة الخامات</td><td colspan="2">' + m(totals().mats) + '</td></tr></tfoot></table></div>';
+            }
+
+            function materialsCards(filter) {
+                var rows = DATA.materials.filter(function (x) { return filter === 'all' || x.type === filter; });
+                if (!rows.length) return '<div class="empty">مفيش مواد.</div>';
+                return '<div class="m-list">' + rows.map(function (x) {
+                    return '<div class="m-item"><div class="top"><span class="nm">' + esc(x.name) + '</span>' +
+                        '<span>' + matChip(x) + ' <span class="chip">' + esc(x.type) + '</span></span></div>' +
+                        '<div class="kv"><span>مطلوب <b class="num">' + x.required + ' ' + esc(x.unit) + '</b></span>' +
+                        '<span>مصروف <b class="num">' + x.issued + '</b></span>' +
+                        '<span>بالمخزن <b class="num">' + x.stock + '</b></span>' +
+                        '<span>تكلفة <b>' + m(x.cost) + '</b></span></div>' +
+                        '<div class="acts"><button class="btn btn-sm" data-act="toast" data-msg="تعديل ' + esc(x.name) + '">تعديل</button>' +
+                        '<button class="btn btn-sm btn-primary" data-act="issue" data-id="' + x.id + '"' + (x.issued >= x.required ? ' disabled' : '') + '>صرف</button>' +
+                        '<button class="btn btn-sm btn-danger" data-act="delMat" data-id="' + x.id + '">حذف</button></div></div>';
+                }).join('') + '</div>';
+            }
+
+            function costsTable() {
+                if (!DATA.costs.length) return '<div class="empty">لسه مفيش مصنعية ولا مصروفات على الغرفة دي.</div>';
+                var t = totals();
+                return '<div class="t-wrap"><table><thead><tr><th>التاريخ</th><th>النوع</th><th>الوصف</th><th>طريقة الدفع</th><th>المبلغ</th><th class="t-end"></th></tr></thead><tbody>' +
+                    DATA.costs.map(function (c) {
+                        return '<tr><td class="num">' + esc(c.date) + '</td>' +
+                            '<td><span class="chip">' + esc(c.kind) + '</span></td>' +
+                            '<td>' + esc(c.desc) + '</td><td>' + esc(c.method) + '</td><td>' + m(c.amount) + '</td>' +
+                            '<td><div class="row-actions"><button class="btn btn-sm btn-danger" data-act="delCost" data-id="' + c.id + '">حذف</button></div></td></tr>';
+                    }).join('') +
+                    '</tbody><tfoot><tr><td colspan="4">مصنعية ' + money(t.labor) + ' · مصروفات ' + money(t.other) + '</td><td colspan="2">' + m(t.labor + t.other) + '</td></tr></tfoot></table></div>';
+            }
+
+            function costsCards() {
+                if (!DATA.costs.length) return '<div class="empty">مفيش تكاليف لسه.</div>';
+                return '<div class="m-list">' + DATA.costs.map(function (c) {
+                    return '<div class="m-item"><div class="top"><span class="nm">' + esc(c.desc) + '</span><span class="chip">' + esc(c.kind) + '</span></div>' +
+                        '<div class="kv"><span>' + esc(c.date) + '</span><span>' + esc(c.method) + '</span><span><b>' + m(c.amount) + '</b></span></div></div>';
+                }).join('') + '</div>';
+            }
+
+            function paymentsTable() {
+                if (!DATA.payments.length) return '<div class="empty">لسه مفيش دفعات من العميل.</div>';
+                var t = totals();
+                return '<div class="t-wrap"><table><thead><tr><th>الإيصال</th><th>التاريخ</th><th>طريقة الدفع</th><th>ملاحظة</th><th>المبلغ</th><th class="t-end"></th></tr></thead><tbody>' +
+                    DATA.payments.map(function (p) {
+                        return '<tr><td class="num">' + esc(p.receipt) + '</td><td class="num">' + esc(p.date) + '</td>' +
+                            '<td>' + esc(p.method) + '</td><td style="color:var(--muted)">' + (p.note ? esc(p.note) : '—') + '</td>' +
+                            '<td>' + m(p.amount) + '</td>' +
+                            '<td><div class="row-actions"><button class="btn btn-sm btn-danger" data-act="delPay" data-id="' + p.id + '">حذف</button></div></td></tr>';
+                    }).join('') +
+                    '</tbody><tfoot><tr><td colspan="4">محصَّل ' + t.pct + '٪ من سعر البيع</td><td colspan="2">' + m(t.paid) + '</td></tr></tfoot></table></div>';
+            }
+
+            function paymentsCards() {
+                if (!DATA.payments.length) return '<div class="empty">مفيش دفعات لسه.</div>';
+                return '<div class="m-list">' + DATA.payments.map(function (p) {
+                    return '<div class="m-item"><div class="top"><span class="nm">' + m(p.amount) + '</span><span class="chip">' + esc(p.method) + '</span></div>' +
+                        '<div class="kv"><span>إيصال <b class="num">' + esc(p.receipt) + '</b></span><span>' + esc(p.date) + '</span>' + (p.note ? '<span>' + esc(p.note) + '</span>' : '') + '</div></div>';
+                }).join('') + '</div>';
+            }
+
+            function pricingBlock() {
+                var p = DATA.pricing, t = totals();
+                var lines = [
+                    ['الخامات', p.materials, DATA.materials.filter(function (x) { return x.type === 'خامة'; }).reduce(function (a, x) { return a + x.cost; }, 0)],
+                    ['الاكسسوارات', p.accessories, DATA.materials.filter(function (x) { return x.type === 'اكسسوار'; }).reduce(function (a, x) { return a + x.cost; }, 0)],
+                    ['المصنعية', p.labor, t.labor],
+                    ['مصروفات أخرى', p.other, t.other]
+                ];
+                var estTotal = p.materials + p.accessories + p.labor + p.other;
+                return '<div class="t-wrap"><table><thead><tr><th>البند</th><th>التقدير</th><th>الفعلي</th><th class="t-end">الفرق</th></tr></thead><tbody>' +
+                    lines.map(function (l) {
+                        var d = l[2] - l[1];
+                        var col = d > 0 ? 'var(--bad)' : (d < 0 ? 'var(--good)' : 'var(--muted)');
+                        return '<tr><td>' + l[0] + '</td><td>' + m(l[1]) + '</td><td>' + m(l[2]) + '</td>' +
+                            '<td class="t-end" style="color:' + col + '">' + (d > 0 ? '+' : '') + money(d) + '</td></tr>';
+                    }).join('') +
+                    '</tbody><tfoot><tr><td>الإجمالي</td><td>' + m(estTotal) + '</td><td>' + m(t.total) + '</td>' +
+                    '<td class="t-end" style="color:' + (t.total - estTotal > 0 ? 'var(--bad)' : 'var(--good)') + '">' + (t.total - estTotal > 0 ? '+' : '') + money(t.total - estTotal) + '</td></tr></tfoot></table></div>' +
+                    '<p class="hint">المدة المتوقعة ' + p.days + ' يوم · بدأ التنفيذ ' + DATA.room.started + '. الفرق الأحمر معناه التكلفة زادت عن التقدير.</p>';
+            }
+
+            function logBlock() {
+                return '<div class="m-list">' + DATA.log.map(function (l) {
+                    return '<div style="display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--line-soft)">' +
+                        '<span class="lbl num">' + esc(l.at) + '</span><b style="font-size:12.5px">' + esc(l.what) + '</b>' +
+                        '<span style="font-size:12.5px;color:var(--muted)">' + esc(l.ev) + '</span>' +
+                        '<span style="font-size:12.5px;color:var(--ink-soft)">' + esc(l.det) + '</span></div>';
+                }).join('') + '</div>';
+            }
+
+            function addCostForm(where) {
+                return '<div class="addrow">' +
+                    '<label class="f" style="flex:1 1 90px"><span>النوع</span><select data-f="' + where + '-kind"><option>مصنعية</option><option>مصروف</option></select></label>' +
+                    '<label class="f" style="flex:2 1 150px"><span>الوصف</span><input data-f="' + where + '-desc" placeholder="نجارة، نقل…"></label>' +
+                    '<label class="f"><span>المبلغ (ج.م)</span><input data-f="' + where + '-amount" type="number" inputmode="decimal" placeholder="0.00"></label>' +
+                    '<div class="acts"><button class="btn btn-primary" data-act="addCost" data-where="' + where + '">إضافة</button>' +
+                    '<button class="btn btn-ghost" data-act="closeAdd" data-where="' + where + '">إلغاء</button></div></div>';
+            }
+
+            function addPayForm(where) {
+                return '<div class="addrow">' +
+                    '<label class="f"><span>المبلغ (ج.م)</span><input data-f="' + where + '-amount" type="number" inputmode="decimal" placeholder="0.00"></label>' +
+                    '<label class="f" style="flex:1 1 120px"><span>طريقة الدفع</span><select data-f="' + where + '-method"><option>كاش</option><option>انستاباي</option><option>محفظة</option><option>شيك</option></select></label>' +
+                    '<label class="f" style="flex:2 1 150px"><span>ملاحظة</span><input data-f="' + where + '-note" placeholder="اختياري"></label>' +
+                    '<div class="acts"><button class="btn btn-primary" data-act="addPay" data-where="' + where + '">إضافة</button>' +
+                    '<button class="btn btn-ghost" data-act="closeAdd" data-where="' + where + '">إلغاء</button></div></div>';
+            }
+
+            var CATALOG = {
+                'خامة': [['سويدي 2سم', 'لوح'], ['زان روماني', 'لوح'], ['أبلكاش 9مم', 'لوح'], ['ورنيش لامع', 'لتر']],
+                'اكسسوار': [['مقابض ألوميتال', 'قطعة'], ['مفصلات بوش', 'قطعة'], ['سكك دوايل', 'طقم'], ['مسامير', 'علبة']]
+            };
+
+            function addMatForm(where) {
+                var type = state.addType[where] || 'خامة';
+                return '<div class="addrow">' +
+                    '<label class="f" style="flex:1 1 110px"><span>النوع</span>' +
+                    '<select data-act="addType" data-where="' + where + '">' +
+                    Object.keys(CATALOG).map(function (k) {
+                        return '<option value="' + k + '"' + (k === type ? ' selected' : '') + '>' + k + '</option>';
+                    }).join('') + '</select></label>' +
+                    '<label class="f" style="flex:2 1 170px"><span>المادة</span><select data-f="' + where + '-name">' +
+                    CATALOG[type].map(function (x) { return '<option value="' + x[0] + '|' + x[1] + '">' + x[0] + ' (' + x[1] + ')</option>'; }).join('') +
+                    '</select></label>' +
+                    '<label class="f" style="flex:1 1 90px"><span>الكمية المطلوبة</span><input data-f="' + where + '-qty" type="number" inputmode="numeric" placeholder="0"></label>' +
+                    '<div class="acts"><button class="btn btn-primary" data-act="addMat" data-where="' + where + '">إضافة</button>' +
+                    '<button class="btn btn-ghost" data-act="closeAdd" data-where="' + where + '">إلغاء</button></div></div>';
+            }
+
+            // ------------------------------------------------------------ design 1
+            function design1() {
+                var t = totals();
+                var tabs = [
+                    { k: 'materials', t: 'المواد', c: DATA.materials.length },
+                    { k: 'costs', t: 'التكاليف', c: DATA.costs.length },
+                    { k: 'payments', t: 'الدفعات', c: DATA.payments.length },
+                    { k: 'pricing', t: 'التسعير' },
+                    { k: 'log', t: 'السجل' }
+                ];
+                function strip(sel, attr) {
+                    return '<div class="tabs" role="tablist" aria-label="أقسام الغرفة">' + tabs.map(function (x) {
+                        return '<button role="tab" aria-selected="' + (sel === x.k ? 'true' : 'false') + '" data-act="' + attr + '" data-k="' + x.k + '">' +
+                            x.t + (x.c !== undefined ? '<span class="count">' + x.c + '</span>' : '') + '</button>';
+                    }).join('') + '</div>';
+                }
+                function pane(sel, isMobile) {
+                    var body = '';
+                    if (sel === 'materials') {
+                        body = '<div class="pane-bar"><div class="seg">' +
+                            ['all', 'خامة', 'اكسسوار'].map(function (f) {
+                                return '<button aria-pressed="' + (state.d1Filter === f ? 'true' : 'false') + '" data-act="d1filter" data-f="' + f + '">' + (f === 'all' ? 'الكل' : f + 'ات') + '</button>';
+                            }).join('') + '</div>' +
+                            '<input class="search" type="search" placeholder="ابحث في مواد الغرفة…" aria-label="بحث">' +
+                            '<button class="btn btn-primary" data-act="openAdd" data-where="d1mat">+ إضافة مادة</button></div>' +
+                            (state.d3Add['d1mat'] ? addMatForm('d1mat') : '') +
+                            (isMobile ? materialsCards(state.d1Filter) : materialsTable(state.d1Filter));
+                    } else if (sel === 'costs') {
+                        body = '<div class="pane-bar"><span class="lbl">مصنعية ' + money(t.labor) + ' · مصروفات ' + money(t.other) + '</span>' +
+                            '<div style="flex:1"></div><button class="btn btn-primary" data-act="openAdd" data-where="d1cost">+ إضافة تكلفة</button></div>' +
+                            (state.d3Add['d1cost'] ? addCostForm('d1cost') : '') +
+                            (isMobile ? costsCards() : costsTable());
+                    } else if (sel === 'payments') {
+                        body = '<div class="pane-bar"><span class="lbl">محصَّل ' + money(t.paid) + ' من ' + money(t.sale) + ' (' + t.pct + '٪)</span>' +
+                            '<div style="flex:1"></div><button class="btn btn-primary" data-act="openAdd" data-where="d1pay">+ تسجيل دفعة</button></div>' +
+                            (state.d3Add['d1pay'] ? addPayForm('d1pay') : '') +
+                            (isMobile ? paymentsCards() : paymentsTable());
+                    } else if (sel === 'pricing') {
+                        body = pricingBlock();
+                    } else {
+                        body = logBlock();
+                    }
+                    return '<div class="pane">' + body + '</div>';
+                }
+
+                return '<div class="fixes"><h2>فكرة التصميم</h2><ul>' +
+                    '<li>الأرقام فوق ثابتة، والتفاصيل في تبويبات — بدل شريط تحت شريط لحد آخر الصفحة.</li>' +
+                    '<li>٤ أرقام أساسية بس؛ الباقي جوه التبويب بتاعه.</li>' +
+                    '<li>تركيب سعر البيع خط رفيع تحت الأرقام، مش بلوك بعرض الشاشة.</li>' +
+                    '<li>«تعديل / صرف / حذف» زراير واضحة، و«صرف» بيتقفل لوحده لما المادة تتصرف كاملة.</li>' +
+                    '</ul><p class="hint">جرّب: بدّل التبويبات، اضغط «صرف» على مقابض، وسجّل دفعة — الأرقام فوق هتتحرك.</p></div>' +
+                    '<div class="stage"><div><p class="frame-label">ديسكتوب <span>— التبويب المفتوح بس هو اللي بيتعرض</span></p>' +
+                    '<div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body">' +
+
+                    '<div class="d-head"><div><h2>' + esc(DATA.room.name) + '</h2>' +
+                    '<div class="sub">العميل: <a href="#d1">' + esc(DATA.room.customer) + '</a> · أُنشئت ' + DATA.room.created + ' · بدأ التنفيذ ' + DATA.room.started + '</div></div>' +
+                    '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span><div class="spacer"></div>' +
+                    '<select aria-label="حالة الغرفة" style="width:auto"><option>تحت التنفيذ</option><option>مسودة</option><option>مكتملة</option><option>ملغاة</option></select>' +
+                    '<button class="btn btn-danger" data-act="toast" data-msg="هيفتح تأكيد حذف الغرفة">حذف الغرفة</button></div>' +
+
+                    '<div class="stats">' +
+                    '<div class="stat"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+                    '<div class="stat"><span class="lbl">إجمالي التكلفة</span><div class="v">' + m(t.total) + '</div>' +
+                    '<div class="n">خامات ' + money(t.mats) + ' · مصنعية وأخرى ' + money(t.labor + t.other) + '</div></div>' +
+                    '<div class="stat"><span class="lbl">الربح المتوقع</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div>' +
+                    '<div class="n">لحد ما الغرفة تكتمل</div></div>' +
+                    '<div class="stat"><span class="lbl">المتبقي للتحصيل</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div>' +
+                    '<div class="n">مدفوع ' + money(t.paid) + ' (' + t.pct + '٪)</div></div></div>' +
+
+                    '<div style="background:var(--surface);border:1px solid var(--line);border-bottom:0;padding:10px 13px">' + compBar(t) + '</div>' +
+                    strip(state.d1Tab, 'd1tab') + pane(state.d1Tab, false) +
+
+                    '</div></div></div>' +
+
+                    '<div><p class="frame-label">موبايل</p><div class="phone"><div class="phone-notch"></div><div class="phone-body">' +
+                    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+                    '<div><div style="font-size:17px;font-weight:700">' + esc(DATA.room.name) + '</div>' +
+                    '<div style="font-size:12px;color:var(--muted)">' + esc(DATA.room.customer) + '</div></div>' +
+                    '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span></div>' +
+                    '<div class="m-stats" style="margin-top:11px">' +
+                    '<div class="m-stat"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+                    '<div class="m-stat"><span class="lbl">التكلفة</span><div class="v">' + m(t.total) + '</div></div>' +
+                    '<div class="m-stat"><span class="lbl">الربح المتوقع</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div></div>' +
+                    '<div class="m-stat"><span class="lbl">المتبقي</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div></div></div>' +
+                    '<div style="margin-top:10px">' + compBar(t) + '</div>' +
+                    '<div style="margin-top:11px">' + strip(state.d1TabM, 'd1tabm') + '</div>' +
+                    pane(state.d1TabM, true) +
+                    '<div class="m-bottom"><button class="btn btn-primary" data-act="openAdd" data-where="d1pay">+ دفعة</button>' +
+                    '<button class="btn" data-act="openAdd" data-where="d1cost">+ تكلفة</button>' +
+                    '<button class="btn" data-act="openAdd" data-where="d1mat">+ مادة</button></div>' +
+                    (state.toast ? '<div class="toast">' + esc(state.toast) + '</div>' : '') +
+                    '</div></div></div></div>';
+            }
+
+            // ------------------------------------------------------------ design 2
+            function design2() {
+                var t = totals();
+                var profitPct = Math.max(0, 100 - t.compMats - t.compWork);
+                var drawer = '';
+                if (state.d2Drawer === 'issue') {
+                    drawer = '<div class="drawer"><h3>صرف خامة للغرفة</h3><div class="grid">' +
+                        '<label class="f" style="flex:2 1 160px"><span>المادة</span><select data-f="d2issue-id">' +
+                        DATA.materials.filter(function (x) { return x.issued < x.required; }).map(function (x) {
+                            return '<option value="' + x.id + '">' + esc(x.name) + ' — باقي ' + (x.required - x.issued) + ' ' + esc(x.unit) + '</option>';
+                        }).join('') + '</select></label>' +
+                        '<div class="acts" style="display:flex;gap:6px"><button class="btn btn-primary" data-act="issueFromDrawer">صرف</button>' +
+                        '<button class="btn btn-ghost" data-act="closeDrawer">إلغاء</button></div></div></div>';
+                } else if (state.d2Drawer === 'pay') {
+                    drawer = '<div class="drawer"><h3>تسجيل دفعة من العميل</h3>' + addPayForm('d2pay').replace('addrow', 'grid') + '</div>';
+                } else if (state.d2Drawer === 'cost') {
+                    drawer = '<div class="drawer"><h3>إضافة مصنعية أو مصروف</h3>' + addCostForm('d2cost').replace('addrow', 'grid') + '</div>';
+                }
+
+                return '<div class="fixes"><h2>فكرة التصميم</h2><ul>' +
+                    '<li>عمود جانبي ثابت فيه فلوس الغرفة كلها — بيفضل قدامك وانت بتشتغل في أي قسم.</li>' +
+                    '<li>الخامات والاكسسوارات جدول واحد بفلتر، بدل بوكسين بنفس الكلام متكرر.</li>' +
+                    '<li>المصنعية والمصروفات جدول واحد بعمود «النوع»، بدل فورمين متطابقين.</li>' +
+                    '<li>زراير الإجراءات السريعة بتفتح فورم صغير فوق، والفورم بيتقفل بعد ما تضيف.</li>' +
+                    '</ul><p class="hint">جرّب: اضغط «تسجيل دفعة» أو «صرف خامة» من العمود الجانبي — الفورم هيفتح والأرقام هتتحدّث.</p></div>' +
+                    '<div class="stage"><div><p class="frame-label">ديسكتوب <span>— العمود الجانبي ثابت مع السكرول</span></p>' +
+                    '<div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body">' +
+
+                    '<div class="d-head" style="border-radius:12px;border-bottom:1px solid var(--line);margin-bottom:14px">' +
+                    '<div><h2>' + esc(DATA.room.name) + '</h2><div class="sub">العميل: <a href="#d2">' + esc(DATA.room.customer) + '</a> · أُنشئت ' + DATA.room.created + '</div></div>' +
+                    '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span><div class="spacer"></div>' +
+                    '<select aria-label="حالة الغرفة" style="width:auto"><option>تحت التنفيذ</option><option>مكتملة</option></select>' +
+                    '<button class="btn btn-danger" data-act="toast" data-msg="هيفتح تأكيد حذف الغرفة">حذف الغرفة</button></div>' +
+
+                    '<div class="ws"><div>' + drawer +
+                    '<div class="sec"><div class="sec-head"><h3>مواد الغرفة</h3>' +
+                    '<span class="tot">' + DATA.materials.length + ' مواد' + (t.shortCount ? ' · ' + t.shortCount + ' ناقصة' : '') + '</span></div>' +
+                    '<div class="filters"><div class="seg">' +
+                    ['all', 'خامة', 'اكسسوار'].map(function (f) {
+                        return '<button aria-pressed="' + (state.d2Filter === f ? 'true' : 'false') + '" data-act="d2filter" data-f="' + f + '">' + (f === 'all' ? 'الكل' : f + 'ات') + '</button>';
+                    }).join('') + '</div>' +
+                    '<input class="search" type="search" placeholder="ابحث…" aria-label="بحث">' +
+                    '<button class="btn btn-primary" data-act="openAdd" data-where="d2mat">+ إضافة</button></div>' +
+                    (state.d3Add['d2mat'] ? '<div style="padding:0 13px 13px">' + addMatForm('d2mat') + '</div>' : '') +
+                    materialsTable(state.d2Filter) + '</div>' +
+
+                    '<div class="sec"><div class="sec-head"><h3>تكاليف الغرفة</h3>' +
+                    '<span class="tot">مصنعية ' + money(t.labor) + ' · مصروفات ' + money(t.other) + '</span>' +
+                    '<button class="btn btn-sm btn-primary" data-act="drawer" data-k="cost">+ تكلفة</button></div>' +
+                    costsTable() + '</div>' +
+
+                    '<div class="sec"><div class="sec-head"><h3>الدفعات</h3>' +
+                    '<span class="tot">محصَّل ' + money(t.paid) + ' من ' + money(t.sale) + '</span>' +
+                    '<button class="btn btn-sm btn-primary" data-act="drawer" data-k="pay">+ دفعة</button></div>' +
+                    paymentsTable() + '</div>' +
+
+                    '<div class="sec"><div class="sec-head"><h3>التسعير التقديري مقابل الفعلي</h3></div>' +
+                    '<div style="padding:13px">' + pricingBlock() + '</div></div>' +
+
+                    '</div><aside class="rail">' +
+                    '<div class="rail-card rail-hero"><span class="lbl">المتبقي للتحصيل</span>' +
+                    '<div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div>' +
+                    '<div class="bar" style="margin-top:9px"><i style="width:' + t.pct + '%"></i></div>' +
+                    '<div class="lbl" style="margin-top:6px">محصَّل ' + t.pct + '٪ · ' + money(t.paid) + ' من ' + money(t.sale) + '</div></div>' +
+                    '<div class="rail-card">' +
+                    '<div class="rail-row"><span class="k">سعر البيع</span><span class="v">' + m(t.sale) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">تكلفة الخامات</span><span class="v">' + m(t.mats) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">مصنعية + أخرى</span><span class="v">' + m(t.labor + t.other) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">إجمالي التكلفة</span><span class="v">' + m(t.total) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">الربح المتوقع</span><span class="v" style="color:var(--good)">' + m(t.profit) + '</span></div>' +
+                    '<div class="comp" style="margin-top:10px">' +
+                    '<i style="width:' + t.compMats + '%;background:#8f5024"></i><i style="width:' + t.compWork + '%;background:#c08a5e"></i><i style="width:' + profitPct + '%;background:#3f6b39"></i></div>' +
+                    '<div class="comp-legend"><b style="--k:#8f5024">خامات ' + t.compMats + '٪</b><b style="--k:#3f6b39">ربح ' + profitPct + '٪</b></div></div>' +
+                    '<div class="rail-card quick">' +
+                    '<button class="btn btn-primary" data-act="drawer" data-k="issue">صرف خامة</button>' +
+                    '<button class="btn" data-act="drawer" data-k="pay">تسجيل دفعة</button>' +
+                    '<button class="btn" data-act="drawer" data-k="cost">إضافة مصنعية</button></div>' +
+                    '</aside></div>' +
+
+                    '</div></div></div>' +
+
+                    '<div><p class="frame-label">موبايل <span>— العمود بيتحول كارت فوق</span></p>' +
+                    '<div class="phone"><div class="phone-notch"></div><div class="phone-body">' +
+                    '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">' +
+                    '<div><div style="font-size:17px;font-weight:700">' + esc(DATA.room.name) + '</div>' +
+                    '<div style="font-size:12px;color:var(--muted)">' + esc(DATA.room.customer) + '</div></div>' +
+                    '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span></div>' +
+                    '<div class="rail-card rail-hero" style="margin-top:11px"><span class="lbl">المتبقي للتحصيل</span>' +
+                    '<div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div>' +
+                    '<div class="bar" style="margin-top:9px"><i style="width:' + t.pct + '%"></i></div>' +
+                    '<div class="lbl" style="margin-top:6px">محصَّل ' + t.pct + '٪ · ' + money(t.paid) + ' من ' + money(t.sale) + '</div></div>' +
+                    // Same rows as the desktop rail — nothing is dropped on the phone.
+                    '<div class="rail-card" style="margin-top:9px">' +
+                    '<div class="rail-row"><span class="k">سعر البيع</span><span class="v">' + m(t.sale) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">تكلفة الخامات</span><span class="v">' + m(t.mats) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">مصنعية + أخرى</span><span class="v">' + m(t.labor + t.other) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">إجمالي التكلفة</span><span class="v">' + m(t.total) + '</span></div>' +
+                    '<div class="rail-row"><span class="k">الربح المتوقع</span><span class="v" style="color:var(--good)">' + m(t.profit) + '</span></div>' +
+                    '<div class="comp" style="margin-top:10px">' +
+                    '<i style="width:' + t.compMats + '%;background:#8f5024"></i><i style="width:' + t.compWork + '%;background:#c08a5e"></i>' +
+                    '<i style="width:' + profitPct + '%;background:#3f6b39"></i></div>' +
+                    '<div class="comp-legend"><b style="--k:#8f5024">خامات ' + t.compMats + '٪</b>' +
+                    '<b style="--k:#c08a5e">مصنعية وأخرى ' + t.compWork + '٪</b>' +
+                    '<b style="--k:#3f6b39">ربح ' + profitPct + '٪</b></div></div>' +
+                    (state.d2Drawer ? '<div style="margin-top:10px">' + drawer + '</div>' : '') +
+                    '<div class="sec" style="margin-top:11px"><div class="sec-head"><h3>مواد الغرفة</h3><span class="tot">' + DATA.materials.length + '</span></div>' +
+                    '<div style="padding:11px">' + materialsCards('all') + '</div></div>' +
+                    '<div class="sec" style="margin-top:9px"><div class="sec-head"><h3>التكاليف</h3><span class="tot">' + money(t.labor + t.other) + '</span></div>' +
+                    '<div style="padding:11px">' + costsCards() + '</div></div>' +
+                    '<div class="sec" style="margin-top:9px"><div class="sec-head"><h3>الدفعات</h3><span class="tot">' + money(t.paid) + '</span></div>' +
+                    '<div style="padding:11px">' + paymentsCards() + '</div></div>' +
+                    '<div class="m-bottom"><button class="btn btn-primary" data-act="drawer" data-k="issue">صرف خامة</button>' +
+                    '<button class="btn" data-act="drawer" data-k="pay">+ دفعة</button></div>' +
+                    (state.toast ? '<div class="toast">' + esc(state.toast) + '</div>' : '') +
+                    '</div></div></div></div>';
+            }
+
+            // ------------------------------------------------------------ design 3
+            function design3() {
+                var t = totals();
+                var secs = [
+                    { k: 'materials', t: 'المواد', meta: DATA.materials.length + ' مواد' + (t.shortCount ? ' · ' + t.shortCount + ' ناقصة' : '') },
+                    { k: 'costs', t: 'التكاليف', meta: money(t.labor + t.other) + ' ج.م' },
+                    { k: 'payments', t: 'الدفعات', meta: money(t.paid) + ' من ' + money(t.sale) },
+                    { k: 'pricing', t: 'التسعير التقديري', meta: 'فرق ' + money(t.total - (DATA.pricing.materials + DATA.pricing.accessories + DATA.pricing.labor + DATA.pricing.other)) },
+                    { k: 'log', t: 'سجل التعديلات', meta: DATA.log.length + ' حركات' }
+                ];
+                function body(k, isMobile) {
+                    if (k === 'materials') {
+                        return (isMobile ? materialsCards('all') : materialsTable('all')) +
+                            (state.d3Add['d3mat' + (isMobile ? 'm' : '')] ? addMatForm('d3mat' + (isMobile ? 'm' : '')) :
+                                '<button class="btn btn-primary" style="margin-top:11px;width:100%" data-act="openAdd" data-where="d3mat' + (isMobile ? 'm' : '') + '">+ إضافة مادة</button>');
+                    }
+                    if (k === 'costs') {
+                        return (isMobile ? costsCards() : costsTable()) +
+                            (state.d3Add['d3cost' + (isMobile ? 'm' : '')] ? addCostForm('d3cost' + (isMobile ? 'm' : '')) :
+                                '<button class="btn btn-primary" style="margin-top:11px;width:100%" data-act="openAdd" data-where="d3cost' + (isMobile ? 'm' : '') + '">+ إضافة تكلفة</button>');
+                    }
+                    if (k === 'payments') {
+                        return (isMobile ? paymentsCards() : paymentsTable()) +
+                            (state.d3Add['d3pay' + (isMobile ? 'm' : '')] ? addPayForm('d3pay' + (isMobile ? 'm' : '')) :
+                                '<button class="btn btn-primary" style="margin-top:11px;width:100%" data-act="openAdd" data-where="d3pay' + (isMobile ? 'm' : '') + '">+ تسجيل دفعة</button>');
+                    }
+                    if (k === 'pricing') return pricingBlock();
+                    return logBlock();
+                }
+                function accs(openMap, attr, isMobile) {
+                    return secs.map(function (s) {
+                        var open = openMap[s.k];
+                        return '<div class="acc"><button class="acc-head" aria-expanded="' + (open ? 'true' : 'false') + '" data-act="' + attr + '" data-k="' + s.k + '">' +
+                            '<span class="t">' + s.t + '</span><span class="meta"><span class="num">' + esc(s.meta) + '</span><span class="caret">▾</span></span></button>' +
+                            (open ? '<div class="acc-body">' + body(s.k, isMobile) + '</div>' : '') + '</div>';
+                    }).join('');
+                }
+
+                return '<div class="fixes"><h2>فكرة التصميم</h2><ul>' +
+                    '<li>كل الأرقام في شريط واحد مضغوط — مش ٦ كروت كل واحد بحجم كارت.</li>' +
+                    '<li>كل قسم بيتفتح ويتقفل، وإجماليه ظاهر وهو مقفول — تشوف الصورة كلها من غير ما تفتح حاجة.</li>' +
+                    '<li>الإضافة سطر جوه القسم نفسه، بيظهر لما تضغط ويختفي بعد ما تضيف.</li>' +
+                    '<li>الرسمة الفاضية مابتظهرش أصلًا بدل ما تاخد بلوك مكتوب فيه «مفيش بيانات».</li>' +
+                    '</ul><p class="hint">جرّب: افتح «الدفعات» وسجّل دفعة، أو «التكاليف» وضيف مصنعية — الشريط فوق هيتحدّث.</p></div>' +
+                    '<div class="stage"><div><p class="frame-label">ديسكتوب <span>— الأقسام مقفولة، تفتح اللي محتاجه</span></p>' +
+                    '<div class="screen"><div class="screen-bar"><i class="dot"></i><i class="dot"></i><i class="dot"></i></div><div class="screen-body">' +
+
+                    '<div class="ledger"><div class="ledger-top"><h2>' + esc(DATA.room.name) + '</h2>' +
+                    '<span class="pill pill-prog">' + esc(DATA.room.status) + '</span>' +
+                    '<span style="color:var(--muted);font-size:12.5px">العميل: <a href="#d3" style="color:var(--accent);text-decoration:none">' + esc(DATA.room.customer) + '</a> · أُنشئت ' + DATA.room.created + '</span>' +
+                    '<div style="flex:1 1 auto"></div>' +
+                    '<select aria-label="حالة الغرفة" style="width:auto"><option>تحت التنفيذ</option><option>مكتملة</option></select>' +
+                    '<button class="btn btn-danger btn-sm" data-act="toast" data-msg="هيفتح تأكيد حذف الغرفة">حذف</button></div>' +
+                    '<div class="ledger-strip">' +
+                    '<div class="cell"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+                    '<div class="cell"><span class="lbl">خامات</span><div class="v">' + m(t.mats) + '</div></div>' +
+                    '<div class="cell"><span class="lbl">مصنعية</span><div class="v">' + m(t.labor) + '</div></div>' +
+                    '<div class="cell"><span class="lbl">أخرى</span><div class="v">' + m(t.other) + '</div></div>' +
+                    '<div class="cell"><span class="lbl">الربح المتوقع</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div></div>' +
+                    '<div class="cell"><span class="lbl">المتبقي</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div></div></div>' +
+                    '<div style="margin-top:11px">' + compBar(t) + '</div></div>' +
+                    accs(state.d3Open, 'd3acc', false) +
+
+                    '</div></div></div>' +
+
+                    '<div><p class="frame-label">موبايل</p><div class="phone"><div class="phone-notch"></div><div class="phone-body">' +
+                    '<div class="ledger" style="padding:11px 12px"><div class="ledger-top">' +
+                    '<h2 style="font-size:16px">' + esc(DATA.room.name) + '</h2><span class="pill pill-prog">' + esc(DATA.room.status) + '</span></div>' +
+                    '<div style="font-size:12px;color:var(--muted);margin-top:3px">' + esc(DATA.room.customer) + ' · ' + DATA.room.created + '</div>' +
+                    '<div class="ledger-strip" style="margin-top:10px">' +
+                    '<div class="cell" style="flex:1 1 44%"><span class="lbl">سعر البيع</span><div class="v">' + m(t.sale) + '</div></div>' +
+                    '<div class="cell" style="flex:1 1 44%"><span class="lbl">التكلفة</span><div class="v">' + m(t.total) + '</div></div>' +
+                    '<div class="cell" style="flex:1 1 44%;border-top:1px solid var(--line-soft)"><span class="lbl">الربح</span><div class="v" style="color:var(--good)">' + m(t.profit) + '</div></div>' +
+                    '<div class="cell" style="flex:1 1 44%;border-top:1px solid var(--line-soft)"><span class="lbl">المتبقي</span><div class="v" style="color:var(--bad)">' + m(t.remaining) + '</div></div></div>' +
+                    '<div style="margin-top:9px"><div class="comp">' +
+                    '<i style="width:' + t.compMats + '%;background:#8f5024"></i><i style="width:' + t.compWork + '%;background:#c08a5e"></i>' +
+                    '<i style="width:' + Math.max(0, 100 - t.compMats - t.compWork) + '%;background:#3f6b39"></i></div></div></div>' +
+                    accs(state.d3OpenM, 'd3accm', true) +
+                    (state.toast ? '<div class="toast" style="bottom:12px">' + esc(state.toast) + '</div>' : '') +
+                    '</div></div></div></div>';
+            }
+
+            // -------------------------------------------------------------- render
+            function render() {
+                document.getElementById('d1').innerHTML = design1();
+                document.getElementById('d2').innerHTML = design2();
+                document.getElementById('d3').innerHTML = design3();
+                var old = document.querySelector('.toast-desk');
+                if (old) old.remove();
+                if (state.toast) {
+                    var el = document.createElement('div');
+                    el.className = 'toast toast-desk';
+                    el.textContent = state.toast;
+                    document.body.appendChild(el);
+                }
+            }
+
+            function val(where, field) {
+                var el = document.querySelector('[data-f="' + where + '-' + field + '"]');
+                return el ? el.value.trim() : '';
+            }
+            function toPiastres(v) {
+                var n = parseFloat(v);
+                return isNaN(n) ? 0 : Math.round(n * 100);
+            }
+
+            // -------------------------------------------------------------- events
+            document.addEventListener('change', function (e) {
+                var sel = e.target.closest('select[data-act="addType"]');
+                if (!sel) return;
+                state.addType[sel.dataset.where] = sel.value;
+                render();
+            });
+
+            document.addEventListener('click', function (e) {
+                var b = e.target.closest('[data-act]');
+                if (!b) {
+                    var sw = e.target.closest('.switch [role="tab"]');
+                    if (sw) {
+                        Array.prototype.forEach.call(document.querySelectorAll('.switch [role="tab"]'), function (t) {
+                            var on = t === sw;
+                            t.setAttribute('aria-selected', on ? 'true' : 'false');
+                            document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+                        });
+                    }
+                    return;
+                }
+                var act = b.dataset.act, id = Number(b.dataset.id), k = b.dataset.k, where = b.dataset.where;
+
+                if (act === 'd1tab') { state.d1Tab = k; }
+                else if (act === 'd1tabm') { state.d1TabM = k; }
+                else if (act === 'd1filter') { state.d1Filter = b.dataset.f; }
+                else if (act === 'd2filter') { state.d2Filter = b.dataset.f; }
+                else if (act === 'd3acc') { state.d3Open[k] = !state.d3Open[k]; }
+                else if (act === 'd3accm') { state.d3OpenM[k] = !state.d3OpenM[k]; }
+                else if (act === 'openAdd') { state.d3Add[where] = true; }
+                else if (act === 'closeAdd') { state.d3Add[where] = false; }
+                else if (act === 'drawer') { state.d2Drawer = (state.d2Drawer === k ? null : k); }
+                else if (act === 'closeDrawer') { state.d2Drawer = null; }
+                else if (act === 'toast') { toast(b.dataset.msg); }
+                else if (act === 'issue') {
+                    var mat = DATA.materials.filter(function (x) { return x.id === id; })[0];
+                    if (mat) {
+                        var take = Math.min(mat.required - mat.issued, mat.stock);
+                        if (take <= 0) { toast('مفيش رصيد في المخزن من ' + mat.name); }
+                        else {
+                            mat.issued += take; mat.stock -= take;
+                            mat.cost += take * 40000;
+                            toast('اتصرف ' + take + ' ' + mat.unit + ' من ' + mat.name);
+                        }
+                    }
+                }
+                else if (act === 'issueFromDrawer') {
+                    var sel = document.querySelector('[data-f="d2issue-id"]');
+                    var mm = sel ? DATA.materials.filter(function (x) { return x.id === Number(sel.value); })[0] : null;
+                    if (mm) {
+                        var tk = Math.min(mm.required - mm.issued, mm.stock);
+                        if (tk <= 0) toast('مفيش رصيد في المخزن من ' + mm.name);
+                        else { mm.issued += tk; mm.stock -= tk; mm.cost += tk * 40000; toast('اتصرف ' + tk + ' ' + mm.unit + ' من ' + mm.name); }
+                    }
+                    state.d2Drawer = null;
+                }
+                else if (act === 'delMat') { DATA.materials = DATA.materials.filter(function (x) { return x.id !== id; }); toast('اتشالت المادة'); }
+                else if (act === 'delCost') { DATA.costs = DATA.costs.filter(function (x) { return x.id !== id; }); toast('اتشالت التكلفة'); }
+                else if (act === 'delPay') { DATA.payments = DATA.payments.filter(function (x) { return x.id !== id; }); toast('اتشالت الدفعة'); }
+                else if (act === 'addCost') {
+                    var amt = toPiastres(val(where, 'amount'));
+                    if (amt <= 0) { toast('اكتب مبلغ صح الأول'); }
+                    else {
+                        DATA.costs.push({
+                            id: Date.now(), kind: val(where, 'kind') || 'مصنعية',
+                            desc: val(where, 'desc') || 'بدون وصف', amount: amt,
+                            date: '2026-10-15', method: 'كاش'
+                        });
+                        state.d3Add[where] = false; state.d2Drawer = null;
+                        toast('اتسجلت التكلفة — الأرقام اتحدّثت');
+                    }
+                }
+                else if (act === 'addPay') {
+                    var pa = toPiastres(val(where, 'amount'));
+                    if (pa <= 0) { toast('اكتب مبلغ صح الأول'); }
+                    else {
+                        var next = String(19 + DATA.payments.length).padStart(5, '0');
+                        DATA.payments.push({
+                            id: Date.now(), receipt: next, amount: pa, date: '2026-10-15',
+                            method: val(where, 'method') || 'كاش', note: val(where, 'note')
+                        });
+                        state.d3Add[where] = false; state.d2Drawer = null;
+                        toast('اتسجلت الدفعة — المتبقي اتحدّث');
+                    }
+                }
+                else if (act === 'addMat') {
+                    var q = parseInt(val(where, 'qty'), 10);
+                    if (!q || q <= 0) { toast('اكتب كمية صح الأول'); }
+                    else {
+                        var raw = (val(where, 'name') || 'مادة جديدة|قطعة').split('|');
+                        DATA.materials.push({
+                            id: Date.now(), name: raw[0], type: state.addType[where] || 'خامة', unit: raw[1] || 'قطعة',
+                            required: q, issued: 0, stock: Math.max(0, q - 2), cost: 0
+                        });
+                        state.d3Add[where] = false;
+                        toast('اتضافت ' + raw[0] + ' للغرفة');
+                    }
+                }
+                else { return; }
+
+                render();
+            });
+
+            render();
+        })();
+    </script>
+
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 <x-app-layout title="سجل المخزن">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">سجل المخزن</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">سجل المخزن</h1>
 
     <form method="GET" action="{{ route('inventory.movements.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
         <div class="relative w-full max-w-xs">
@@ -11,13 +11,13 @@
                 name="q"
                 value="{{ $search }}"
                 placeholder="ابحث باسم المادة"
-                class="w-full rounded-full border border-transparent bg-bg-subtle py-2 ps-9 pe-3 text-sm text-gray-900 transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+                class="w-full rounded-full border border-transparent bg-bg-subtle py-2 ps-9 pe-3 text-sm text-ink transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
         </div>
 
         <select
             name="type"
-            class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
+            class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30"
         >
             <option value="">كل الأنواع</option>
             @foreach ($movementTypes as $movementType)
@@ -26,24 +26,24 @@
         </select>
 
         <div>
-            <label for="from" class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
+            <label for="from" class="mb-1 block text-xs font-medium text-ink-soft">من تاريخ</label>
             <input
                 id="from"
                 type="date"
                 name="from"
                 value="{{ $from }}"
-                class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
         </div>
 
         <div>
-            <label for="to" class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
+            <label for="to" class="mb-1 block text-xs font-medium text-ink-soft">إلى تاريخ</label>
             <input
                 id="to"
                 type="date"
                 name="to"
                 value="{{ $to }}"
-                class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
         </div>
 

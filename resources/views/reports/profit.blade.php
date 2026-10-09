@@ -1,15 +1,15 @@
 <x-app-layout title="تقرير الربح">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">تقرير الربح</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">تقرير الربح</h1>
 
-    <form method="GET" action="{{ route('reports.profit') }}" class="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-gray-700 shadow-sm">
+    <form method="GET" action="{{ route('reports.profit') }}" class="mb-6 flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm text-ink-soft shadow-sm">
         <span>
             @if ($isClosedSeason)
-                الأرقام دي من السنابشوت المحفوظ لـ<strong class="text-gray-900">{{ $seasonName }}</strong> (مقفول)
+                الأرقام دي من السنابشوت المحفوظ لـ<strong class="text-ink">{{ $seasonName }}</strong> (مقفول)
             @else
-                الأرقام دي للموسم المفتوح: <strong class="text-gray-900">{{ $seasonName }}</strong>
+                الأرقام دي للموسم المفتوح: <strong class="text-ink">{{ $seasonName }}</strong>
             @endif
         </span>
-        <select name="season" onchange="this.form.submit()" class="rounded-full border border-transparent bg-bg-subtle px-4 py-1.5 text-sm text-gray-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="season" onchange="this.form.submit()" class="rounded-full border border-transparent bg-bg-subtle px-4 py-1.5 text-sm text-ink focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="open" @selected(! $isClosedSeason)>الموسم المفتوح</option>
             @foreach ($seasonOptions as $option)
                 <option value="{{ $option->id }}" @selected($isClosedSeason && $season->id === $option->id)>{{ 'موسم '.$option->number }} (مقفول)</option>
@@ -18,98 +18,98 @@
     </form>
 
     @if ($lossCarriedIn > 0)
-        <div class="mb-6 rounded-lg border border-danger/30 bg-danger/5 p-4 text-sm text-gray-700">
+        <div class="mb-6 rounded-lg border border-danger/30 bg-danger/5 p-4 text-sm text-ink-soft">
             <div>خسارة مُدوَّرة من موسم سابق: <strong class="text-danger"><x-money :amount="$lossCarriedIn" /></strong></div>
-            <div class="mt-1">القابل للتوزيع دلوقتي: <strong class="text-gray-900"><x-money :amount="$distributableProfit" /></strong> — الخسارة لازم تتغطى الأول.</div>
+            <div class="mt-1">القابل للتوزيع دلوقتي: <strong class="text-ink"><x-money :amount="$distributableProfit" /></strong> — الخسارة لازم تتغطى الأول.</div>
         </div>
     @endif
 
-    <div class="mb-6 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-gray-700">
-        <strong class="text-gray-900">رصيد الخزنة</strong> و<strong class="text-gray-900">صافي الربح</strong> رقمان مختلفان تمامًا ولا يجب الخلط بينهما:
+    <div class="mb-6 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm text-ink-soft">
+        <strong class="text-ink">رصيد الخزنة</strong> و<strong class="text-ink">صافي الربح</strong> رقمان مختلفان تمامًا ولا يجب الخلط بينهما:
         رصيد الخزنة نقدي (كل جنيه دخل أو خرج فعليًا)، بينما صافي الربح محاسبي (إيراد وتكلفة الغرف المكتملة فقط + كل المصروفات).
     </div>
 
     <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">رصيد الخزنة (نقدي)</div>
-            <div class="mt-1 text-2xl font-bold {{ $cashboxBalance < 0 ? 'text-danger' : 'text-gray-900' }}">
-                <x-money :amount="$cashboxBalance" />
-            </div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">صافي الربح (استحقاقي)</div>
-            <div class="mt-1 text-2xl font-bold {{ $netProfit < 0 ? 'text-danger' : 'text-success' }}">
-                <x-money :amount="$netProfit" />
-            </div>
-        </div>
+        <x-stat label="رصيد الخزنة (نقدي)" size="2xl" :tone="$cashboxBalance < 0 ? 'danger' : 'ink'">
+            <x-money :amount="$cashboxBalance" />
+        </x-stat>
+        <x-stat label="صافي الربح (استحقاقي)" size="2xl" :tone="$netProfit < 0 ? 'danger' : 'success'">
+            <x-money :amount="$netProfit" />
+        </x-stat>
     </div>
 
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">الإيراد (الغرف المكتملة)</div>
-            <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$revenue" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">تكلفة الخامات (الغرف المكتملة)</div>
-            <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$costOfMaterials" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">تكاليف الغرف المكتملة (مصنعية + أخرى)</div>
-            <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$roomCosts" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">تكاليف غرف ملغاة (خسارة)</div>
-            <div class="mt-1 text-lg font-semibold {{ $cancelledRoomCosts > 0 ? 'text-danger' : 'text-gray-900' }}">
-                <x-money :amount="$cancelledRoomCosts" />
-            </div>
-            <div class="mt-1 text-xs text-secondary">مصنعية ومصروفات غرف ألغيت — فلوس خرجت ولن تعود، فتُخصم فورًا.</div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">المصروفات الإدارية</div>
-            <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$adminExpenses" /></div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">إنتاج تحت التشغيل (WIP)</div>
-            <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$workInProgress" /></div>
-            <div class="mt-1 text-xs text-secondary">خامات وتكاليف غرف لم تكتمل بعد — أصل، ليست تكلفة.</div>
-        </div>
-        <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-            <div class="text-sm text-secondary">قيمة المخزن غير المصروف</div>
-            <div class="mt-1 text-lg font-semibold text-gray-900"><x-money :amount="$stockValue" /></div>
-            <div class="mt-1 text-xs text-secondary">خامات مشتراة ولم تُصرف بعد — أصل، ليست تكلفة.</div>
-        </div>
+    <x-panel title="من الإيراد إلى صافي الربح" sub="الإيراد وكل خصم على التوالي، لحد صافي الربح النهائي">
+        <x-charts.waterfall
+            :steps="[
+                ['label' => 'الإيراد', 'value' => $revenue, 'type' => 'total'],
+                ['label' => 'تكلفة الخامات', 'value' => -$costOfMaterials, 'type' => 'change'],
+                ['label' => 'تكاليف الغرف', 'value' => -$roomCosts, 'type' => 'change'],
+                ['label' => 'غرف ملغاة', 'value' => -$cancelledRoomCosts, 'type' => 'change'],
+                ['label' => 'مصروفات إدارية', 'value' => -$adminExpenses, 'type' => 'change'],
+                ['label' => 'صافي الربح', 'value' => $netProfit, 'type' => 'total'],
+            ]"
+            alt="من الإيراد {{ \App\Casts\MoneyCast::toDisplayString($revenue) }} ج.م إلى صافي الربح {{ \App\Casts\MoneyCast::toDisplayString($netProfit) }} ج.م"
+        />
+    </x-panel>
+
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <x-stat label="الإيراد (الغرف المكتملة)" size="lg"><x-money :amount="$revenue" /></x-stat>
+        <x-stat label="تكلفة الخامات (الغرف المكتملة)" size="lg"><x-money :amount="$costOfMaterials" /></x-stat>
+        <x-stat label="تكاليف الغرف المكتملة (مصنعية + أخرى)" size="lg"><x-money :amount="$roomCosts" /></x-stat>
+        <x-stat label="تكاليف غرف ملغاة (خسارة)" size="lg" :tone="$cancelledRoomCosts > 0 ? 'danger' : 'ink'" hint="مصنعية ومصروفات غرف ألغيت — فلوس خرجت ولن تعود، فتُخصم فورًا.">
+            <x-money :amount="$cancelledRoomCosts" />
+        </x-stat>
+        <x-stat label="المصروفات الإدارية" size="lg"><x-money :amount="$adminExpenses" /></x-stat>
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <x-panel title="أصول مش تكلفة" sub="خامات ومصروفات لم تُحسب بعد — موجودة لكن ليست ربحًا ولا خسارة">
+            <ul class="space-y-3 text-sm">
+                <li class="flex items-center justify-between">
+                    <span class="text-ink-soft">إنتاج تحت التشغيل (WIP)</span>
+                    <span class="font-semibold text-ink"><x-money :amount="$workInProgress" /></span>
+                </li>
+                <li class="flex items-center justify-between">
+                    <span class="text-ink-soft">قيمة المخزن غير المصروف</span>
+                    <span class="font-semibold text-ink"><x-money :amount="$stockValue" /></span>
+                </li>
+            </ul>
+            <p class="mt-3 text-xs text-secondary">خامات وتكاليف غرف لم تكتمل بعد، وخامات مشتراة ولم تُصرف — أصول، ليست تكلفة.</p>
+        </x-panel>
+
+        <x-panel title="نصيب الشركاء" sub="من الربح القابل للتوزيع في {{ $isClosedSeason ? 'الموسم المقفول' : 'الموسم المفتوح' }}" link="{{ route('partners.index') }}" link-label="الشركاء">
+            <ul class="space-y-3 text-sm">
+                @forelse ($partnerShares as $row)
+                    <li class="flex items-center justify-between">
+                        <span class="text-ink-soft">{{ $row['name'] }}</span>
+                        <span class="font-semibold text-ink"><x-money :amount="$row['share']" /></span>
+                    </li>
+                @empty
+                    <li class="text-secondary">مفيش شركاء مسجلين.</li>
+                @endforelse
+            </ul>
+        </x-panel>
     </div>
 
     @unless ($isClosedSeason)
-        <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
             @foreach ([['المصروفات الإدارية شهر بشهر', $adminByMonth], ['المصنعيات شهر بشهر', $laborByMonth], ['مصروفات أخرى للغرف شهر بشهر', $otherByMonth]] as [$title, $byMonth])
-                <div class="rounded-xl border border-border bg-surface p-4 shadow-sm">
-                    <h2 class="mb-3 text-sm font-semibold text-gray-900">{{ $title }}</h2>
-                    <table class="min-w-full divide-y divide-border text-sm">
-                        <thead class="bg-bg-subtle">
+                <x-panel :title="$title">
+                    <x-data-table :headings="['الشهر', 'الإجمالي']" :rows="$byMonth" empty="مفيش حاجة في الموسم ده لسه.">
+                        @foreach ($byMonth as $month => $total)
                             <tr>
-                                <th class="px-3 py-2 text-start text-xs font-semibold text-secondary">الشهر</th>
-                                <th class="px-3 py-2 text-end text-xs font-semibold text-secondary">الإجمالي</th>
+                                <td class="px-4 py-2.5">{{ __('date.months.'.(int) substr($month, 5, 2)) }} {{ substr($month, 0, 4) }}</td>
+                                <td class="px-4 py-2.5 text-end"><x-money :amount="$total" /></td>
                             </tr>
-                        </thead>
-                        <tbody class="divide-y divide-border">
-                            @forelse ($byMonth as $month => $total)
-                                <tr>
-                                    <td class="px-3 py-2">{{ __('date.months.'.(int) substr($month, 5, 2)) }} {{ substr($month, 0, 4) }}</td>
-                                    <td class="px-3 py-2 text-end"><x-money :amount="$total" /></td>
-                                </tr>
-                            @empty
-                                <tr><td colspan="2" class="px-3 py-4 text-center text-secondary">مفيش حاجة في الموسم ده لسه.</td></tr>
-                            @endforelse
-                        </tbody>
-                        <tfoot>
-                            <tr class="font-bold">
-                                <td class="px-3 py-2">الإجمالي</td>
-                                <td class="px-3 py-2 text-end"><x-money :amount="$byMonth->sum()" /></td>
+                        @endforeach
+                        <x-slot:footer>
+                            <tr>
+                                <td class="px-4 py-2.5">الإجمالي</td>
+                                <td class="px-4 py-2.5 text-end"><x-money :amount="$byMonth->sum()" /></td>
                             </tr>
-                        </tfoot>
-                    </table>
-                </div>
+                        </x-slot:footer>
+                    </x-data-table>
+                </x-panel>
             @endforeach
         </div>
         <p class="mt-3 text-xs text-secondary">إجمالي المصنعيات + المصروفات الأخرى = كارت "تكاليف الغرف المكتملة" فوق. وإجمالي الجدول الأول = كارت "المصروفات الإدارية".</p>

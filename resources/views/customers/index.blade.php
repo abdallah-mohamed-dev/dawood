@@ -1,9 +1,9 @@
 <x-app-layout title="العملاء">
-    <h1 class="mb-6 text-2xl font-bold tracking-tight text-gray-900">العملاء</h1>
+    <h1 class="mb-6 text-2xl font-bold tracking-tight text-ink">العملاء</h1>
 
     <form method="GET" action="{{ route('customers.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
         <div class="relative w-full max-w-xs">
-            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالاسم أو رقم التليفون" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالاسم أو رقم التليفون" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
         <a href="{{ route('customers.index') }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء البحث</a>

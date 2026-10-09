@@ -61,6 +61,13 @@ abstract class ScaledIntegerCast implements CastsAttributes
      */
     public static function validationPattern(): string
     {
+        // A zero-decimal scale (money) takes no point at all — spelling it as
+        // \d{1,0} would be an invalid quantifier, and allowing "10.00" through
+        // would reintroduce the fraction the scale exists to forbid.
+        if (static::decimals() === 0) {
+            return '/^\d+$/';
+        }
+
         return '/^\d+(\.\d{1,'.static::decimals().'})?$/';
     }
 
@@ -70,6 +77,11 @@ abstract class ScaledIntegerCast implements CastsAttributes
         $scaled = abs($scaled);
 
         $whole = intdiv($scaled, static::scale());
+
+        if (static::decimals() === 0) {
+            return ($negative ? '-' : '').$whole;
+        }
+
         $fraction = $scaled % static::scale();
 
         return ($negative ? '-' : '').$whole.'.'.str_pad((string) $fraction, static::decimals(), '0', STR_PAD_LEFT);
@@ -96,7 +108,9 @@ abstract class ScaledIntegerCast implements CastsAttributes
      */
     public static function toDisplayString(int $scaled): string
     {
-        [$whole, $fraction] = explode('.', static::toDecimalString($scaled));
+        // A zero-decimal scale has no point to split on, so pad the missing
+        // fraction rather than indexing past the end of the array.
+        [$whole, $fraction] = array_pad(explode('.', static::toDecimalString($scaled), 2), 2, '');
         $negative = str_starts_with($whole, '-');
         $whole = ltrim($whole, '-');
 

@@ -31,8 +31,8 @@ test('deleting a room with no issued materials just deletes it', function () {
 });
 
 test('deleting a room also removes its payments and their cashbox transactions', function () {
-    $this->payments->create($this->room, 500_000, '2026-01-01');
-    expect($this->cashbox->balance())->toBe(500_000);
+    $this->payments->create($this->room, 5_000, '2026-01-01');
+    expect($this->cashbox->balance())->toBe(5_000);
 
     $this->roomService->deleteRoom($this->room, false);
 
@@ -41,54 +41,54 @@ test('deleting a room also removes its payments and their cashbox transactions',
 });
 
 test('deleting a room with the "return" choice puts the issued materials back on the shelf', function () {
-    $this->inventory->addStock($this->material, 3_000, 10_000, '2026-01-01');
-    $this->inventory->addStock($this->material, 10_000, 12_000, '2026-01-02');
-    $rm = $this->roomMaterials->addRequirement($this->room, $this->material, 5_000);
-    $this->roomMaterials->issue($rm, 5_000, '2026-01-03');
+    $this->inventory->addStock($this->material, 3, 100, '2026-01-01');
+    $this->inventory->addStock($this->material, 10, 120, '2026-01-02');
+    $rm = $this->roomMaterials->addRequirement($this->room, $this->material, 5);
+    $this->roomMaterials->issue($rm, 5, '2026-01-03');
 
-    expect($this->inventory->currentStock($this->material))->toBe(8_000);
+    expect($this->inventory->currentStock($this->material))->toBe(8);
 
     $this->roomService->deleteRoom($this->room, true);
 
-    expect($this->inventory->currentStock($this->material))->toBe(13_000);
+    expect($this->inventory->currentStock($this->material))->toBe(13);
     expect(InventoryMovement::query()->where('type', InventoryMovementType::ReturnedToStock)->count())->toBe(1);
     expect(InventoryMovement::query()->where('type', InventoryMovementType::Out)->count())->toBe(1);
     expect(Room::query()->find($this->room->id))->toBeNull();
 });
 
 test('deleting a room with the "consumed" choice does not touch stock', function () {
-    $this->inventory->addStock($this->material, 3_000, 10_000, '2026-01-01');
-    $this->inventory->addStock($this->material, 10_000, 12_000, '2026-01-02');
-    $rm = $this->roomMaterials->addRequirement($this->room, $this->material, 5_000);
-    $this->roomMaterials->issue($rm, 5_000, '2026-01-03');
+    $this->inventory->addStock($this->material, 3, 100, '2026-01-01');
+    $this->inventory->addStock($this->material, 10, 120, '2026-01-02');
+    $rm = $this->roomMaterials->addRequirement($this->room, $this->material, 5);
+    $this->roomMaterials->issue($rm, 5, '2026-01-03');
 
     $this->roomService->deleteRoom($this->room, false);
 
-    expect($this->inventory->currentStock($this->material))->toBe(8_000);
+    expect($this->inventory->currentStock($this->material))->toBe(8);
     expect(InventoryMovement::query()->where('type', InventoryMovementType::ReturnedToStock)->count())->toBe(0);
     expect(Room::query()->find($this->room->id))->toBeNull();
 });
 
 test('deleting a room that carries labour or extra costs is refused outright', function () {
     $costs = new RoomCostService($this->cashbox);
-    $costs->create($this->room, RoomCostType::Labor, 500_000, '2026-01-05');
+    $costs->create($this->room, RoomCostType::Labor, 5_000, '2026-01-05');
 
     expect(fn () => $this->roomService->deleteRoom($this->room, false))
         ->toThrow(RoomHasCostsException::class);
 
     expect(Room::query()->whereKey($this->room->id)->exists())->toBeTrue();
     // The money that left the drawer stays gone — nothing was silently refunded.
-    expect($this->cashbox->totalOut())->toBe(500_000);
+    expect($this->cashbox->totalOut())->toBe(5_000);
 });
 
 test('the refusal happens before anything is touched, so payments and materials survive', function () {
     $costs = new RoomCostService($this->cashbox);
-    $this->payments->create($this->room, 300_000, '2026-01-01');
-    $costs->create($this->room, RoomCostType::Other, 100_000, '2026-01-05');
+    $this->payments->create($this->room, 3_000, '2026-01-01');
+    $costs->create($this->room, RoomCostType::Other, 1_000, '2026-01-05');
 
     expect(fn () => $this->roomService->deleteRoom($this->room, true))
         ->toThrow(RoomHasCostsException::class);
 
     expect(CustomerPayment::query()->count())->toBe(1);
-    expect($this->cashbox->balance())->toBe(200_000);
+    expect($this->cashbox->balance())->toBe(2_000);
 });

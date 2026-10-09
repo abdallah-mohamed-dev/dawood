@@ -1,29 +1,29 @@
 <x-app-layout title="المصروفات الإدارية">
     <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-2xl font-bold tracking-tight text-gray-900">المصروفات الإدارية</h1>
+        <h1 class="text-2xl font-bold tracking-tight text-ink">المصروفات الإدارية</h1>
 
-        <a href="{{ route('expenses.categories.index') }}" class="rounded-md border border-border px-4 py-2 text-sm text-gray-700 hover:bg-bg">
+        <a href="{{ route('expenses.categories.index') }}" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">
             البنود
         </a>
     </div>
 
     <form method="GET" action="{{ route('expenses.index') }}" class="mb-6 flex flex-wrap items-end gap-2 border-b border-border pb-4">
         <div class="relative w-full max-w-xs">
-            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالوصف" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <input type="search" name="q" value="{{ $search }}" placeholder="ابحث بالوصف" class="w-full rounded-full border border-transparent bg-bg-subtle py-2 px-4 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
-        <select name="expense_category_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-gray-900 focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+        <select name="expense_category_id" class="rounded-full border border-transparent bg-bg-subtle px-4 py-2 text-sm text-ink focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">كل البنود</option>
             @foreach ($categories as $category)
                 <option value="{{ $category->id }}" @selected($selectedCategoryId === $category->id)>{{ $category->name }}</option>
             @endforeach
         </select>
         <div>
-            <label class="mb-1 block text-xs font-medium text-gray-700">من تاريخ</label>
-            <input type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="mb-1 block text-xs font-medium text-ink-soft">من تاريخ</label>
+            <input type="date" name="from" value="{{ $from }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <div>
-            <label class="mb-1 block text-xs font-medium text-gray-700">إلى تاريخ</label>
-            <input type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label class="mb-1 block text-xs font-medium text-ink-soft">إلى تاريخ</label>
+            <input type="date" name="to" value="{{ $to }}" class="rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
         </div>
         <button type="submit" class="rounded-full bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">بحث</button>
         <a href="{{ route('expenses.index') }}" class="text-sm text-secondary hover:text-danger hover:underline">إلغاء الفلاتر</a>
@@ -31,8 +31,8 @@
 
     <x-quick-add :action="route('expenses.store')" title="تسجيل مصروف">
         <div>
-            <label for="expense_category_id" class="mb-1 block text-xs font-medium text-gray-700">البند</label>
-            <select id="expense_category_id" name="expense_category_id" required class="w-48 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+            <label for="expense_category_id" class="mb-1 block text-xs font-medium text-ink-soft">البند</label>
+            <select id="expense_category_id" name="expense_category_id" required class="w-48 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 <option value="">اختر بندًا</option>
                 @foreach ($categories as $category)
                     <option value="{{ $category->id }}" @selected((int) old('expense_category_id') === $category->id)>{{ $category->name }}</option>
@@ -43,7 +43,7 @@
             @enderror
         </div>
 
-        <x-quick-field name="amount" label="المبلغ (ج.م)" type="number" step="0.01" min="0" width="w-32" required />
+        <x-quick-field name="amount" label="المبلغ (ج.م)" type="number" step="1" min="0" width="w-32" required />
         <x-quick-field name="occurred_at" label="التاريخ" type="date" width="w-40" :value="old('occurred_at', now()->toDateString())" required />
         <x-quick-field name="description" label="الوصف" width="w-56" />
 

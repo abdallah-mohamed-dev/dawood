@@ -1,19 +1,34 @@
-<div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-    <div class="mb-3 flex items-center justify-between">
-        <h2 class="text-sm font-semibold text-gray-900">آخر التعديلات على الغرفة</h2>
-        <a href="{{ route('logs.index', ['q' => $room->room_type]) }}" class="text-sm text-primary hover:underline">عرض السجل الكامل</a>
-    </div>
+<x-panel title="آخر التعديلات على الغرفة" :link="route('logs.index', ['q' => $room->room_type])" link-label="عرض السجل الكامل" class="mb-6">
 
     @forelse ($activityLogs as $log)
-        <div class="flex flex-wrap items-baseline gap-2 border-b border-border py-2 text-sm last:border-0">
-            <span class="text-xs text-secondary">{{ $log->created_at->format('Y-m-d H:i') }}</span>
-            <span class="font-medium text-gray-900">{{ $log->subject_label }}</span>
-            <span class="text-secondary">{{ \App\Services\ActivityLogService::eventLabel($log->event) }}</span>
-            @if (\App\Services\ActivityLogService::detailsText($log) !== '')
-                <span class="w-full whitespace-pre-line text-xs text-secondary">{{ \App\Services\ActivityLogService::detailsText($log) }}</span>
+        @php
+            $details = \App\Services\ActivityLogService::detailsList($log);
+
+            // Same wash-and-text pairing as <x-status-badge>, written out in
+            // full so Tailwind finds the class names literally.
+            $tone = match ($log->event) {
+                'created' => 'bg-success/10 text-success',
+                'updated' => 'bg-warning/10 text-warning',
+                'deleted' => 'bg-danger/10 text-danger',
+                default => 'bg-bg-subtle text-ink-soft',
+            };
+        @endphp
+
+        <div class="flex items-center gap-2 border-b border-border-soft py-2 text-sm last:border-0">
+            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold {{ $tone }}">
+                {{ \App\Services\ActivityLogService::eventLabel($log->event) }}
+            </span>
+
+            <span class="min-w-0 max-w-[45%] truncate font-medium text-ink">{{ $log->subject_label }}</span>
+
+            @if ($details !== [])
+                {{-- One line, whatever the change count: the full text is on hover. --}}
+                <span class="min-w-0 flex-1 truncate text-xs text-secondary" title="{{ implode(' · ', $details) }}">{{ implode(' · ', $details) }}</span>
             @endif
+
+            <span class="ms-auto shrink-0 text-xs tabular-nums text-secondary">{{ $log->created_at->format('Y-m-d H:i') }}</span>
         </div>
     @empty
         <p class="text-sm text-secondary">لا توجد تعديلات مسجّلة على الغرفة دي بعد.</p>
     @endforelse
-</div>
+</x-panel>

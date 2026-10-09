@@ -2,9 +2,7 @@
     $locked = $room->status === \App\Enums\RoomStatus::Completed;
 @endphp
 
-<div class="mb-6 rounded-xl border border-border bg-surface p-4 shadow-sm">
-    <h2 class="mb-1 text-sm font-semibold text-gray-900">التسعير التقديري</h2>
-    <p class="mb-4 text-xs text-secondary">تقدير بيكتبه المستخدم للمقارنة بعدين. ما بيدخلش في الخزنة ولا في الربح.</p>
+<x-panel title="التسعير التقديري" sub="تقدير بيكتبه المستخدم للمقارنة بعدين. ما بيدخلش في الخزنة ولا في الربح." class="mb-6">
 
     @if ($locked)
         <p class="mb-4 rounded-lg bg-bg-subtle px-3 py-2 text-sm text-secondary">الغرفة مكتملة، التسعير مقفول.</p>
@@ -14,28 +12,28 @@
         @csrf
         <fieldset @disabled($locked) class="grid grid-cols-1 gap-3 sm:grid-cols-5 sm:items-end">
             <div>
-                <label for="estimated_materials" class="mb-1 block text-xs font-medium text-gray-700">الخامات (ج.م)</label>
-                <input id="estimated_materials" type="number" step="0.01" min="0" name="estimated_materials" value="{{ old('estimated_materials', $room->estimated_materials) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="estimated_materials" class="mb-1 block text-xs font-medium text-ink-soft">الخامات (ج.م)</label>
+                <input id="estimated_materials" type="number" step="1" min="0" name="estimated_materials" value="{{ old('estimated_materials', $room->estimated_materials) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_materials')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label for="estimated_accessories" class="mb-1 block text-xs font-medium text-gray-700">الاكسسوارات (ج.م)</label>
-                <input id="estimated_accessories" type="number" step="0.01" min="0" name="estimated_accessories" value="{{ old('estimated_accessories', $room->estimated_accessories) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="estimated_accessories" class="mb-1 block text-xs font-medium text-ink-soft">الاكسسوارات (ج.م)</label>
+                <input id="estimated_accessories" type="number" step="1" min="0" name="estimated_accessories" value="{{ old('estimated_accessories', $room->estimated_accessories) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_accessories')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label for="estimated_labor" class="mb-1 block text-xs font-medium text-gray-700">المصنعية (ج.م)</label>
-                <input id="estimated_labor" type="number" step="0.01" min="0" name="estimated_labor" value="{{ old('estimated_labor', $room->estimated_labor) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="estimated_labor" class="mb-1 block text-xs font-medium text-ink-soft">المصنعية (ج.م)</label>
+                <input id="estimated_labor" type="number" step="1" min="0" name="estimated_labor" value="{{ old('estimated_labor', $room->estimated_labor) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_labor')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label for="estimated_other" class="mb-1 block text-xs font-medium text-gray-700">مصروفات أخرى (ج.م)</label>
-                <input id="estimated_other" type="number" step="0.01" min="0" name="estimated_other" value="{{ old('estimated_other', $room->estimated_other) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="estimated_other" class="mb-1 block text-xs font-medium text-ink-soft">مصروفات أخرى (ج.م)</label>
+                <input id="estimated_other" type="number" step="1" min="0" name="estimated_other" value="{{ old('estimated_other', $room->estimated_other) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('estimated_other')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div>
-                <label for="expected_duration_days" class="mb-1 block text-xs font-medium text-gray-700">مدة التنفيذ المتوقعة (أيام)</label>
-                <input id="expected_duration_days" type="number" step="1" min="1" name="expected_duration_days" value="{{ old('expected_duration_days', $room->expected_duration_days) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <label for="expected_duration_days" class="mb-1 block text-xs font-medium text-ink-soft">مدة التنفيذ المتوقعة (أيام)</label>
+                <input id="expected_duration_days" type="number" step="1" min="1" name="expected_duration_days" value="{{ old('expected_duration_days', $room->expected_duration_days) }}" class="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
                 @error('expected_duration_days')<p class="mt-1 text-xs text-danger">{{ $message }}</p>@enderror
             </div>
             <div class="sm:col-span-5">
@@ -46,7 +44,7 @@
 
     @if ($locked)
         <div class="mt-6">
-            <h3 class="mb-2 text-sm font-semibold text-gray-900">التقدير مقابل الفعلي</h3>
+            <h3 class="mb-2 text-sm font-semibold text-ink">التقدير مقابل الفعلي</h3>
             <div class="overflow-x-auto rounded-xl border border-border shadow-sm">
                 <table class="min-w-full divide-y divide-border text-sm">
                     <thead class="bg-bg-subtle">
@@ -92,11 +90,11 @@
             <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div class="rounded-xl border border-border bg-bg-subtle p-4">
                     <div class="text-sm text-secondary">المدة المتوقعة</div>
-                    <div class="mt-1 text-xl font-bold text-gray-900">{{ $duration['expected'] }} يوم</div>
+                    <div class="mt-1 text-xl font-bold text-ink">{{ $duration['expected'] }} يوم</div>
                 </div>
                 <div class="rounded-xl border border-border bg-bg-subtle p-4">
                     <div class="text-sm text-secondary">المدة الفعلية</div>
-                    <div class="mt-1 text-xl font-bold text-gray-900">{{ $duration['actual'] }} يوم</div>
+                    <div class="mt-1 text-xl font-bold text-ink">{{ $duration['actual'] }} يوم</div>
                 </div>
                 <div class="rounded-xl border border-border bg-bg-subtle p-4">
                     <div class="text-sm text-secondary">الفرق</div>
@@ -104,10 +102,10 @@
                         'mt-1 text-xl font-bold',
                         'text-danger' => $duration['difference'] > 0,
                         'text-success' => $duration['difference'] < 0,
-                        'text-gray-900' => $duration['difference'] === 0,
+                        'text-ink' => $duration['difference'] === 0,
                     ])>{{ $duration['difference'] > 0 ? '+' : '' }}{{ $duration['difference'] }} يوم</div>
                 </div>
             </div>
         @endif
     @endif
-</div>
+</x-panel>

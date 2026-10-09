@@ -4,7 +4,6 @@ namespace App\Http\Requests\Inventory;
 
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
-use App\Enums\PaymentMethod;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -24,6 +23,15 @@ class UpdateMaterialRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    /**
+     * The inline row shares a page with the quick-add form, and both post the
+     * same field names. Without a bag of its own, a rejected row save would
+     * also light up the quick-add fields above it (specs/023).
+     *
+     * @var string
+     */
+    protected $errorBag = 'materialRow';
+
     public function rules(): array
     {
         return [
@@ -40,7 +48,8 @@ class UpdateMaterialRequest extends FormRequest
             // Required on edit — the box shows the new total, and any change
             // from it is a movement. Zero is legal: it empties the material.
             'quantity' => ['required', 'regex:'.QuantityCast::validationPattern()],
-            'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
+            // No payment_method rule: a stock correction is always cash
+            // (specs/023), so the row never asks for one.
         ];
     }
 

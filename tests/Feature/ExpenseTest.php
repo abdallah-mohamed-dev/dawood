@@ -17,7 +17,7 @@ test('guests cannot access expenses', function () {
 test('recording an expense creates a cashbox outflow', function () {
     $response = $this->actingAs($this->admin)->post(route('expenses.store'), [
         'expense_category_id' => $this->category->id,
-        'amount' => '2000.00',
+        'amount' => '2000',
         'occurred_at' => '2026-01-01',
         'description' => 'فاتورة يناير',
         'payment_method' => 'cash',
@@ -25,13 +25,13 @@ test('recording an expense creates a cashbox outflow', function () {
 
     // back() to the index, which is now also the add form's page.
     $response->assertRedirect();
-    expect(app(CashboxService::class)->balance())->toBe(-200_000);
+    expect(app(CashboxService::class)->balance())->toBe(-2_000);
 });
 
 test('the expenses index lists an expense with its category, description, and amount', function () {
     $this->actingAs($this->admin)->post(route('expenses.store'), [
         'expense_category_id' => $this->category->id,
-        'amount' => '2000.00',
+        'amount' => '2000',
         'occurred_at' => '2026-01-01',
         'description' => 'فاتورة يناير',
         'payment_method' => 'cash',
@@ -42,7 +42,7 @@ test('the expenses index lists an expense with its category, description, and am
     $response->assertOk()
         ->assertSee('كهرباء')
         ->assertSee('فاتورة يناير')
-        ->assertSee('2,000.00 ج.م');
+        ->assertSeeText('2,000 ج.م');
 });
 
 test('a zero expense amount is rejected', function () {
@@ -60,7 +60,7 @@ test('a zero expense amount is rejected', function () {
 test('an expense description of exactly "0" is preserved, not silently discarded', function () {
     $this->actingAs($this->admin)->post(route('expenses.store'), [
         'expense_category_id' => $this->category->id,
-        'amount' => '2000.00',
+        'amount' => '2000',
         'occurred_at' => '2026-01-01',
         'description' => '0',
         'payment_method' => 'cash',
@@ -72,7 +72,7 @@ test('an expense description of exactly "0" is preserved, not silently discarded
 test('an unsafely large expense amount is rejected as a clean validation error, not a 500', function () {
     $response = $this->actingAs($this->admin)->post(route('expenses.store'), [
         'expense_category_id' => $this->category->id,
-        'amount' => '9999999999999999.00',
+        'amount' => '9999999999999999',
         'occurred_at' => '2026-01-01',
         'payment_method' => 'cash',
     ]);
@@ -84,25 +84,25 @@ test('an unsafely large expense amount is rejected as a clean validation error, 
 test('an expense amount can be edited, updating the same cashbox transaction', function () {
     $this->actingAs($this->admin)->post(route('expenses.store'), [
         'expense_category_id' => $this->category->id,
-        'amount' => '2000.00',
+        'amount' => '2000',
         'occurred_at' => '2026-01-01',
         'payment_method' => 'cash',
     ]);
     $expense = Expense::query()->sole();
 
     $response = $this->actingAs($this->admin)->put(route('expenses.update', $expense), [
-        'amount' => '2500.00',
+        'amount' => '2500',
         'payment_method' => 'cash',
     ]);
 
     $response->assertRedirect(route('expenses.index'));
-    expect(app(CashboxService::class)->balance())->toBe(-250_000);
+    expect(app(CashboxService::class)->balance())->toBe(-2_500);
 });
 
 test('deleting an expense restores the cashbox balance', function () {
     $this->actingAs($this->admin)->post(route('expenses.store'), [
         'expense_category_id' => $this->category->id,
-        'amount' => '2000.00',
+        'amount' => '2000',
         'occurred_at' => '2026-01-01',
         'payment_method' => 'cash',
     ]);

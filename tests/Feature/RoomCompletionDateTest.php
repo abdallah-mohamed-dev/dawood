@@ -65,8 +65,8 @@ test('the migration fills the completion date of old completed rooms from their 
     Artisan::call('migrate:rollback', ['--path' => $migration]);
 
     DB::table('rooms')->insert([
-        ['customer_id' => $customer->id, 'room_type' => 'مطبخ قديم', 'sale_price' => 100000, 'status' => 'completed', 'created_at' => now(), 'updated_at' => '2026-03-15 10:00:00'],
-        ['customer_id' => $customer->id, 'room_type' => 'غرفة مسودة', 'sale_price' => 100000, 'status' => 'draft', 'created_at' => now(), 'updated_at' => '2026-03-15 10:00:00'],
+        ['customer_id' => $customer->id, 'room_type' => 'مطبخ قديم', 'sale_price' => 1000, 'status' => 'completed', 'created_at' => now(), 'updated_at' => '2026-03-15 10:00:00'],
+        ['customer_id' => $customer->id, 'room_type' => 'غرفة مسودة', 'sale_price' => 1000, 'status' => 'draft', 'created_at' => now(), 'updated_at' => '2026-03-15 10:00:00'],
     ]);
 
     Artisan::call('migrate', ['--path' => $migration]);

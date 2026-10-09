@@ -59,6 +59,22 @@ class PartnerService
             ->sum('amount');
     }
 
+    /**
+     * Withdrawals for one season instead of the open one. 'open' is what
+     * totalWithdrawn() reports and what every page shows; a season id reads a
+     * sealed season, and null reads every season at once. Used by the CSV
+     * export so its "المسحوب" column follows the same season filter as the
+     * rest of the file, instead of always reporting the open season.
+     */
+    public function totalWithdrawnForSeason(Partner $partner, int|string|null $season): int
+    {
+        return (int) PartnerWithdrawal::query()
+            ->where('partner_id', $partner->id)
+            ->when($season === 'open', fn ($query) => $query->whereNull('season_id'))
+            ->when(is_int($season), fn ($query) => $query->where('season_id', $season))
+            ->sum('amount');
+    }
+
     public function remaining(Partner $partner): int
     {
         return $this->carriedIn($partner) + $this->share($partner) - $this->totalWithdrawn($partner);

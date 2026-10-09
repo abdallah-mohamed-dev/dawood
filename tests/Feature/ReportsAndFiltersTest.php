@@ -40,22 +40,22 @@ beforeEach(function () {
 // ---------- 19.1 monthly breakdown ----------
 
 test('the monthly tables add up to the cards above them', function () {
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 100_000, 'occurred_at' => '2026-03-05']);
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 50_000, 'occurred_at' => '2026-04-05']);
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Other, 'amount' => 30_000, 'occurred_at' => '2026-04-09']);
-    Expense::factory()->create(['expense_category_id' => ExpenseCategory::factory()->create()->id, 'amount' => 70_000, 'occurred_at' => '2026-03-20']);
-    Expense::factory()->create(['expense_category_id' => ExpenseCategory::factory()->create()->id, 'amount' => 20_000, 'occurred_at' => '2026-04-02']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 1_000, 'occurred_at' => '2026-03-05']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 500, 'occurred_at' => '2026-04-05']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Other, 'amount' => 300, 'occurred_at' => '2026-04-09']);
+    Expense::factory()->create(['expense_category_id' => ExpenseCategory::factory()->create()->id, 'amount' => 700, 'occurred_at' => '2026-03-20']);
+    Expense::factory()->create(['expense_category_id' => ExpenseCategory::factory()->create()->id, 'amount' => 200, 'occurred_at' => '2026-04-02']);
 
     $profit = app(ProfitService::class);
 
-    expect($profit->laborCostsByMonth()->all())->toBe(['2026-04' => 50_000, '2026-03' => 100_000]);
-    expect($profit->otherRoomCostsByMonth()->sum())->toBe(30_000);
+    expect($profit->laborCostsByMonth()->all())->toBe(['2026-04' => 500, '2026-03' => 1_000]);
+    expect($profit->otherRoomCostsByMonth()->sum())->toBe(300);
     expect($profit->laborCostsByMonth()->sum() + $profit->otherRoomCostsByMonth()->sum())->toBe($profit->roomCosts());
     expect($profit->adminExpensesByMonth()->sum())->toBe($profit->adminExpenses());
 });
 
 test('a closed season is not in the monthly tables and its numbers are the frozen ones', function () {
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 100_000, 'occurred_at' => '2026-03-05']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 1_000, 'occurred_at' => '2026-03-05']);
     app(SeasonService::class)->close('2026-06-30');
 
     $this->actingAs($this->admin)
@@ -69,15 +69,15 @@ test('a closed season is not in the monthly tables and its numbers are the froze
 
 test('the labor report groups by month and by room, and its three totals match', function () {
     $other = Room::factory()->create(['customer_id' => Customer::factory()->create()->id, 'room_type' => 'صالون']);
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 100_000, 'occurred_at' => '2026-03-05']);
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 50_000, 'occurred_at' => '2026-04-05']);
-    RoomCost::factory()->create(['room_id' => $other->id, 'type' => RoomCostType::Labor, 'amount' => 25_000, 'occurred_at' => '2026-04-07']);
-    RoomCost::factory()->create(['room_id' => $other->id, 'type' => RoomCostType::Other, 'amount' => 999_000, 'occurred_at' => '2026-04-07']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 1_000, 'occurred_at' => '2026-03-05']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 500, 'occurred_at' => '2026-04-05']);
+    RoomCost::factory()->create(['room_id' => $other->id, 'type' => RoomCostType::Labor, 'amount' => 250, 'occurred_at' => '2026-04-07']);
+    RoomCost::factory()->create(['room_id' => $other->id, 'type' => RoomCostType::Other, 'amount' => 9_990, 'occurred_at' => '2026-04-07']);
 
     $this->actingAs($this->admin)
         ->get(route('reports.labor'))
         ->assertOk()
-        ->assertSee('1,750.00');
+        ->assertSee('1,750');
 
     $controller = app(LaborReportController::class);
     $view = $controller->index(Request::create(route('reports.labor')));
@@ -86,24 +86,24 @@ test('the labor report groups by month and by room, and its three totals match',
     $monthSum = $data['byMonth']->sum(fn ($row) => (int) $row->total);
     $roomSum = $data['perRoom']->sum(fn ($row) => (int) $row->total);
 
-    expect($data['total'])->toBe(175_000);
-    expect($monthSum)->toBe(175_000);
-    expect($roomSum)->toBe(175_000);
+    expect($data['total'])->toBe(1_750);
+    expect($monthSum)->toBe(1_750);
+    expect($roomSum)->toBe(1_750);
 });
 
 test('the labor report filters by date, room and customer, and works with two filters together', function () {
     $other = Room::factory()->create(['customer_id' => Customer::factory()->create()->id]);
-    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 100_000, 'occurred_at' => '2026-03-05']);
-    RoomCost::factory()->create(['room_id' => $other->id, 'type' => RoomCostType::Labor, 'amount' => 40_000, 'occurred_at' => '2026-04-07']);
+    RoomCost::factory()->create(['room_id' => $this->room->id, 'type' => RoomCostType::Labor, 'amount' => 1_000, 'occurred_at' => '2026-03-05']);
+    RoomCost::factory()->create(['room_id' => $other->id, 'type' => RoomCostType::Labor, 'amount' => 400, 'occurred_at' => '2026-04-07']);
 
     $run = fn (array $query) => app(LaborReportController::class)
         ->index(Request::create(route('reports.labor', $query)))
         ->getData()['total'];
 
-    expect($run(['from' => '2026-04-01']))->toBe(40_000);
-    expect($run(['room_id' => $this->room->id]))->toBe(100_000);
-    expect($run(['customer_id' => $this->customer->id]))->toBe(100_000);
-    expect($run(['room_id' => $other->id, 'from' => '2026-04-01']))->toBe(40_000);
+    expect($run(['from' => '2026-04-01']))->toBe(400);
+    expect($run(['room_id' => $this->room->id]))->toBe(1_000);
+    expect($run(['customer_id' => $this->customer->id]))->toBe(1_000);
+    expect($run(['room_id' => $other->id, 'from' => '2026-04-01']))->toBe(400);
     expect($run(['room_id' => $this->room->id, 'from' => '2026-04-01']))->toBe(0);
 });
 
@@ -117,9 +117,9 @@ test('customers can be searched by name or phone', function () {
 });
 
 test('payments can be searched by customer, room and receipt number with or without leading zeros', function () {
-    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 10_000, 'receipt_number' => 12]);
+    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 100, 'receipt_number' => 12]);
     $other = Room::factory()->create(['customer_id' => Customer::factory()->create(['name' => 'منى كمال'])->id, 'room_type' => 'صالون']);
-    CustomerPayment::factory()->create(['room_id' => $other->id, 'amount' => 20_000, 'receipt_number' => 13]);
+    CustomerPayment::factory()->create(['room_id' => $other->id, 'amount' => 200, 'receipt_number' => 13]);
 
     $this->actingAs($this->admin)->get(route('payments.index', ['q' => 'منى']))->assertSee('منى كمال')->assertDontSee('أحمد علي');
     $this->actingAs($this->admin)->get(route('payments.index', ['q' => 'صالون']))->assertSee('صالون')->assertDontSee('مطبخ');
@@ -128,8 +128,8 @@ test('payments can be searched by customer, room and receipt number with or with
 });
 
 test('payments can be filtered by date and the monthly totals follow the filter', function () {
-    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 10_000, 'paid_at' => '2026-03-10']);
-    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 20_000, 'paid_at' => '2026-04-10']);
+    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 100, 'paid_at' => '2026-03-10']);
+    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 200, 'paid_at' => '2026-04-10']);
 
     $this->actingAs($this->admin)
         ->get(route('payments.index', ['from' => '2026-04-01']))
@@ -150,7 +150,7 @@ test('expenses can be searched by description, filtered by category and by date'
 });
 
 test('the cashbox list can be filtered by kind and by payment method, while the top cards stay whole', function () {
-    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 10_000, 'paid_at' => '2026-03-10']);
+    CustomerPayment::factory()->create(['room_id' => $this->room->id, 'amount' => 100, 'paid_at' => '2026-03-10']);
     $category = ExpenseCategory::factory()->create(['name' => 'بند الاختبار']);
     app(ExpenseService::class)->create($category, 5_000, '2026-03-11', null, PaymentMethod::Wallet);
 
@@ -167,8 +167,8 @@ test('the cashbox list can be filtered by kind and by payment method, while the 
 
 test('the partner withdrawals list can be filtered by date and the share cards do not change', function () {
     $partner = Partner::factory()->create(['percentage' => 2_000]);
-    PartnerWithdrawal::query()->create(['partner_id' => $partner->id, 'amount' => 1_000, 'occurred_at' => '2026-03-01', 'note' => 'سحب أول']);
-    PartnerWithdrawal::query()->create(['partner_id' => $partner->id, 'amount' => 2_000, 'occurred_at' => '2026-05-01', 'note' => 'سحب تاني']);
+    PartnerWithdrawal::query()->create(['partner_id' => $partner->id, 'amount' => 10, 'occurred_at' => '2026-03-01', 'note' => 'سحب أول']);
+    PartnerWithdrawal::query()->create(['partner_id' => $partner->id, 'amount' => 20, 'occurred_at' => '2026-05-01', 'note' => 'سحب تاني']);
 
     $this->actingAs($this->admin)
         ->get(route('partners.show', ['partner' => $partner, 'from' => '2026-04-01']))

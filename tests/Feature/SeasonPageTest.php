@@ -24,14 +24,14 @@ beforeEach(function () {
 });
 
 test('the preview shows the numbers and writes nothing', function () {
-    Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 1_000_000]);
+    Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 10_000]);
     $before = Season::query()->count();
 
     $this->actingAs($this->admin)
         ->get(route('seasons.preview', ['ends_at' => '2026-06-30']))
         ->assertOk()
         ->assertSee('معاينة إقفال الموسم')
-        ->assertSee('10,000.00');
+        ->assertSee('10,000');
 
     expect(Season::query()->count())->toBe($before);
     expect(Season::query()->where('status', SeasonStatus::Open)->count())->toBe(1);
@@ -41,7 +41,7 @@ test('the preview shows the numbers and writes nothing', function () {
 test('the preview warns when what is owed to partners is more than the cashbox holds', function () {
     // One partner at 100% is owed the whole 50,000 EGP profit; the cashbox is empty.
     Partner::factory()->create(['percentage' => 10_000]);
-    Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 5_000_000]);
+    Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 50_000]);
 
     $this->actingAs($this->admin)
         ->get(route('seasons.preview', ['ends_at' => '2026-06-30']))
@@ -95,7 +95,7 @@ test('the rooms page shows only the open season by default', function () {
 
 test('the profit report says which season it covers and shows a carried loss', function () {
     $room = Room::factory()->create(['status' => RoomStatus::Completed, 'sale_price' => 0]);
-    RoomMaterial::factory()->create(['room_id' => $room->id, 'cost' => 2_000_000]);
+    RoomMaterial::factory()->create(['room_id' => $room->id, 'cost' => 20_000]);
     app(SeasonService::class)->close('2026-06-30');
 
     $this->actingAs($this->admin)
