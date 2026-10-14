@@ -28,16 +28,11 @@ class ExpenseCategoryController extends Controller
         return redirect()->route('expenses.categories.index')->with('success', 'تم إضافة البند.');
     }
 
-    public function edit(ExpenseCategory $category): View
-    {
-        return view('expenses.categories.edit', ['category' => $category]);
-    }
-
     public function update(UpdateExpenseCategoryRequest $request, ExpenseCategory $category): RedirectResponse
     {
         $category->update($request->validated());
 
-        return redirect()->route('expenses.categories.index')->with('success', 'تم تعديل البند.');
+        return back()->with('success', 'تم تعديل البند.');
     }
 
     public function destroy(ExpenseCategory $category): RedirectResponse

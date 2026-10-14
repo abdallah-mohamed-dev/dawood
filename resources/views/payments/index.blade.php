@@ -18,6 +18,10 @@
     </form>
 
 
+    {{-- The row whose save just failed comes back open (see x-edit-row). --}}
+    @php $reopenId = (int) old('editing_id', 0); @endphp
+
+    <div x-data="{ editing: {{ $reopenId }} }">
     <x-data-table :headings="['رقم الإيصال', 'التاريخ', 'العميل', 'الغرفة', 'ملاحظة', 'المبلغ', __('Actions')]" :rows="$payments">
         @php $currentMonth = null; @endphp
         @foreach ($payments as $payment)
@@ -46,13 +50,15 @@
                 </td>
                 <td class="px-4 py-2 text-secondary">{{ $payment->note ?? '—' }}</td>
                 <td class="px-4 py-2"><x-money :amount="$payment->amount" /></td>
-                <td class="px-4 py-2 text-end">
-                    <a href="{{ route('payments.edit', $payment) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
+                <td class="px-4 py-2 text-end whitespace-nowrap">
+                    <button type="button" x-on:click="editing = {{ $payment->id }}" class="text-primary hover:underline">{{ __('Edit') }}</button>
                     <x-delete-button :action="route('payments.destroy', $payment)" class="ms-3" />
                 </td>
             </tr>
+            @include('payments._edit-row', ['colspan' => 7])
         @endforeach
     </x-data-table>
+    </div>
 
     <div class="mt-4">
         {{ $payments->links() }}

@@ -65,8 +65,10 @@ Route::middleware('auth')->group(function () {
         Route::get('shortages/{room}/print', [ShortageController::class, 'print'])->name('shortages.print');
     });
 
-    Route::resource('customers', CustomerController::class)->except('create');
-    Route::resource('capital-items', CapitalItemController::class)->except(['show', 'create'])->names('capital');
+    // Every list below is edited inline in its own row — no create/edit
+    // pages anywhere (specs/024).
+    Route::resource('customers', CustomerController::class)->except(['create', 'edit']);
+    Route::resource('capital-items', CapitalItemController::class)->except(['show', 'create', 'edit'])->names('capital');
 
     Route::resource('rooms', RoomController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::post('/customers/{customer}/rooms', [RoomController::class, 'store'])->name('customers.rooms.store');
@@ -81,16 +83,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payments', [PaymentController::class, 'index'])->name('payments.index');
     Route::post('/rooms/{room}/payments', [PaymentController::class, 'store'])->name('rooms.payments.store');
-    Route::get('/payments/{payment}/edit', [PaymentController::class, 'edit'])->name('payments.edit');
     Route::put('/payments/{payment}', [PaymentController::class, 'update'])->name('payments.update');
     Route::delete('/payments/{payment}', [PaymentController::class, 'destroy'])->name('payments.destroy');
 
     Route::prefix('expenses')->name('expenses.')->group(function () {
-        Route::resource('categories', ExpenseCategoryController::class)->except(['show', 'create']);
+        Route::resource('categories', ExpenseCategoryController::class)->except(['show', 'create', 'edit']);
     });
-    Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
+    Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'update', 'destroy']);
 
-    Route::resource('partners', PartnerController::class);
+    Route::resource('partners', PartnerController::class)->except(['create', 'edit']);
     Route::post('/partners/{partner}/withdrawals', [PartnerController::class, 'storeWithdrawal'])->name('partners.withdrawals.store');
     Route::delete('/partners/{partner}/withdrawals/{withdrawal}', [PartnerController::class, 'destroyWithdrawal'])->name('partners.withdrawals.destroy');
 
@@ -103,7 +104,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/settings/material-types/{materialType}', [SettingsController::class, 'updateMaterialType'])->name('settings.material-types.update');
     Route::put('/settings/reminders', [SettingsController::class, 'updateReminders'])->name('settings.reminders.update');
 
-    Route::resource('debts', DebtController::class)->except(['show', 'create']);
+    Route::resource('debts', DebtController::class)->except(['show', 'create', 'edit']);
     Route::post('/debts/{debt}/toggle-paid', [DebtController::class, 'togglePaid'])->name('debts.toggle-paid');
 
     Route::get('/logs', [ActivityLogController::class, 'index'])->name('logs.index');

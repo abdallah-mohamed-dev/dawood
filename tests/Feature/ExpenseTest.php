@@ -90,7 +90,7 @@ test('an expense amount can be edited, updating the same cashbox transaction', f
     ]);
     $expense = Expense::query()->sole();
 
-    $response = $this->actingAs($this->admin)->put(route('expenses.update', $expense), [
+    $response = $this->actingAs($this->admin)->from(route('expenses.index'))->put(route('expenses.update', $expense), [
         'amount' => '2500',
         'payment_method' => 'cash',
     ]);
@@ -108,7 +108,7 @@ test('deleting an expense restores the cashbox balance', function () {
     ]);
     $expense = Expense::query()->sole();
 
-    $response = $this->actingAs($this->admin)->delete(route('expenses.destroy', $expense));
+    $response = $this->actingAs($this->admin)->from(route('expenses.index'))->delete(route('expenses.destroy', $expense));
 
     $response->assertRedirect(route('expenses.index'));
     expect(app(CashboxService::class)->balance())->toBe(0);

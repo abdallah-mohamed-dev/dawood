@@ -16,14 +16,14 @@ test('guests cannot access partners', function () {
     $this->get(route('partners.index'))->assertRedirect(route('login'));
 });
 
-test('the partner create and edit pages render', function () {
-    $this->actingAs($this->admin)->get(route('partners.create'))->assertOk()->assertSee('إضافة شريك');
-
+test('the partners page carries the add form and an inline edit row per partner', function () {
     $partner = Partner::factory()->create(['percentage' => 1500]);
-    $this->actingAs($this->admin)->get(route('partners.edit', $partner))
+
+    $this->actingAs($this->admin)->get(route('partners.index'))
         ->assertOk()
-        ->assertSee('تعديل شريك')
-        ->assertSee('15'); // prefilled percentage shown as a decimal
+        ->assertSee('إضافة شريك')
+        ->assertSee(route('partners.update', $partner))
+        ->assertSee('value="15.00"', escape: false); // prefilled percentage shown as a decimal
 });
 
 test('a partner can be created, storing its percentage scaled ×100', function () {
@@ -80,14 +80,14 @@ test('updating a partner whose percentage pushes the total over 100% is rejected
         'percentage' => '30', // other partners sum 80% + 30% = 110%
     ]);
 
-    $response->assertSessionHasErrors('percentage');
+    $response->assertSessionHasErrorsIn('row', 'percentage');
     expect($second->fresh()->getRawOriginal('percentage'))->toBe(1000);
 });
 
 test('updating a partner excludes its own current percentage from the total cap', function () {
     $partner = Partner::factory()->create(['percentage' => 3000]); // the only partner
 
-    $this->actingAs($this->admin)->put(route('partners.update', $partner), [
+    $this->actingAs($this->admin)->from(route('partners.show', $partner))->put(route('partners.update', $partner), [
         'name' => $partner->name,
         'percentage' => '100',
     ])->assertRedirect(route('partners.show', $partner));

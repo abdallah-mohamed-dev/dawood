@@ -35,7 +35,8 @@ class ExpenseController extends Controller
             ->when($to !== '', fn (Builder $q) => $q->whereDate('occurred_at', '<=', $to));
 
         $expenses = $applyFilters(Expense::query())
-            ->with('category')
+            // cashboxTransaction feeds the payment method in each row's edit form.
+            ->with(['category', 'cashboxTransaction'])
             ->latest('occurred_at')
             ->latest('id')
             ->paginate(25)
@@ -67,34 +68,30 @@ class ExpenseController extends Controller
         return back()->with('success', 'تم تسجيل المصروف.');
     }
 
-    public function edit(Expense $expense): View
-    {
-        return view('expenses.edit', ['expense' => $expense]);
-    }
-
     public function update(UpdateExpenseRequest $request, Expense $expense): RedirectResponse
     {
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
             $this->expenses->update($expense, $amount, PaymentMethod::from($request->string('payment_method')->toString()));
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
+            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.'], 'row');
         } catch (RuntimeException) {
             // Defensive only — ExpenseService::update() calls
             // CashboxService::updateFor(), which throws a plain
             // RuntimeException if this expense's cashbox row is missing
             // (should be unreachable via normal create/delete flows).
-            return back()->withInput()->withErrors(['amount' => 'حدث خطأ غير متوقع أثناء تحديث المصروف.']);
+            return back()->withInput()->withErrors(['amount' => 'حدث خطأ غير متوقع أثناء تحديث المصروف.'], 'row');
         }
 
-        return redirect()->route('expenses.index')->with('success', 'تم تعديل المصروف.');
+        // back(), not the index route: keeps the filters and the page.
+        return back()->with('success', 'تم تعديل المصروف.');
     }
 
     public function destroy(Expense $expense): RedirectResponse
     {
         $this->expenses->delete($expense);
 
-        return redirect()->route('expenses.index')->with('success', 'تم حذف المصروف.');
+        return back()->with('success', 'تم حذف المصروف.');
     }
 
     /**

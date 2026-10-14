@@ -11,6 +11,15 @@ use InvalidArgumentException;
 
 class UpdatePartnerRequest extends FormRequest
 {
+    /**
+     * Edited inline in its row, on a page that also carries the add form with
+     * the same field names — its own bag keeps a rejected row save from
+     * lighting up the add form too (specs/024).
+     *
+     * @var string
+     */
+    protected $errorBag = 'row';
+
     public function authorize(): bool
     {
         return true;

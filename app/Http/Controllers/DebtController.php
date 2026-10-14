@@ -54,22 +54,17 @@ class DebtController extends Controller
         return back()->with('success', 'تم تسجيل الدين.');
     }
 
-    public function edit(Debt $debt): View
-    {
-        return view('debts.edit', ['debt' => $debt]);
-    }
-
     public function update(UpdateDebtRequest $request, Debt $debt): RedirectResponse
     {
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
+            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.'], 'row');
         }
 
         $debt->update($this->attributes($request, $amount));
 
-        return redirect()->route('debts.index')->with('success', 'تم تعديل الدين.');
+        return back()->with('success', 'تم تعديل الدين.');
     }
 
     public function destroy(Debt $debt): RedirectResponse

@@ -83,7 +83,7 @@ test('editing a payment to an unsafely large magnitude is rejected as a clean va
         'payment_method' => 'cash',
     ]);
 
-    $response->assertSessionHasErrors('amount');
+    $response->assertSessionHasErrorsIn('row', 'amount');
     expect($payment->fresh()->getRawOriginal('amount'))->toBe(10_000);
 });
 
@@ -105,7 +105,7 @@ test('deleting a payment restores the cashbox and shows no orphaned transaction'
     ]);
     $payment = CustomerPayment::query()->sole();
 
-    $response = $this->actingAs($this->admin)->delete(route('payments.destroy', $payment));
+    $response = $this->actingAs($this->admin)->from(route('rooms.show', $this->room))->delete(route('payments.destroy', $payment));
 
     $response->assertRedirect(route('rooms.show', $this->room));
     expect($this->room->fresh()->paidAmount())->toBe(0);
@@ -120,7 +120,7 @@ test('a payment amount can be edited, updating the same cashbox transaction', fu
     ]);
     $payment = CustomerPayment::query()->sole();
 
-    $response = $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+    $response = $this->actingAs($this->admin)->from(route('rooms.show', $this->room))->put(route('payments.update', $payment), [
         'amount' => '15000',
         'payment_method' => 'cash',
     ]);
@@ -143,7 +143,7 @@ test('editing a payment beyond the remaining amount is rejected', function () {
         'payment_method' => 'cash',
     ]);
 
-    $response->assertSessionHasErrors('amount');
+    $response->assertSessionHasErrorsIn('row', 'amount');
     expect($this->room->fresh()->paidAmount())->toBe(10_000);
 });
 
@@ -270,7 +270,7 @@ test('editing a payment note saves it', function () {
     ]);
     $payment = CustomerPayment::query()->sole();
 
-    $this->actingAs($this->admin)->put(route('payments.update', $payment), [
+    $this->actingAs($this->admin)->from(route('rooms.show', $this->room))->put(route('payments.update', $payment), [
         'amount' => '1000',
         'payment_method' => 'cash',
         'note' => 'دفعة مقدم',
@@ -309,7 +309,7 @@ test('a note longer than 500 characters is rejected with an Arabic message', fun
         'amount' => '1000',
         'payment_method' => 'cash',
         'note' => str_repeat('أ', 501),
-    ])->assertSessionHasErrors(['note' => 'يجب ألا يتجاوز طول حقل ملاحظة 500 حرفًا.']);
+    ])->assertSessionHasErrorsIn('row', ['note' => 'يجب ألا يتجاوز طول حقل ملاحظة 500 حرفًا.']);
 });
 
 test('editing the amount and note together updates the cashbox too', function () {

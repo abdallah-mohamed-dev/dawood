@@ -42,16 +42,13 @@ class CustomerController extends Controller
         return view('customers.show', ['customer' => $customer, 'rooms' => $rooms]);
     }
 
-    public function edit(Customer $customer): View
-    {
-        return view('customers.edit', ['customer' => $customer]);
-    }
-
+    // Edited from its row on the index or from a dialog on its own page, so
+    // the save returns to whichever page it came from (specs/024).
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
         $customer->update($request->validated());
 
-        return redirect()->route('customers.show', $customer)->with('success', 'تم تعديل بيانات العميل.');
+        return back()->with('success', 'تم تعديل بيانات العميل.');
     }
 
     public function destroy(Customer $customer): RedirectResponse

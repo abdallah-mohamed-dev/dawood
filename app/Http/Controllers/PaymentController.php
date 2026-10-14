@@ -40,7 +40,8 @@ class PaymentController extends Controller
             ->when($to !== '', fn (Builder $q) => $q->whereDate('paid_at', '<=', $to));
 
         $payments = $applyFilters(CustomerPayment::query())
-            ->with('room.customer')
+            // cashboxTransaction feeds the payment method in each row's edit form.
+            ->with(['room.customer', 'cashboxTransaction'])
             ->latest('paid_at')
             ->latest('id')
             ->paginate(25)
@@ -81,11 +82,9 @@ class PaymentController extends Controller
         return back()->with('success', 'تم تسجيل الدفعة.');
     }
 
-    public function edit(CustomerPayment $payment): View
-    {
-        return view('payments.edit', ['payment' => $payment]);
-    }
-
+    // A payment is edited and deleted from its row on either the room page or
+    // the payments page, so both return to the page they came from
+    // (specs/024) — not always to the room.
     public function update(UpdatePaymentRequest $request, CustomerPayment $payment): RedirectResponse
     {
         try {
@@ -95,26 +94,24 @@ class PaymentController extends Controller
         } catch (PaymentExceedsRemainingException $e) {
             return back()->withInput()->withErrors([
                 'amount' => 'المبلغ أكبر من المتبقي. المتبقي الفعلي: '.MoneyCast::toDisplayString($e->remaining).' ج.م.',
-            ]);
+            ], 'row');
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
+            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.'], 'row');
         } catch (RuntimeException) {
             // Defensive only — CustomerPaymentService::update() calls
             // CashboxService::updateFor(), which throws a plain
             // RuntimeException if this payment's cashbox row is missing
             // (should be unreachable via normal create/delete flows).
-            return back()->withInput()->withErrors(['amount' => 'حدث خطأ غير متوقع أثناء تحديث الدفعة.']);
+            return back()->withInput()->withErrors(['amount' => 'حدث خطأ غير متوقع أثناء تحديث الدفعة.'], 'row');
         }
 
-        return redirect()->route('rooms.show', $payment->room)->with('success', 'تم تعديل الدفعة.');
+        return back()->with('success', 'تم تعديل الدفعة.');
     }
 
     public function destroy(CustomerPayment $payment): RedirectResponse
     {
-        $room = $payment->room;
-
         $this->payments->delete($payment);
 
-        return redirect()->route('rooms.show', $room)->with('success', 'تم حذف الدفعة.');
+        return back()->with('success', 'تم حذف الدفعة.');
     }
 }

@@ -66,7 +66,7 @@
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-ink-soft">الكمية المطلوبة</label>
-                    <input type="number" step="0.001" min="0" name="required_quantity" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
+                    <input type="number" step="1" min="0" name="required_quantity" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
                     @error('required_quantity')
                         <p class="mt-1 text-xs text-danger">{{ $message }}</p>
                     @enderror

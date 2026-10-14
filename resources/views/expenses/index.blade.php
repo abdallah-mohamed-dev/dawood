@@ -53,8 +53,11 @@
     @php
         $expenseHeadings = ['التاريخ', 'البند', 'الوصف', 'المبلغ', __('Actions')];
         $currentMonthKey = null;
+        // The row whose save just failed comes back open (see x-edit-row).
+        $reopenId = (int) old('editing_id', 0);
     @endphp
 
+    <div x-data="{ editing: {{ $reopenId }} }">
     <x-data-table :headings="$expenseHeadings" :rows="$expenses">
         @foreach ($expenses as $expense)
             @php $rowMonthKey = $expense->occurred_at->format('Y-m'); @endphp
@@ -83,13 +86,24 @@
                 <td class="px-4 py-2">{{ $expense->category->name }}</td>
                 <td class="px-4 py-2 text-secondary">{{ $expense->description ?? '—' }}</td>
                 <td class="px-4 py-2"><x-money :amount="$expense->amount" /></td>
-                <td class="px-4 py-2 text-end">
-                    <a href="{{ route('expenses.edit', $expense) }}" class="text-primary hover:underline">{{ __('Edit') }}</a>
+                <td class="px-4 py-2 text-end whitespace-nowrap">
+                    <button type="button" x-on:click="editing = {{ $expense->id }}" class="text-primary hover:underline">{{ __('Edit') }}</button>
                     <x-delete-button :action="route('expenses.destroy', $expense)" class="ms-3" />
                 </td>
             </tr>
+            {{-- Only the amount and payment method are editable — the same two
+                 fields the old edit page offered. --}}
+            @php
+                $reopen = $reopenId === $expense->id;
+                $bag = $reopen ? 'row' : 'none';
+            @endphp
+            <x-edit-row :action="route('expenses.update', $expense)" :key="$expense->id" :colspan="count($expenseHeadings)">
+                <x-quick-field name="amount" :id="'amount_'.$expense->id" label="المبلغ (ج.م)" type="number" step="1" min="0" width="w-32" :bag="$bag" :value="$reopen ? old('amount', '') : $expense->amount" required />
+                <x-payment-method-select :id="'payment_method_'.$expense->id" :bag="$bag" :selected="$expense->cashboxTransaction?->payment_method" />
+            </x-edit-row>
         @endforeach
     </x-data-table>
+    </div>
 
     <div class="mt-4">
         {{ $expenses->links() }}

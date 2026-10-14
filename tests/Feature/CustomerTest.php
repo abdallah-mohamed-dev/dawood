@@ -32,7 +32,7 @@ test('creating a customer without a name fails validation', function () {
 test('a customer can be edited', function () {
     $customer = Customer::factory()->create(['name' => 'أحمد']);
 
-    $this->actingAs($this->admin)->put(route('customers.update', $customer), [
+    $this->actingAs($this->admin)->from(route('customers.show', $customer))->put(route('customers.update', $customer), [
         'name' => 'أحمد محمد',
         'phone' => $customer->phone,
         'address' => $customer->address,

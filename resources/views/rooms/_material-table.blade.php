@@ -66,7 +66,7 @@
                                 <form method="POST" action="{{ route('rooms.materials.issue', [$room, $roomMaterial]) }}" class="inline-flex flex-col items-end gap-1">
                                     @csrf
                                     <span class="inline-flex items-center gap-1">
-                                        <input type="number" step="0.001" min="0" name="quantity" value="{{ $errors->getBag($issueBag)->has('quantity') ? old('quantity') : '' }}" placeholder="الكمية" class="w-20 rounded-md border border-border px-2 py-1 text-xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
+                                        <input type="number" step="1" min="0" name="quantity" value="{{ $errors->getBag($issueBag)->has('quantity') ? old('quantity') : '' }}" placeholder="الكمية" class="w-20 rounded-md border border-border px-2 py-1 text-xs focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary">
                                         <button type="submit" class="inline-flex items-center rounded-md border border-primary bg-primary px-2.5 py-1 text-xs font-semibold text-white transition-colors hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40">صرف</button>
                                     </span>
                                     @error('quantity', $issueBag)
@@ -96,7 +96,7 @@
                                 @method('PATCH')
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-ink-soft">الكمية المطلوبة</label>
-                                    <input type="number" step="0.001" min="0" name="required_quantity" value="{{ old('required_quantity', $roomMaterial->required_quantity) }}" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
+                                    <input type="number" step="1" min="0" name="required_quantity" value="{{ old('required_quantity', $roomMaterial->required_quantity) }}" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
                                     @error('required_quantity', $editBag)
                                         <p class="mt-1 text-xs text-danger">{{ $message }}</p>
                                     @enderror

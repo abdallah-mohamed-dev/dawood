@@ -64,11 +64,12 @@ test('editing and deleting an item leaves the cashbox and profit untouched', fun
     $net = $profit->netProfit();
 
     $this->actingAs($this->admin)
+        ->from(route('capital.index'))
         ->put(route('capital.update', $item), capitalPayload(['amount' => '7000']))
         ->assertRedirect(route('capital.index'));
     expect($item->fresh()->getRawOriginal('amount'))->toBe(7_000);
 
-    $this->actingAs($this->admin)->delete(route('capital.destroy', $item))->assertRedirect(route('capital.index'));
+    $this->actingAs($this->admin)->from(route('capital.index'))->delete(route('capital.destroy', $item))->assertRedirect(route('capital.index'));
     expect(CapitalItem::query()->count())->toBe(0);
 
     expect($cashbox->balance())->toBe($balance);

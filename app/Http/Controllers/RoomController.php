@@ -154,7 +154,9 @@ class RoomController extends Controller
         $room->load([
             'customer',
             'roomMaterials.material.materialType',
-            'customerPayments' => fn ($query) => $query->latest('paid_at')->latest('id'),
+            // cashboxTransaction: each payment row carries its own edit form,
+            // which shows the method the payment was recorded with.
+            'customerPayments' => fn ($query) => $query->with('cashboxTransaction')->latest('paid_at')->latest('id'),
             'roomCosts' => fn ($query) => $query->latest('occurred_at')->latest('id'),
         ]);
 

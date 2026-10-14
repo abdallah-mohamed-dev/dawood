@@ -47,11 +47,6 @@ class PartnerController extends Controller
         ]);
     }
 
-    public function create(): View
-    {
-        return view('partners.create');
-    }
-
     public function store(StorePartnerRequest $request): RedirectResponse
     {
         try {
@@ -96,17 +91,12 @@ class PartnerController extends Controller
         ]);
     }
 
-    public function edit(Partner $partner): View
-    {
-        return view('partners.edit', ['partner' => $partner]);
-    }
-
     public function update(UpdatePartnerRequest $request, Partner $partner): RedirectResponse
     {
         try {
             $percentage = PercentageCast::toScaledInt($request->string('percentage')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['percentage' => 'قيمة النسبة غير صالحة.']);
+            return back()->withInput()->withErrors(['percentage' => 'قيمة النسبة غير صالحة.'], 'row');
         }
 
         $partner->update([
@@ -115,7 +105,8 @@ class PartnerController extends Controller
             'percentage' => $percentage,
         ]);
 
-        return redirect()->route('partners.show', $partner)->with('success', 'تم تعديل بيانات الشريك.');
+        // Edited from its row on the index or from a dialog on its own page.
+        return back()->with('success', 'تم تعديل بيانات الشريك.');
     }
 
     public function destroy(Partner $partner): RedirectResponse

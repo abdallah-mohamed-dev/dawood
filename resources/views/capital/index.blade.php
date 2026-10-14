@@ -26,24 +26,39 @@
         @endif
     </form>
 
-    <x-data-table :headings="['البند', 'السعر', 'التاريخ', 'ملاحظات', 'إجراءات']" :rows="$items">
-        @foreach ($items as $item)
-            <tr>
-                <td class="px-4 py-2">{{ $item->name }}</td>
-                <td class="px-4 py-2"><x-money :amount="$item->getRawOriginal('amount')" /></td>
-                <td class="px-4 py-2">{{ $item->occurred_at->format('Y-m-d') }}</td>
-                <td class="px-4 py-2">{{ $item->note ?? '—' }}</td>
-                <td class="px-4 py-2 text-end">
-                    <a href="{{ route('capital.edit', $item) }}" class="text-primary hover:underline">تعديل</a>
-                    <form method="POST" action="{{ route('capital.destroy', $item) }}" class="inline" onsubmit="return confirm('تحذف البند ده؟')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="ms-3 text-danger hover:underline">حذف</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
-    </x-data-table>
+    {{-- The row whose save just failed comes back open (see x-edit-row). --}}
+    @php $reopenId = (int) old('editing_id', 0); @endphp
+
+    <div x-data="{ editing: {{ $reopenId }} }">
+        <x-data-table :headings="['البند', 'السعر', 'التاريخ', 'ملاحظات', 'إجراءات']" :rows="$items">
+            @foreach ($items as $item)
+                @php
+                    $reopen = $reopenId === $item->id;
+                    $bag = $reopen ? 'row' : 'none';
+                @endphp
+                <tr>
+                    <td class="px-4 py-2">{{ $item->name }}</td>
+                    <td class="px-4 py-2"><x-money :amount="$item->getRawOriginal('amount')" /></td>
+                    <td class="px-4 py-2">{{ $item->occurred_at->format('Y-m-d') }}</td>
+                    <td class="px-4 py-2">{{ $item->note ?? '—' }}</td>
+                    <td class="px-4 py-2 text-end whitespace-nowrap">
+                        <button type="button" x-on:click="editing = {{ $item->id }}" class="text-primary hover:underline">تعديل</button>
+                        <form method="POST" action="{{ route('capital.destroy', $item) }}" class="inline" onsubmit="return confirm('تحذف البند ده؟')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="ms-3 text-danger hover:underline">حذف</button>
+                        </form>
+                    </td>
+                </tr>
+                <x-edit-row :action="route('capital.update', $item)" :key="$item->id" colspan="5">
+                    <x-quick-field name="name" :id="'name_'.$item->id" label="البند" width="w-56" :bag="$bag" :value="$reopen ? old('name', '') : $item->name" required />
+                    <x-quick-field name="amount" :id="'amount_'.$item->id" label="السعر (ج.م)" type="number" step="1" min="0" width="w-40" :bag="$bag" :value="$reopen ? old('amount', '') : $item->amount" required />
+                    <x-quick-field name="occurred_at" :id="'occurred_at_'.$item->id" label="التاريخ" type="date" width="w-44" :bag="$bag" :value="$reopen ? old('occurred_at', '') : $item->occurred_at->format('Y-m-d')" required />
+                    <x-quick-field name="note" :id="'note_'.$item->id" label="ملاحظات" width="w-64" :bag="$bag" :value="$reopen ? old('note', '') : ($item->note ?? '')" />
+                </x-edit-row>
+            @endforeach
+        </x-data-table>
+    </div>
 
     <div class="mt-4">
         {{ $items->links() }}

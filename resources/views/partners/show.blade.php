@@ -5,10 +5,37 @@
             <p class="mt-1 text-sm text-secondary">نسبة الشريك: {{ $percentageDisplay }}%</p>
         </div>
 
-        <a href="{{ route('partners.edit', $partner) }}" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">
+        <button type="button" onclick="document.getElementById('edit-partner-dialog').showModal()" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">
             {{ __('Edit') }}
-        </a>
+        </button>
     </div>
+
+    {{-- Edited in a dialog on this page — there is no separate edit page
+         (specs/024). Its errors live in the `row` bag, apart from the
+         withdrawal form below. --}}
+    @php $failed = $errors->getBag('row')->isNotEmpty(); @endphp
+
+    <dialog id="edit-partner-dialog" class="w-full max-w-md rounded-lg border border-border p-6 backdrop:bg-black/40">
+        <h2 class="mb-4 text-lg font-semibold text-ink">تعديل بيانات الشريك</h2>
+
+        <form method="POST" action="{{ route('partners.update', $partner) }}" class="space-y-4">
+            @csrf
+            @method('PUT')
+
+            <x-quick-field name="name" id="edit_partner_name" label="الاسم" width="w-full" bag="row" :value="$failed ? old('name', '') : $partner->name" required />
+            <x-quick-field name="email" id="edit_partner_email" type="email" label="البريد الإلكتروني (اختياري)" width="w-full" bag="row" :value="$failed ? old('email', '') : ($partner->email ?? '')" />
+            <x-quick-field name="percentage" id="edit_partner_percentage" type="number" step="0.01" min="0" label="النسبة المئوية (%)" width="w-full" bag="row" :value="$failed ? old('percentage', '') : $percentageDisplay" required />
+
+            <div class="flex gap-3">
+                <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm transition-all hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2">{{ __('Save') }}</button>
+                <button type="button" onclick="document.getElementById('edit-partner-dialog').close()" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">إلغاء</button>
+            </div>
+        </form>
+    </dialog>
+
+    @if ($failed)
+        <script>document.addEventListener('DOMContentLoaded', () => document.getElementById('edit-partner-dialog')?.showModal());</script>
+    @endif
 
     @if ($carriedIn !== 0)
         <div class="mb-6 rounded-xl border border-border bg-surface px-4 py-3 text-sm shadow-sm">

@@ -65,17 +65,12 @@ class CapitalItemController extends Controller
         return back()->with('success', 'تم تسجيل البند.');
     }
 
-    public function edit(CapitalItem $capitalItem): View
-    {
-        return view('capital.edit', ['item' => $capitalItem]);
-    }
-
     public function update(UpdateCapitalItemRequest $request, CapitalItem $capitalItem): RedirectResponse
     {
         try {
             $amount = MoneyCast::toScaledInt($request->string('amount')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.']);
+            return back()->withInput()->withErrors(['amount' => 'قيمة المبلغ غير صالحة.'], 'row');
         }
 
         $capitalItem->update([
@@ -85,13 +80,14 @@ class CapitalItemController extends Controller
             'note' => $request->filled('note') ? $request->string('note')->toString() : null,
         ]);
 
-        return redirect()->route('capital.index')->with('success', 'تم تعديل البند.');
+        // back(), not the index route: keeps the search, dates and page.
+        return back()->with('success', 'تم تعديل البند.');
     }
 
     public function destroy(CapitalItem $capitalItem): RedirectResponse
     {
         $capitalItem->delete();
 
-        return redirect()->route('capital.index')->with('success', 'تم حذف البند.');
+        return back()->with('success', 'تم حذف البند.');
     }
 }
