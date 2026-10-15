@@ -86,7 +86,7 @@
                 than squashing its items.
             --}}
             <aside class="fixed inset-y-0 start-0 z-40 flex w-[228px] translate-x-full flex-col overflow-y-auto border-e border-border bg-nav text-nav-text shadow-xl transition-transform duration-200 peer-checked:translate-x-0 md:sticky md:top-0 md:h-screen md:translate-x-0">
-                <div class="flex shrink-0 items-center justify-center px-5 py-2">
+                <div class="flex shrink-0 items-center justify-center px-5 pt-0 pb-2">
                     <a href="{{ route('dashboard') }}">
                         <img src="{{ asset('logo-new.png') }}" alt="DAWOOD" class="w-20 object-contain">
                     </a>
