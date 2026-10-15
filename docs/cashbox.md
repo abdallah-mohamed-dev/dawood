@@ -2,14 +2,14 @@
 
 ## حركة الخزنة (CashboxTransaction)
 
-| الحقل | النوع | ملاحظات |
-|---|---|---|
-| `type` | enum | `in` (دخول) / `out` (خروج) |
-| `amount` | مبلغ (جنيه، رقم صحيح) | دائمًا **موجب** — الاتجاه يُحدَّد من `type` لا من إشارة الرقم |
-| `source_type` / `source_id` | polymorphic nullable | العملية الأصلية؛ `null` للرصيد الافتتاحي فقط |
-| `kind` | نص | `opening_balance` / `customer_payment` / `inventory_purchase` / `expense` / `partner_withdrawal` / `room_labor` / `room_expense` |
-| `payment_method` | enum nullable | كاش / محفظة / انستاباي / شيك / فيزا — انظر أدناه |
-| `occurred_at` | تاريخ | تاريخ العملية الفعلي (منفصل عن `created_at`) |
+| الحقل                       | النوع                 | ملاحظات                                                                                                                          |
+| --------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `type`                      | enum                  | `in` (دخول) / `out` (خروج)                                                                                                       |
+| `amount`                    | مبلغ (جنيه، رقم صحيح) | دائمًا **موجب** — الاتجاه يُحدَّد من `type` لا من إشارة الرقم                                                                    |
+| `source_type` / `source_id` | polymorphic nullable  | العملية الأصلية؛ `null` للرصيد الافتتاحي فقط                                                                                     |
+| `kind`                      | نص                    | `opening_balance` / `customer_payment` / `inventory_purchase` / `expense` / `partner_withdrawal` / `room_labor` / `room_expense` |
+| `payment_method`            | enum nullable         | كاش / محفظة / انستاباي / شيك / فيزا — انظر أدناه                                                                                 |
+| `occurred_at`               | تاريخ                 | تاريخ العملية الفعلي (منفصل عن `created_at`)                                                                                     |
 
 ## طريقة الدفع (payment_method)
 
@@ -41,14 +41,14 @@
 
 `CashboxTransaction::detailedLabel()` تقرأ من **سجل المصدر الحي** لا من نص مخزَّن:
 
-| المصدر | ما يُعرض |
-|---|---|
-| `Expense` | اسم بند المصروف (كهرباء، إيجار) |
-| `CustomerPayment` | اسم العميل — نوع الغرفة |
-| `InventoryMovement` | اسم المادة |
-| `PartnerWithdrawal` | اسم الشريك |
-| `RoomCost` | مصنعية/مصروف إضافي — نوع الغرفة |
-| رصيد افتتاحي أو مصدر مفقود | `kind->label()` |
+| المصدر                     | ما يُعرض                        |
+| -------------------------- | ------------------------------- |
+| `Expense`                  | اسم بند المصروف (كهرباء، إيجار) |
+| `CustomerPayment`          | اسم العميل — نوع الغرفة         |
+| `InventoryMovement`        | اسم المادة                      |
+| `PartnerWithdrawal`        | اسم الشريك                      |
+| `RoomCost`                 | مصنعية/مصروف إضافي — نوع الغرفة |
+| رصيد افتتاحي أو مصدر مفقود | `kind->label()`                 |
 
 **لماذا القراءة الحية بدل تخزين النص؟** لأن تغيير اسم عميل أو مادة كان سيترك في الخزنة نصًا قديمًا لا يطابق أي شيء في النظام، وكان سيحتاج backfill للصفوف الموجودة. الثمن: `CashboxController` **ملزم** بعمل eager loading بـ`morphWith` على العلاقة `source` — بدونه الصفحة تصبح N+1 ثقيلًا (استعلام لكل صف + استعلام لعلاقة كل مصدر). يوجد اختبار يثبت أن عدد الاستعلامات لا ينمو مع عدد الصفوف.
 
@@ -58,7 +58,7 @@
 
 ```text
 دفعة عميل        → CashboxService::recordIn(kind: customer_payment)
-شراء مخزون       → CashboxService::recordOut(kind: inventory_purchase)
+شراء مخزن       → CashboxService::recordOut(kind: inventory_purchase)
 مصروف إداري      → CashboxService::recordOut(kind: expense)
 سحب شريك         → CashboxService::recordOut(kind: partner_withdrawal)
 مصنعية/مصروف غرفة → CashboxService::recordOut(kind: room_labor | room_expense)
@@ -105,6 +105,7 @@ totalOut() = SUM(amount WHERE type = out)
 كل رقم في هذا المثال له مصدر واحد فقط، ولا يُحسب مرتين.
 
 ## بيع خامة (الدفعة الخامسة — تاسك 14)
+
 نقص يدوي في كمية خامة بيدخل الخزنة كـ**داخل** بنوع `material_sale` ("بيع خامة"). ما بيدخلش الربح.
 
 ## الديون (الدفعة الرابعة — تاسك 11)
@@ -117,4 +118,5 @@ totalOut() = SUM(amount WHERE type = out)
 - جدولي الداخل والخارج فيهم فاصل لكل شهر بإجمالي الشهر من استعلام على كل حركات الاتجاه (`incomingMonthlyTotals` / `outgoingMonthlyTotals`)، مش من الصفوف المعروضة.
 
 ## الخزنة والمواسم (الدفعة العاشرة)
+
 الخزنة **دائمة**: رصيدها مش بيتصفّر ولا بيتقفل مع الموسم. الإقفال مبيغيّرش أي حركة خزنة ولا رصيدها.

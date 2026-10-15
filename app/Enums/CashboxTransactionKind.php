@@ -18,7 +18,7 @@ enum CashboxTransactionKind: string
         return match ($this) {
             self::OpeningBalance => 'رصيد افتتاحي',
             self::CustomerPayment => 'دفعة عميل',
-            self::InventoryPurchase => 'شراء مخزون',
+            self::InventoryPurchase => 'شراء مخزن',
             self::Expense => 'مصروف إداري',
             self::PartnerWithdrawal => 'سحب شريك',
             self::RoomLabor => 'مصنعية غرفة',

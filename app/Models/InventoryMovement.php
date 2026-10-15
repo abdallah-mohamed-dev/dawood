@@ -19,7 +19,7 @@ class InventoryMovement extends Model
     /** @use HasFactory<InventoryMovementFactory> */
     use HasFactory, LogsActivity;
 
-    protected static string $activityTypeLabel = 'حركة مخزون';
+    protected static string $activityTypeLabel = 'حركة مخزن';
 
     public function activityLabel(): string
     {

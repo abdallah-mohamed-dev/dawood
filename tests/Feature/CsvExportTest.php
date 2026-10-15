@@ -53,8 +53,15 @@ function queriesFor(string $url, User $admin): int
 test('guests are redirected to login from every export', function (string $route) {
     $this->get(route($route))->assertRedirect(route('login'));
 })->with([
-    'exports.customers', 'exports.rooms', 'exports.materials', 'exports.purchases',
-    'exports.payments', 'exports.expenses', 'exports.cashbox', 'exports.partners', 'exports.withdrawals',
+    'exports.customers',
+    'exports.rooms',
+    'exports.materials',
+    'exports.purchases',
+    'exports.payments',
+    'exports.expenses',
+    'exports.cashbox',
+    'exports.partners',
+    'exports.withdrawals',
 ]);
 
 test('the backup page links to all nine readable exports', function () {
@@ -74,7 +81,13 @@ test('the customers export streams a BOM-prefixed CSV with Arabic headers', func
         ->toContain('dawood-customers-'.now()->format('Y-m-d').'.csv');
 
     expect(csvRows($response)[0])->toBe([
-        'الاسم', 'التليفون', 'عدد الغرف', 'إجمالي سعر البيع', 'المدفوع', 'المتبقي', 'تاريخ الإضافة',
+        'الاسم',
+        'التليفون',
+        'عدد الغرف',
+        'إجمالي سعر البيع',
+        'المدفوع',
+        'المتبقي',
+        'تاريخ الإضافة',
     ]);
 });
 
@@ -106,9 +119,22 @@ test('the rooms export shows the customer name and phone instead of ids', functi
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.rooms')));
 
     expect($rows[0])->toBe([
-        'الغرفة', 'العميل', 'تليفون العميل', 'الحالة', 'الموسم', 'سعر البيع', 'تكلفة الخامات',
-        'المصنعية', 'مصروفات أخرى', 'إجمالي التكلفة', 'الربح', 'المدفوع', 'المتبقي',
-        'تاريخ الإنشاء', 'تاريخ بدء التنفيذ', 'تاريخ الاكتمال',
+        'الغرفة',
+        'العميل',
+        'تليفون العميل',
+        'الحالة',
+        'الموسم',
+        'سعر البيع',
+        'تكلفة الخامات',
+        'المصنعية',
+        'مصروفات أخرى',
+        'إجمالي التكلفة',
+        'الربح',
+        'المدفوع',
+        'المتبقي',
+        'تاريخ الإنشاء',
+        'تاريخ بدء التنفيذ',
+        'تاريخ الاكتمال',
     ]);
     expect($rows[1][0])->toBe('غرفة نوم');
     expect($rows[1][1])->toBe('أحمد عبد الرحمن');
@@ -154,7 +180,7 @@ test('the materials export shows type, quantity in whole units and unit price in
 
     $rows = csvRows($this->actingAs($this->admin)->get(route('exports.materials')));
 
-    expect($rows[0])->toBe(['الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة', 'قيمة المخزون']);
+    expect($rows[0])->toBe(['الخامة', 'النوع', 'الوحدة', 'الكمية المتاحة', 'سعر الوحدة', 'قيمة المخزن']);
     // 12 لوح × 1500 ج.م = 18000 ج.م
     expect($rows[1])->toBe([$material->name, 'خامة', 'لوح', '12', '1500', '18000']);
 });
