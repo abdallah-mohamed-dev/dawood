@@ -86,9 +86,10 @@
                 than squashing its items.
             --}}
             <aside class="fixed inset-y-0 start-0 z-40 flex w-[228px] translate-x-full flex-col overflow-y-auto border-e border-border bg-nav text-nav-text shadow-xl transition-transform duration-200 peer-checked:translate-x-0 md:sticky md:top-0 md:h-screen md:translate-x-0">
-                <div class="flex h-16 shrink-0 items-center gap-3 px-5">
-                    <span class="flex size-9 items-center justify-center rounded-lg bg-brand text-sm font-bold text-brand-text shadow-sm">D</span>
-                    <a href="{{ route('dashboard') }}" class="text-base font-bold tracking-wide text-ink">DAWOOD</a>
+                <div class="flex shrink-0 items-center justify-center px-5 py-4">
+                    <a href="{{ route('dashboard') }}">
+                        <img src="{{ asset('logo-new.png') }}" alt="DAWOOD" class="w-28 object-contain">
+                    </a>
                 </div>
 
                 <nav class="flex-1 space-y-4 overflow-y-auto px-3 pb-4">
@@ -158,7 +159,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </label>
-                    <span class="text-base font-bold text-primary">DAWOOD</span>
+                    <img src="{{ asset('logo-new.png') }}" alt="DAWOOD" class="h-12 object-contain">
                 </header>
             @endauth
 
