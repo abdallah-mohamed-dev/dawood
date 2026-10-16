@@ -38,16 +38,16 @@
         </x-stat>
     </div>
 
-    <x-panel title="من الإيراد إلى صافي الربح" sub="الإيراد وكل خصم على التوالي، لحد صافي الربح النهائي">
-        <x-charts.waterfall
-            :steps="[
-                ['label' => 'الإيراد', 'value' => $revenue, 'type' => 'total'],
-                ['label' => 'تكلفة الخامات', 'value' => -$costOfMaterials, 'type' => 'change'],
-                ['label' => 'تكاليف الغرف', 'value' => -$roomCosts, 'type' => 'change'],
-                ['label' => 'غرف ملغاة', 'value' => -$cancelledRoomCosts, 'type' => 'change'],
-                ['label' => 'مصروفات إدارية', 'value' => -$adminExpenses, 'type' => 'change'],
-                ['label' => 'صافي الربح', 'value' => $netProfit, 'type' => 'total'],
+    <x-panel title="من الإيراد إلى صافي الربح" sub="الإيراد، وكل بند اتخصم منه بنسبته، وصافي الربح اللي فاضل">
+        <x-charts.profit-breakdown
+            :revenue="$revenue"
+            :deductions="[
+                ['label' => 'تكلفة الخامات', 'value' => $costOfMaterials],
+                ['label' => 'تكاليف الغرف', 'value' => $roomCosts],
+                ['label' => 'غرف ملغاة', 'value' => $cancelledRoomCosts],
+                ['label' => 'مصروفات إدارية', 'value' => $adminExpenses],
             ]"
+            :net="$netProfit"
             alt="من الإيراد {{ \App\Casts\MoneyCast::toDisplayString($revenue) }} ج.م إلى صافي الربح {{ \App\Casts\MoneyCast::toDisplayString($netProfit) }} ج.م"
         />
     </x-panel>

@@ -22,7 +22,7 @@ test('the profit report shows revenue, cost, expenses, and net profit for comple
         ->assertSeeText('30,000 ج.م');
 });
 
-test('the profit report shows the waterfall chart and its figures as text', function () {
+test('the profit report shows the revenue-to-profit chart with a table toggle', function () {
     Room::factory()->create(['sale_price' => 50_000, 'status' => RoomStatus::Completed]);
 
     $response = $this->actingAs($this->admin)->get(route('reports.profit'))->assertOk();
@@ -31,7 +31,7 @@ test('the profit report shows the waterfall chart and its figures as text', func
     $response->assertSeeInOrder(['رسم', 'جدول']);
 });
 
-test('the waterfall totals are internally consistent with net profit', function () {
+test('the revenue-to-profit figures are internally consistent with net profit', function () {
     Room::factory()->create(['sale_price' => 50_000, 'status' => RoomStatus::Completed]);
 
     $this->actingAs($this->admin)->get(route('reports.profit'))->assertOk();
