@@ -71,9 +71,20 @@
             <form method="POST" action="{{ route('rooms.materials.store', $room) }}" class="flex flex-wrap items-end gap-3">
                 @csrf
                 <div>
-                    <label for="material_search" class="mb-1 block text-xs font-medium text-ink-soft">ابحث عن مادة</label>
+                    {{-- The match count rides on the label line, not under the
+                         input — a line under one field threw the row's
+                         bottom-aligned fields out of line. --}}
+                    <div class="mb-1 flex items-baseline justify-between gap-2">
+                        <label for="material_search" class="text-xs font-medium text-ink-soft">ابحث عن مادة</label>
+                        <span
+                            x-show="search !== '' || selectedType !== ''"
+                            x-cloak
+                            :class="matches().length === 0 ? 'bg-danger/10 text-danger' : 'bg-bg text-secondary'"
+                            class="rounded-full px-2 text-[11px] font-medium leading-5"
+                            x-text="matches().length === 0 ? 'مفيش نتايج' : (matches().length === 1 ? 'نتيجة واحدة' : (matches().length === 2 ? 'نتيجتين' : (matches().length <= 10 ? matches().length + ' نتايج' : matches().length + ' نتيجة')))"
+                        ></span>
+                    </div>
                     <input id="material_search" type="search" x-model="search" placeholder="اكتب جزء من الاسم" autocomplete="off" class="w-48 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
-                    <p class="mt-1 text-xs text-secondary" x-show="search !== '' || selectedType !== ''" x-text="matches().length + ' نتيجة'"></p>
                 </div>
                 <div>
                     <label class="mb-1 block text-xs font-medium text-ink-soft">النوع</label>
