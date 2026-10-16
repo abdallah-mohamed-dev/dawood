@@ -32,7 +32,7 @@ class MaterialController extends Controller
         // material, so longer pages mean less flipping. withQueryString keeps
         // an active search — and the type filter — alive on page two.
         $materials = Material::query()
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', '%'.$search.'%'))
+            ->when($search !== '', fn ($query) => $query->whereArabicLike('name', $search))
             ->when($typeId > 0, fn ($query) => $query->where('material_type_id', $typeId))
             ->with('materialType')
             ->orderBy('name')
@@ -179,8 +179,20 @@ class MaterialController extends Controller
 
     public function destroy(Material $material): RedirectResponse
     {
-        if ($material->quantity > 0 || $material->roomMaterials()->exists()) {
-            return back()->with('error', 'لا يمكن حذف هذه المادة لأن عليها كمية في المخزن أو اتصرفت لغرفة.');
+        // Two different reasons, each told plainly — one combined message
+        // ("عليها كمية ... أو اتصرفت") left the user guessing which applied.
+        $stock = (int) $material->getRawOriginal('quantity');
+
+        if ($stock > 0) {
+            return back()->with('error', "مينفعش تحذف «{$material->name}» لأن لسه فيه منها {$stock} {$material->unit} في المخزن. خلّي الكمية صفر الأول من زرار التعديل (قيمتها هترجع للخزنة)، وبعدين احذفها.");
+        }
+
+        $roomMaterial = $material->roomMaterials()->with('room.customer')->first();
+
+        if ($roomMaterial !== null) {
+            $room = $roomMaterial->room;
+
+            return back()->with('error', "مينفعش تحذف «{$material->name}» لأنها مستخدمة في غرف (زي «{$room->room_type} — {$room->customer->name}»)، وتكلفة الغرف دي محسوبة عليها.");
         }
 
         // The exists() check above and this delete() are not atomic — a stock
@@ -190,7 +202,7 @@ class MaterialController extends Controller
         try {
             $material->delete();
         } catch (QueryException) {
-            return back()->with('error', 'لا يمكن حذف هذه المادة لأن عليها كمية في المخزن أو اتصرفت لغرفة.');
+            return back()->with('error', "مينفعش تحذف «{$material->name}» لأنها اتسجّل عليها حركة دلوقتي. حدّث الصفحة وشوفها تاني.");
         }
 
         return redirect()->route('inventory.materials.index')->with('success', 'تم حذف المادة.');

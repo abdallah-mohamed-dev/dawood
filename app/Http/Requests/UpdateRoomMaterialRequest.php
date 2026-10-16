@@ -4,10 +4,22 @@ namespace App\Http\Requests;
 
 use App\Casts\QuantityCast;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateRoomMaterialRequest extends FormRequest
 {
+    /**
+     * A rejected edit is told at the top of the page, like the controller's
+     * own refusals: the row's edit form is closed again after the redirect,
+     * and the default bag would have shown the message under the ADD form.
+     */
+    protected function failedValidation(Validator $validator): void
+    {
+        throw new HttpResponseException(back()->with('error', $validator->errors()->first()));
+    }
+
     public function authorize(): bool
     {
         return true;

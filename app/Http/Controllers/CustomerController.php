@@ -19,7 +19,7 @@ class CustomerController extends Controller
         $customers = Customer::query()
             ->withCount('rooms')
             ->when($search !== '', fn ($query) => $query->where(fn ($inner) => $inner
-                ->where('name', 'like', '%'.$search.'%')
+                ->whereArabicLike('name', $search)
                 ->orWhere('phone', 'like', '%'.$search.'%')))
             ->orderBy('name')
             ->paginate(25)

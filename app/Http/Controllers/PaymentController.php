@@ -33,8 +33,8 @@ class PaymentController extends Controller
 
         $applyFilters = fn (Builder $query) => $query
             ->when($search !== '', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner
-                ->whereHas('room', fn (Builder $room) => $room->where('room_type', 'like', '%'.$search.'%')
-                    ->orWhereHas('customer', fn (Builder $customer) => $customer->where('name', 'like', '%'.$search.'%')))
+                ->whereHas('room', fn (Builder $room) => $room->whereArabicLike('room_type', $search)
+                    ->orWhereHas('customer', fn (Builder $customer) => $customer->whereArabicLike('name', $search)))
                 ->when($receipt !== null, fn (Builder $r) => $r->orWhere('receipt_number', $receipt))))
             ->when($from !== '', fn (Builder $q) => $q->whereDate('paid_at', '>=', $from))
             ->when($to !== '', fn (Builder $q) => $q->whereDate('paid_at', '<=', $to));

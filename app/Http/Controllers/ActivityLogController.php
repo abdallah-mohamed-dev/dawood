@@ -89,6 +89,6 @@ class ActivityLogController extends Controller
             ->when($filters['to'] !== '', fn (Builder $q) => $q->where('created_at', '<', Carbon::parse($filters['to'])->addDay()->startOfDay()))
             ->when($filters['event'] !== '', fn (Builder $q) => $q->where('event', $filters['event']))
             ->when($filters['subject_type'] !== '', fn (Builder $q) => $q->where('subject_type', $filters['subject_type']))
-            ->when($filters['q'] !== '', fn (Builder $q) => $q->where('subject_label', 'like', '%'.$filters['q'].'%'));
+            ->when($filters['q'] !== '', fn (Builder $q) => $q->whereArabicLike('subject_label', $filters['q']));
     }
 }

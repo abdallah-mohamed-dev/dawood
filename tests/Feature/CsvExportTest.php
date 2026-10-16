@@ -157,7 +157,7 @@ test('the rooms export writes money as pounds with two decimals', function () {
     expect($row[10])->toBe('55000');  // الربح
 });
 
-test('the rooms export shows the status in Arabic and leaves an empty season blank', function () {
+test('the rooms export shows the status in Arabic and an unsealed room under the open season', function () {
     Room::factory()->create([
         'customer_id' => Customer::factory(),
         'status' => RoomStatus::InProgress,
@@ -167,7 +167,27 @@ test('the rooms export shows the status in Arabic and leaves an empty season bla
     $row = csvRows($this->actingAs($this->admin)->get(route('exports.rooms')))[1];
 
     expect($row[3])->toBe('تحت التنفيذ');
-    expect($row[4])->toBe('');
+    // The first season is created open by its migration.
+    expect($row[4])->toBe('موسم 1 (المفتوح)');
+});
+
+test('the rooms export names the season a sealed room belongs to', function () {
+    $season = Season::factory()->create(['number' => 7, 'status' => SeasonStatus::Closed]);
+    Room::factory()->create(['customer_id' => Customer::factory(), 'season_id' => $season->id]);
+
+    expect(csvRows($this->actingAs($this->admin)->get(route('exports.rooms')))[1][4])->toBe('موسم 7');
+});
+
+test('a season-filtered download carries the season number in its file name', function () {
+    $season = Season::factory()->create(['number' => 7, 'status' => SeasonStatus::Closed]);
+    $date = now()->format('Y-m-d');
+
+    expect($this->actingAs($this->admin)->get(route('exports.rooms', ['season' => $season->id]))->headers->get('content-disposition'))
+        ->toContain("dawood-rooms-season-7-{$date}.csv");
+    expect($this->actingAs($this->admin)->get(route('exports.expenses', ['season' => 'open']))->headers->get('content-disposition'))
+        ->toContain("dawood-expenses-season-1-{$date}.csv");
+    expect($this->actingAs($this->admin)->get(route('exports.payments', ['season' => 'all']))->headers->get('content-disposition'))
+        ->toContain("dawood-payments-{$date}.csv");
 });
 
 test('the materials export shows type, quantity in whole units and unit price in pounds', function () {

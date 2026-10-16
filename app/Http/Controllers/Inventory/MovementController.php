@@ -27,7 +27,7 @@ class MovementController extends Controller
 
         $applyFilters = function (Builder $query) use ($search, $type, $from, $to): Builder {
             return $query
-                ->when($search !== '', fn (Builder $q) => $q->whereHas('material', fn (Builder $q) => $q->where('name', 'like', '%'.$search.'%')))
+                ->when($search !== '', fn (Builder $q) => $q->whereHas('material', fn (Builder $q) => $q->whereArabicLike('name', $search)))
                 ->when($type !== '', fn (Builder $q) => $q->where('type', $type))
                 ->when($from !== '', fn (Builder $q) => $q->whereDate('occurred_at', '>=', $from))
                 ->when($to !== '', fn (Builder $q) => $q->whereDate('occurred_at', '<=', $to));

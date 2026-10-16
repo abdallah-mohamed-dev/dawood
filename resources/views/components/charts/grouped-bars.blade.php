@@ -77,7 +77,10 @@
                 @foreach ($ticks as $tick)
                     @php($y = round($baseline - $tick / $max * $plotHeight, 2))
                     <line x1="{{ $padLeft }}" x2="{{ $width - $padRight }}" y1="{{ $y }}" y2="{{ $y }}" class="stroke-chart-grid" stroke-width="1"/>
-                    <text x="{{ $width - $padRight + 6 }}" y="{{ $y + 3 }}" class="fill-secondary text-[10px] tabular-nums">{{ MoneyCast::toDisplayString((int) round($tick)) }}</text>
+                    {{-- The page is RTL, so an SVG <text> would grow leftwards from x,
+                         into the bars. Pinned LTR, the axis numbers grow rightwards
+                         into the padding reserved for them. --}}
+                    <text x="{{ $width - $padRight + 6 }}" direction="ltr" text-anchor="start" y="{{ $y + 3 }}" class="fill-secondary text-[10px] tabular-nums">{{ MoneyCast::toDisplayString((int) round($tick)) }}</text>
                 @endforeach
 
                 @foreach ($bars as $bar)

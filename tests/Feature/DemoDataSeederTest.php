@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Services\CashboxService;
 use App\Services\ProfitService;
 use App\Services\SeasonBackupService;
+use App\Services\SeasonService;
 use App\Services\ShortageService;
+use Carbon\CarbonImmutable;
 use Database\Seeders\DemoDataSeeder;
 use Database\Seeders\MaterialTypeSeeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The demo data is what the app is looked at with locally, so it has to stay
@@ -37,6 +40,21 @@ test('season 1 is closed at the end of july with a profit, season 2 is open', fu
 
     expect($second->status)->toBe(SeasonStatus::Open);
     expect($second->started_at->toDateString())->toBe('2026-08-01');
+});
+
+test('nothing is dated after the story ends, so season 2 can be closed and reopened', function () {
+    $end = DemoDataSeeder::STORY_ENDS.' 23:59:59';
+
+    foreach (['rooms', 'expenses', 'room_costs', 'partner_withdrawals', 'customer_payments', 'cashbox_transactions', 'inventory_movements', 'room_materials'] as $table) {
+        expect((string) DB::table($table)->max('created_at'))->toBeLessThanOrEqual($end);
+    }
+
+    // The exact failure seen by hand: a future-dated row made the closed
+    // season look touched, and the reopen button never appeared.
+    $this->travelTo(CarbonImmutable::parse(DemoDataSeeder::STORY_ENDS)->addDay()->setTime(8, 0));
+    $closed = app(SeasonService::class)->close(DemoDataSeeder::STORY_ENDS);
+
+    expect(app(SeasonService::class)->canReopen($closed))->toBeTrue();
 });
 
 test('the rooms cover every state, and season 1 sealed only its finished ones', function () {

@@ -29,7 +29,7 @@ class ExpenseController extends Controller
         $to = trim($request->string('to')->toString());
 
         $applyFilters = fn (Builder $query) => $query
-            ->when($search !== '', fn (Builder $q) => $q->where('description', 'like', '%'.$search.'%'))
+            ->when($search !== '', fn (Builder $q) => $q->whereArabicLike('description', $search))
             ->when($categoryId > 0, fn (Builder $q) => $q->where('expense_category_id', $categoryId))
             ->when($from !== '', fn (Builder $q) => $q->whereDate('occurred_at', '>=', $from))
             ->when($to !== '', fn (Builder $q) => $q->whereDate('occurred_at', '<=', $to));

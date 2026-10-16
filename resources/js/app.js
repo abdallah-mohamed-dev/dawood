@@ -2,6 +2,18 @@ import Alpine from 'alpinejs';
 
 window.Alpine = Alpine;
 
+// Folds the Arabic letters people type interchangeably, so a search for
+// "احمد" finds "أحمد". Must stay in step with App\Support\ArabicSearch::fold()
+// on the server — same letters, same targets.
+window.normalizeArabic = (text) => String(text ?? '')
+    .toLowerCase()
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/ؤ/g, 'و')
+    .replace(/ئ/g, 'ي')
+    .replace(/[ً-ْـ]/g, '');
+
 // A show/hide toggle whose state is remembered per browser under `key`.
 // localStorage can throw (private mode, blocked storage), so both reads and
 // writes fall back silently — the toggle still works, it just won't persist.

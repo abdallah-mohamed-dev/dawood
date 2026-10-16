@@ -9,6 +9,7 @@ use App\Services\ProfitService;
 use App\Services\ReminderService;
 use App\Services\SeasonService;
 use App\Services\SettingsService;
+use App\Support\ArabicSearch;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Foundation\Console\ServeCommand;
 use Illuminate\Support\Facades\Event;
@@ -30,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // whereArabicLike(): search that ignores أ/ا, ة/ه, ى/ي and the like.
+        ArabicSearch::registerMacros();
+
         // `php artisan serve` hands the server process a whitelist of
         // environment variables, and TMP/TEMP are not on it — so on Windows
         // sys_get_temp_dir() falls back to C:\Windows, tempnam() returns false,

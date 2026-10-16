@@ -42,7 +42,10 @@ class StoreMaterialRequest extends FormRequest
             // Optional here (14.4.11 "الكمية المبدئية اختيارية"): a material
             // can be catalogued before anything is bought for it. The pattern
             // rejects a negative quantity; zero is a legal "no stock yet".
-            'quantity' => ['sometimes', 'regex:'.QuantityCast::validationPattern()],
+            // nullable, not just sometimes: the form always sends the field,
+            // and a blank one arrives as null (ConvertEmptyStringsToNull) —
+            // which regex rejects unless nullable lets it through.
+            'quantity' => ['nullable', 'regex:'.QuantityCast::validationPattern()],
             // No payment_method rule: buying stock is always cash (specs/023),
             // so the form never asks and the controller never reads a choice.
         ];

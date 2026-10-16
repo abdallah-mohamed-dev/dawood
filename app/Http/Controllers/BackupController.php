@@ -93,6 +93,9 @@ class BackupController extends Controller
 
             $csvPath = $tempDir.DIRECTORY_SEPARATOR.uniqid('dawood-csv-');
             $handle = fopen($csvPath, 'w');
+            // BOM — without it Excel reads the file as ANSI and the Arabic
+            // comes out garbled (same as the single-table exports).
+            fwrite($handle, "\xEF\xBB\xBF");
             fputcsv($handle, $columns);
 
             $modelClass::query()->orderBy('id')->cursor()->each(function ($record) use ($handle, $columns) {

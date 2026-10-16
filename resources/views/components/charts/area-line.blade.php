@@ -51,7 +51,10 @@
             <svg viewBox="0 0 {{ $width }} {{ $height }}" class="w-full" role="img" aria-label="{{ $alt }}">
                 @foreach ($ticks as $tick)
                     <line x1="{{ $padLeft }}" x2="{{ $width - $padRight }}" y1="{{ $yAt((int) round($tick)) }}" y2="{{ $yAt((int) round($tick)) }}" class="stroke-chart-grid" stroke-width="1"/>
-                    <text x="{{ $width - $padRight + 6 }}" y="{{ $yAt((int) round($tick)) + 3 }}" class="fill-secondary text-[10px] tabular-nums">{{ MoneyCast::toDisplayString((int) round($tick)) }}</text>
+                    {{-- The page is RTL, so an SVG <text> would grow leftwards from x,
+                         into the bars. Pinned LTR, the axis numbers grow rightwards
+                         into the padding reserved for them. --}}
+                    <text x="{{ $width - $padRight + 6 }}" direction="ltr" text-anchor="start" y="{{ $yAt((int) round($tick)) + 3 }}" class="fill-secondary text-[10px] tabular-nums">{{ MoneyCast::toDisplayString((int) round($tick)) }}</text>
                 @endforeach
 
                 <path d="{{ $areaPath }}" class="fill-chart-a/10"/>

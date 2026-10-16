@@ -25,8 +25,8 @@ class CapitalItemController extends Controller
 
         $applyFilters = fn ($query) => $query
             ->when($search !== '', fn ($q) => $q->where(fn ($inner) => $inner
-                ->where('name', 'like', '%'.$search.'%')
-                ->orWhere('note', 'like', '%'.$search.'%')))
+                ->whereArabicLike('name', $search)
+                ->orWhereArabicLike('note', $search)))
             ->when($from !== '', fn ($q) => $q->whereDate('occurred_at', '>=', $from))
             ->when($to !== '', fn ($q) => $q->whereDate('occurred_at', '<=', $to));
 

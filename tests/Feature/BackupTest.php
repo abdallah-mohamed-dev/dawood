@@ -62,7 +62,9 @@ test('an admin can download a csv archive containing every table', function () {
     expect($zip->locateName('cashbox_transactions.csv'))->not->toBeFalse();
 
     $customersCsv = $zip->getFromName('customers.csv');
-    expect($customersCsv)->toContain('name')
+    // Starts with the UTF-8 BOM, or Excel garbles the Arabic.
+    expect($customersCsv)->toStartWith("\xEF\xBB\xBF")
+        ->toContain('name')
         ->toContain($customer->name);
 
     $roomsCsv = $zip->getFromName('rooms.csv');

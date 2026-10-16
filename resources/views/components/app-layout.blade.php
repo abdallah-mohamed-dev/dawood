@@ -100,13 +100,18 @@ $linkClasses = fn (bool $active) => 'flex items-center gap-2.5 rounded-lg px-3 p
 </head>
 
 <body class="min-h-screen bg-bg font-sans text-ink antialiased">
-    @auth
-    <input type="checkbox" id="sidebar-toggle" class="peer hidden">
-    <label for="sidebar-toggle" class="fixed inset-0 z-30 hidden bg-ink/40 peer-checked:block md:hidden" aria-hidden="true"></label>
-    @endauth
-
     <div class="flex min-h-screen">
         @auth
+        {{--
+            The mobile menu toggle. Tailwind's peer-checked only reaches LATER
+            SIBLINGS of the checkbox, so the checkbox, the dimming overlay and
+            the <aside> must share this parent, in this order. With the
+            checkbox outside this div the overlay opened but the menu never
+            slid in.
+        --}}
+        <input type="checkbox" id="sidebar-toggle" class="peer hidden">
+        <label for="sidebar-toggle" class="fixed inset-0 z-30 hidden bg-ink/40 peer-checked:block md:hidden" aria-hidden="true"></label>
+
         {{--
                 sticky (not static) from md up: it stays in the flex row so the
                 main column sits beside it, but is pinned to the viewport with

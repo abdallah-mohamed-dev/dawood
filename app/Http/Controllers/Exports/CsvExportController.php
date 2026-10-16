@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Exports;
 use App\Casts\MoneyCast;
 use App\Casts\QuantityCast;
 use App\Enums\InventoryMovementType;
+use App\Enums\SeasonStatus;
 use App\Http\Controllers\Controller;
 use App\Models\CashboxTransaction;
 use App\Models\Customer;
@@ -16,6 +17,7 @@ use App\Models\Partner;
 use App\Models\PartnerWithdrawal;
 use App\Models\Room;
 use App\Models\RoomCost;
+use App\Models\Season;
 use App\Services\InventoryService;
 use App\Services\PartnerService;
 use App\Services\ProfitService;
@@ -68,10 +70,14 @@ class CsvExportController extends Controller
 
     public function rooms(Request $request): StreamedResponse
     {
+        // A room with no season_id belongs to the open season — it is only
+        // stamped with its season when that season closes.
+        $openSeason = Season::query()->where('status', SeasonStatus::Open)->value('number');
+
         $rows = $this->applySeasonFilter(Room::query(), $request)
             ->with(['customer', 'season', 'roomMaterials', 'roomCosts', 'customerPayments'])
             ->lazyById(500)
-            ->map(function (Room $room) {
+            ->map(function (Room $room) use ($openSeason) {
                 $figures = $this->profit->forRoom($room);
 
                 return [
@@ -79,7 +85,11 @@ class CsvExportController extends Controller
                     $room->customer?->name ?? '',
                     $room->customer?->phone ?? '',
                     $room->status?->label() ?? '',
-                    $room->season?->name ?? '',
+                    match (true) {
+                        $room->season !== null => 'موسم '.$room->season->number,
+                        $openSeason !== null => 'موسم '.$openSeason.' (المفتوح)',
+                        default => '',
+                    },
                     $this->money($figures['sale_price']),
                     $this->money($figures['materials']),
                     $this->money($figures['labor']),
@@ -339,12 +349,32 @@ class CsvExportController extends Controller
     }
 
     /**
+     * "-season-2" when the download was filtered to one season, so files from
+     * different seasons don't share a name. Empty with no filter (or "all").
+     * The filter carries the season's id, the file name its number.
+     */
+    private function seasonSuffix(): string
+    {
+        $season = trim((string) request()->query('season', ''));
+
+        if ($season === '' || $season === 'all') {
+            return '';
+        }
+
+        $number = $season === 'open'
+            ? Season::query()->where('status', SeasonStatus::Open)->value('number')
+            : Season::query()->whereKey((int) $season)->value('number');
+
+        return $number === null ? '' : '-season-'.$number;
+    }
+
+    /**
      * @param  list<string>  $headers  عناوين الأعمدة بالعربي
      * @param  iterable<array<int, string>>  $rows
      */
     private function stream(string $name, array $headers, iterable $rows): StreamedResponse
     {
-        $filename = 'dawood-'.$name.'-'.now()->format('Y-m-d').'.csv';
+        $filename = 'dawood-'.$name.$this->seasonSuffix().'-'.now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($headers, $rows) {
             $handle = fopen('php://output', 'w');

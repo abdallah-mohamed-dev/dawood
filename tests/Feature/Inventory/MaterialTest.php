@@ -30,6 +30,22 @@ test('adding a material shows it listed with its unit', function () {
         ->assertSee('لوح');
 });
 
+test('a blank initial quantity is accepted and means no stock and no purchase', function () {
+    // The real form always posts the field; left blank it used to be rejected
+    // with "قيمة الكمية غير صالحة" (found by hand in USER-TESTS 4.2).
+    $this->actingAs($this->admin)->post(route('inventory.materials.store'), [
+        'name' => 'مسامير',
+        'unit' => 'علبة',
+        'material_type_id' => MaterialType::query()->where('name', 'اكسسوار')->value('id'),
+        'unit_price' => '50',
+        'quantity' => '',
+    ])->assertSessionHasNoErrors();
+
+    $material = Material::query()->sole();
+    expect($material->getRawOriginal('quantity'))->toBe(0);
+    expect(DB::table('cashbox_transactions')->count())->toBe(0);
+});
+
 test('creating a material without a name fails validation', function () {
     $response = $this->actingAs($this->admin)->post(route('inventory.materials.store'), [
         'name' => '',

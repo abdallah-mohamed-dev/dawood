@@ -28,6 +28,7 @@ use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use LogicException;
 use stdClass;
 
 /**
@@ -45,6 +46,9 @@ use stdClass;
  */
 class DemoDataSeeder extends Seeder
 {
+    /** The story's "today" — no event may be dated after it. */
+    public const STORY_ENDS = '2026-10-15';
+
     /** @var list<array{0: string, 1: int, 2: Closure}> */
     private array $events = [];
 
@@ -279,7 +283,10 @@ class DemoDataSeeder extends Seeder
             $this->expense("2026-$month-01", 'إيجار الورشة', 5_000, 'إيجار شهر '.(int) $month, PaymentMethod::Instapay);
             $this->expense("2026-$month-10", 'كهرباء', $bill, 'فاتورة الكهرباء', PaymentMethod::Wallet);
 
-            if ($month !== '10') {
+            // PHP turns the key '10' into the int 10 (no leading zero), so this
+            // compares as an int — a string compare once let October's 15th
+            // and 20th through, dated after "today" in the story.
+            if ((int) $month < 10) {
                 $this->expense("2026-$month-15", 'مواصلات', 650, 'مشاوير شراء ومعاينات');
                 $this->expense("2026-$month-20", 'ضيافة', 300, 'شاي وقهوة');
             }
@@ -368,7 +375,16 @@ class DemoDataSeeder extends Seeder
 
     private function at(string $when, Closure $action): void
     {
-        $this->events[] = [strlen($when) === 10 ? $when.' 10:00' : $when, count($this->events), $action];
+        $when = strlen($when) === 10 ? $when.' 10:00' : $when;
+
+        // Nothing may be dated after the story's "today": a record created in
+        // the future counts as activity after any season close, and blocks
+        // reopening it.
+        if ($when > self::STORY_ENDS.' 23:59:59') {
+            throw new LogicException("Demo event at {$when} is after ".self::STORY_ENDS.'.');
+        }
+
+        $this->events[] = [$when, count($this->events), $action];
     }
 
     /**

@@ -102,7 +102,7 @@ test('editing a requirement over HTTP saves it', function () {
     expect($requirement->fresh()->getRawOriginal('required_quantity'))->toBe(7);
 });
 
-test('lowering a requirement below what was issued shows the Arabic reason on its own row', function () {
+test('lowering a requirement below what was issued shows the Arabic reason at the top of the page', function () {
     $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
     $material = Material::factory()->create(['material_type_id' => $this->wood]);
     $this->inventory->addStock($material, 10, 100, '2026-01-01', PaymentMethod::Cash);
@@ -112,7 +112,21 @@ test('lowering a requirement below what was issued shows the Arabic reason on it
     $this->actingAs($this->admin)
         ->from(route('rooms.show', $room))
         ->patch(route('rooms.materials.update', [$room, $requirement]), ['required_quantity' => '1'])
-        ->assertSessionHasErrors(['required_quantity' => 'الخامة دي اتصرف منها 3 بالفعل، ومينفعش المطلوب يبقى أقل من كده.'], errorBag: 'edit_'.$requirement->id);
+        ->assertSessionHas('error', "«{$material->name}» اتصرف منها 3 بالفعل، ومينفعش المطلوب يبقى أقل من كده.")
+        ->assertSessionHasNoErrors();
 
     expect($requirement->fresh()->getRawOriginal('required_quantity'))->toBe(5);
+});
+
+test('an invalid requirement edit is also reported at the top, never under the add form', function () {
+    $room = Room::factory()->create(['status' => RoomStatus::InProgress]);
+    $material = Material::factory()->create(['material_type_id' => $this->wood]);
+    $requirement = $this->roomMaterials->addRequirement($room, $material, 5);
+
+    $this->actingAs($this->admin)
+        ->from(route('rooms.show', $room))
+        ->patch(route('rooms.materials.update', [$room, $requirement]), ['required_quantity' => '2.5'])
+        ->assertRedirect(route('rooms.show', $room))
+        ->assertSessionHas('error', 'قيمة الكمية غير صالحة.')
+        ->assertSessionHasNoErrors();
 });

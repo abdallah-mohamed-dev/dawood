@@ -413,6 +413,25 @@ test('a material already issued to a room cannot be deleted', function () {
     expect(Material::query()->find($this->material->id))->not->toBeNull();
 });
 
+test('each refusal says which reason applies', function () {
+    // Still in the warehouse: says how much is left and what to do.
+    $this->actingAs($this->admin)
+        ->delete(route('inventory.materials.destroy', $this->material))
+        ->assertSessionHas('error', fn (string $message) => str_contains($message, 'لسه فيه منها')
+            && str_contains($message, (string) $this->material->fresh()->getRawOriginal('quantity')));
+
+    // Nothing left in stock, but listed on a room: names the room instead.
+    $empty = Material::factory()->create(['name' => 'خشب فاضي', 'quantity' => 0]);
+    $room = Room::factory()->create(['room_type' => 'مطبخ تجربة']);
+    (new RoomMaterialService($this->inventory))->addRequirement($room, $empty, 3);
+
+    $this->actingAs($this->admin)
+        ->delete(route('inventory.materials.destroy', $empty))
+        ->assertSessionHas('error', fn (string $message) => str_contains($message, 'مستخدمة في غرف')
+            && str_contains($message, 'مطبخ تجربة')
+            && ! str_contains($message, 'لسه فيه منها'));
+});
+
 test('an unused material with no stock can still be deleted', function () {
     $spare = Material::factory()->create(['name' => 'خشب زائد']);
 

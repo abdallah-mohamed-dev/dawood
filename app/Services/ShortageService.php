@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\RoomStatus;
 use App\Models\Room;
 use App\Models\RoomMaterial;
+use App\Support\ArabicSearch;
 use Illuminate\Support\Collection;
 
 /**
@@ -79,7 +80,7 @@ class ShortageService
             ->filter(fn (array $group) => $customerId === 0 || $group['room']->customer_id === $customerId)
             ->map(function (array $group) use ($typeId, $search) {
                 $lines = $group['lines']->filter(fn (array $line) => ($typeId === 0 || $line['roomMaterial']->material->material_type_id === $typeId)
-                    && ($search === '' || str_contains(mb_strtolower($line['roomMaterial']->material->name), mb_strtolower($search))));
+                    && ($search === '' || ArabicSearch::contains($line['roomMaterial']->material->name, $search)));
 
                 return ['room' => $group['room'], 'lines' => $lines, 'total' => $lines->sum('cost')];
             })

@@ -67,8 +67,8 @@ class RoomController extends Controller
 
         $matching = Room::query()
             ->when($filters['q'] !== '', fn ($query) => $query->where(fn ($inner) => $inner
-                ->where('room_type', 'like', '%'.$filters['q'].'%')
-                ->orWhereHas('customer', fn ($customer) => $customer->where('name', 'like', '%'.$filters['q'].'%'))))
+                ->whereArabicLike('room_type', $filters['q'])
+                ->orWhereHas('customer', fn ($customer) => $customer->whereArabicLike('name', $filters['q']))))
             ->when(RoomStatus::tryFrom($filters['status']) !== null, fn ($query) => $query->where('status', $filters['status']))
             ->when($filters['customer_id'] > 0, fn ($query) => $query->where('customer_id', $filters['customer_id']))
             ->when($filters['from'] !== '', fn ($query) => $query->whereDate('created_at', '>=', $filters['from']))
@@ -324,22 +324,25 @@ class RoomController extends Controller
     {
         abort_if($roomMaterial->room_id !== $room->id, 404);
 
+        // Every refusal here goes to the page-top message, not under the field:
+        // the edit row is closed again after the redirect, so a message inside
+        // it was never seen (USER-TESTS 3.4).
+        $name = $roomMaterial->material->name;
+
         try {
             $quantity = QuantityCast::toScaledInt($request->string('required_quantity')->toString());
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['required_quantity' => 'قيمة الكمية غير صالحة.'], 'edit_'.$roomMaterial->id);
+            return back()->with('error', "قيمة الكمية المطلوبة لـ«{$name}» غير صالحة.");
         }
 
         try {
             $this->roomMaterialService->updateRequirement($roomMaterial, $quantity);
         } catch (ExceedsRequiredQuantityException $exception) {
-            return back()->withInput()->withErrors([
-                'required_quantity' => 'الخامة دي اتصرف منها '.QuantityCast::toDisplayString($exception->attempted).' بالفعل، ومينفعش المطلوب يبقى أقل من كده.',
-            ], 'edit_'.$roomMaterial->id);
+            return back()->with('error', "«{$name}» اتصرف منها ".QuantityCast::toDisplayString($exception->attempted).' بالفعل، ومينفعش المطلوب يبقى أقل من كده.');
         } catch (RoomLockedException) {
             return back()->with('error', 'هذه الغرفة مكتملة ومقفولة، ما ينفعش تتعدل خاماتها.');
         } catch (InvalidArgumentException) {
-            return back()->withInput()->withErrors(['required_quantity' => 'الكمية لازم تكون أكبر من صفر.'], 'edit_'.$roomMaterial->id);
+            return back()->with('error', "الكمية المطلوبة لـ«{$name}» لازم تكون أكبر من صفر.");
         }
 
         return back()->with('success', 'تم تعديل الاحتياج.');

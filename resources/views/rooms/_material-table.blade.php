@@ -1,4 +1,7 @@
-{{-- The one table of a room's material requirements, filtered client-side by type and search. --}}
+{{-- The one table of a room's material requirements, filtered client-side by type.
+     A refused requirement edit is reported at the top of the page (the row
+     closes again after the redirect), and the row always shows the stored
+     value — old() here would echo whatever the ADD form last submitted. --}}
 <div class="overflow-x-auto rounded-xl border border-border bg-surface shadow-sm">
     <table class="min-w-full divide-y divide-border text-sm">
         <thead class="bg-bg-subtle">
@@ -20,15 +23,12 @@
                 $short = ! $fullyIssued && $roomMaterial->isShort($stock);
                 $borderClass = $fullyIssued ? 'border-s-4 border-success' : ($short ? 'border-s-4 border-danger' : 'border-s-4 border-transparent');
                 $issueBag = 'issue_'.$roomMaterial->id;
-                $editBag = 'edit_'.$roomMaterial->id;
                 $typeId = (string) $roomMaterial->material->material_type_id;
-                $nameKey = \Illuminate\Support\Str::lower($roomMaterial->material->name);
             @endphp
 
             <tbody
                 x-data="{ editing: false }"
-                x-show="(type === 'all' || type === '{{ $typeId }}') && (q === '' || $el.dataset.name.includes(q.toLowerCase()))"
-                data-name="{{ $nameKey }}"
+                x-show="type === 'all' || type === '{{ $typeId }}'"
                 class="divide-y divide-border {{ $borderClass }}"
             >
                 <tr>
@@ -96,10 +96,7 @@
                                 @method('PATCH')
                                 <div>
                                     <label class="mb-1 block text-xs font-medium text-ink-soft">الكمية المطلوبة</label>
-                                    <input type="number" step="1" min="0" name="required_quantity" value="{{ old('required_quantity', $roomMaterial->required_quantity) }}" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
-                                    @error('required_quantity', $editBag)
-                                        <p class="mt-1 text-xs text-danger">{{ $message }}</p>
-                                    @enderror
+                                    <input type="number" step="1" min="0" name="required_quantity" value="{{ $roomMaterial->required_quantity }}" class="w-32 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-ink shadow-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" required>
                                 </div>
                                 <button type="submit" class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-dark">{{ __('Save') }}</button>
                                 <button type="button" @click="editing = false" class="rounded-md border border-border px-4 py-2 text-sm text-ink-soft hover:bg-bg">{{ __('Cancel') }}</button>

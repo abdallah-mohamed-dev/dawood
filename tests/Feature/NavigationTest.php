@@ -30,3 +30,14 @@ test('every sidebar link opens with a 200', function () {
         $this->actingAs($user)->get(route($route))->assertOk();
     }
 });
+
+test('the mobile menu checkbox is a sibling right before the sidebar, so peer-checked can slide it in', function () {
+    $html = $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()->getContent();
+
+    // peer-checked: only reaches later siblings. The checkbox once sat outside
+    // the sidebar's parent: the overlay opened, the menu never moved.
+    $between = substr($html, strpos($html, 'id="sidebar-toggle"'), strpos($html, '<aside') - strpos($html, 'id="sidebar-toggle"'));
+
+    expect($between)->not->toContain('<div')
+        ->not->toContain('</div>');
+});
