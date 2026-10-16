@@ -105,3 +105,15 @@ test('row actions are real buttons, disabled once a material is fully issued', f
         ->toContain('<button')
         ->toContain('title="تم صرف الكمية كاملة"');
 });
+
+test('the room page column can shrink below its widest table, so a phone gets no sideways scroll', function () {
+    $room = Room::factory()->create(['customer_id' => $this->customer->id]);
+
+    $html = $this->actingAs($this->admin)->get(route('rooms.show', $room))->assertOk()->getContent();
+
+    // A bare `grid` gives an implicit column as wide as its widest content:
+    // the ≈650px materials table stretched the whole page on a 390px phone
+    // (checked in a real browser, specs/025). grid-cols-1 = minmax(0, 1fr).
+    expect($html)->toContain('class="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_17rem]"')
+        ->toContain('class="min-w-0 space-y-4"');
+});
