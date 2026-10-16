@@ -22,7 +22,10 @@
     foreach ($steps as $step) {
         $before = $running;
         $running = $step['type'] === 'total' ? $step['value'] : $running + $step['value'];
-        $bars[] = ['label' => $step['label'], 'from' => $before, 'to' => $running, 'type' => $step['type'], 'value' => $step['value']];
+        // A total stands on zero. Drawn from the running figure before it, the
+        // closing "صافي الربح" bar went from net to net — a flat line.
+        $from = $step['type'] === 'total' ? 0 : $before;
+        $bars[] = ['label' => $step['label'], 'from' => $from, 'to' => $running, 'type' => $step['type'], 'value' => $step['value']];
     }
 
     $allEdges = collect($bars)->flatMap(fn ($b) => [$b['from'], $b['to']]);
@@ -67,9 +70,14 @@
                         $isTotal = $bar['type'] === 'total';
                         $token = $isTotal ? 'ramp-1' : ($bar['value'] >= 0 ? 'chart-a' : 'chart-b');
                     @endphp
-                    <rect x="{{ round($x, 2) }}" y="{{ $top }}" width="{{ round($barWidth, 2) }}" height="{{ max(2, round($bottom - $top, 2)) }}" rx="3" class="fill-{{ $token }}">
-                        <title>{{ $bar['label'] }}: {{ MoneyCast::toDisplayString($bar['value']) }} ج.م</title>
-                    </rect>
+                    {{-- A change of zero (e.g. no cancelled rooms) draws no bar: a
+                         2px sliver in the "increase" colour read as a value. The
+                         label stays, and the table view shows the 0. --}}
+                    @unless (! $isTotal && $bar['value'] === 0)
+                        <rect x="{{ round($x, 2) }}" y="{{ $top }}" width="{{ round($barWidth, 2) }}" height="{{ max(2, round($bottom - $top, 2)) }}" rx="3" class="fill-{{ $token }}">
+                            <title>{{ $bar['label'] }}: {{ MoneyCast::toDisplayString($bar['value']) }} ج.م</title>
+                        </rect>
+                    @endunless
                     <text x="{{ round($center, 2) }}" y="{{ $padTop + $plotHeight + 18 }}" text-anchor="middle" class="fill-secondary text-[10px]">{{ $bar['label'] }}</text>
                 @endforeach
             </svg>
