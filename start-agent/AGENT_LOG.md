@@ -1114,3 +1114,5 @@ materials=0, rooms=0).
 **ملحوظة اختبارات:** `migrate:fresh` و`VACUUM INTO` مايشتغلوش جوه transaction بتاعة RefreshDatabase. عشان كده الـe2e بيشغّل عملية `artisan` منفصلة على ملف مؤقت، وتحميل النسخة في `BackupTest` بقى بـmock.
 
 **النتيجة:** 706/706 · Pint نظيف · `reset.bat` اتجرب بإجابة "no" والداتا ماتلمستش.
+
+**إضافة على 026 (نفس اليوم):** العميل استلم المشروع قبل التعديل، فـ`reset.bat` اتعمل ملف **مستقل**: بيعمل النسخة بـ`php -r` (VACUUM INTO)، وبعدها `migrate:fresh` والـseeders. واتشال أمر `app:reset-data`. اتجرّب على worktree مؤقت من `51d67e5` (نسخة العميل) مربوط بـjunctions لـ`vendor` و`php`: الداتا اتمسحت والنسخة الاحتياطية كاملة. الـjunctions اتفكت قبل `worktree remove`، والفولدرات الحقيقية سليمة.

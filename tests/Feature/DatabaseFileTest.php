@@ -1,72 +1,99 @@
 <?php
 
-use App\Models\Customer;
-use App\Models\Season;
 use App\Support\DatabaseFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Process;
 
 /**
- * reset.bat → `php artisan app:reset-data`. The order is the whole point:
- * nothing is deleted unless RESET is typed AND the backup was written first.
+ * Backups (DatabaseFile, VACUUM INTO) and the client's reset.bat.
+ *
+ * reset.bat is tested by running the real file through cmd, against a
+ * throw-away database file — the same way the client double-clicks it.
+ * It needs Windows and the bundled php\php.exe, so it is skipped elsewhere.
  */
-beforeEach(function () {
-    Customer::factory()->count(3)->create();
-});
+function runResetBat(string $database, string $answer): Illuminate\Contracts\Process\ProcessResult
+{
+    return Process::path(base_path())
+        ->env(['DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => $database, 'APP_ENV' => 'production'])
+        ->input($answer."\r\n\r\n")
+        ->timeout(180)
+        ->run(['cmd', '/c', base_path('reset.bat')]);
+}
 
-test('typing anything but RESET changes nothing and takes no backup', function () {
-    $this->mock(DatabaseFile::class)->shouldNotReceive('copyTo');
-
-    $this->artisan('app:reset-data')
-        ->expectsQuestion('Type RESET (capital letters) to continue, or anything else to cancel', 'reset')
-        ->expectsOutput('Cancelled. Nothing was changed.')
-        ->assertFailed();
-
-    expect(Customer::query()->count())->toBe(3);
-});
-
-test('if the backup fails, nothing is deleted', function () {
-    $this->mock(DatabaseFile::class)->shouldReceive('copyTo')->once()->andThrow(new RuntimeException('disk full'));
-
-    $this->artisan('app:reset-data')
-        ->expectsQuestion('Type RESET (capital letters) to continue, or anything else to cancel', 'RESET')
-        ->expectsOutput('The backup could not be made, so NOTHING was deleted.')
-        ->assertFailed();
-
-    expect(Customer::query()->count())->toBe(3);
-});
-
-test('end to end: backs up, then wipes everything and starts from zero', function () {
-    // Run exactly as reset.bat does — a real artisan process on a real
-    // database file. In-process it cannot work: migrate:fresh VACUUMs, which
-    // SQLite refuses inside the test transaction.
+function freshTestDatabase(): string
+{
     $dir = storage_path('framework/testing/reset-'.uniqid());
     mkdir($dir, 0777, true);
     $file = $dir.DIRECTORY_SEPARATOR.'database.sqlite';
     touch($file);
-    $env = ['DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => $file, 'APP_ENV' => 'production'];
-    $artisan = fn (array $args, string $input = '') => Process::path(base_path())->env($env)->input($input)->timeout(120)
-        ->run([PHP_BINARY, 'artisan', ...$args]);
 
-    expect($artisan(['migrate', '--force'])->successful())->toBeTrue();
+    Process::path(base_path())
+        ->env(['DB_CONNECTION' => 'sqlite', 'DB_DATABASE' => $file, 'APP_ENV' => 'production'])
+        ->run([PHP_BINARY, 'artisan', 'migrate', '--force'])
+        ->throw();
+
     $pdo = new PDO('sqlite:'.$file);
     foreach (['أحمد', 'منى', 'كريم'] as $name) {
         $pdo->exec("INSERT INTO customers (name, created_at, updated_at) VALUES ('{$name}', '2026-01-01', '2026-01-01')");
     }
-    $pdo = null;
 
-    $result = $artisan(['app:reset-data'], "RESET\n");
+    return $file;
+}
 
-    expect($result->successful())->toBeTrue($result->output().$result->errorOutput());
-    preg_match('/Backup saved: (.+\.sqlite)/', $result->output(), $match);
-    $backup = trim($match[1] ?? '');
+function removeTestDatabase(string $file): void
+{
+    $dir = dirname($file);
+    array_map('unlink', glob($dir.DIRECTORY_SEPARATOR.'*'));
+    rmdir($dir);
+}
+
+test('reset.bat: anything but RESET changes nothing and takes no backup', function () {
+    $file = freshTestDatabase();
+    $backupsBefore = glob(storage_path('app/safety/before-reset/*.sqlite')) ?: [];
+
+    $result = runResetBat($file, 'reset');
+
+    expect($result->output())->toContain('Cancelled. Nothing was changed.');
+    expect((int) (new PDO('sqlite:'.$file))->query('SELECT count(*) FROM customers')->fetchColumn())->toBe(3);
+    expect(glob(storage_path('app/safety/before-reset/*.sqlite')) ?: [])->toBe($backupsBefore);
+
+    removeTestDatabase($file);
+})->skip(fn () => PHP_OS_FAMILY !== 'Windows' || ! is_file(base_path('php/php.exe')), 'needs Windows and the bundled php\\php.exe');
+
+test('reset.bat: if the backup cannot be made, nothing is deleted', function () {
+    // Make the backup folder impossible to create: a FILE sits at its path.
+    // Only when nothing is there yet — never touch real backups.
+    $safety = storage_path('app/safety');
+    if (file_exists($safety)) {
+        $this->markTestSkipped('storage/app/safety already exists on this machine.');
+    }
+    file_put_contents($safety, 'not a folder');
+    $file = freshTestDatabase();
+
+    $result = runResetBat($file, 'RESET');
+
+    expect($result->output())->toContain('the backup could not be made, so NOTHING was deleted');
+    expect((int) (new PDO('sqlite:'.$file))->query('SELECT count(*) FROM customers')->fetchColumn())->toBe(3);
+
+    unlink($safety);
+    removeTestDatabase($file);
+})->skip(fn () => PHP_OS_FAMILY !== 'Windows' || ! is_file(base_path('php/php.exe')), 'needs Windows and the bundled php\\php.exe');
+
+test('reset.bat: backs up first, then starts from zero', function () {
+    $file = freshTestDatabase();
+
+    $result = runResetBat($file, 'RESET');
+
+    expect($result->output())->toContain('Done. The system is empty and ready.');
+    preg_match('/Backup saved: (\S+\.sqlite)/', $result->output(), $match);
+    $backup = base_path(str_replace('/', DIRECTORY_SEPARATOR, $match[1] ?? 'missing'));
 
     // The backup holds the data as it was…
     expect(is_file($backup))->toBeTrue();
     expect((int) (new PDO('sqlite:'.$backup))->query('SELECT count(*) FROM customers')->fetchColumn())->toBe(3);
 
     // …and the live database starts from zero: admin + material types + one
-    // open season, and no demo data.
+    // open season, and no demo data even though the seeders exist.
     $live = new PDO('sqlite:'.$file);
     expect((int) $live->query('SELECT count(*) FROM customers')->fetchColumn())->toBe(0);
     expect((int) $live->query('SELECT count(*) FROM rooms')->fetchColumn())->toBe(0);
@@ -75,13 +102,9 @@ test('end to end: backs up, then wipes everything and starts from zero', functio
     expect((int) $live->query("SELECT count(*) FROM seasons WHERE status = 'open'")->fetchColumn())->toBe(1);
     $live = null;
 
-    // Rebuilding from scratch leaves no stray empty copies beside the database.
-    expect(glob($dir.DIRECTORY_SEPARATOR.'dawood-before-*'))->toBe([]);
-
     unlink($backup);
-    array_map('unlink', glob($dir.DIRECTORY_SEPARATOR.'*'));
-    rmdir($dir);
-});
+    removeTestDatabase($file);
+})->skip(fn () => PHP_OS_FAMILY !== 'Windows' || ! is_file(base_path('php/php.exe')), 'needs Windows and the bundled php\\php.exe');
 
 test('the backup holds writes that are still in the WAL file, which a plain copy would miss', function () {
     $dir = storage_path('framework/testing/db-snapshot-'.uniqid());
