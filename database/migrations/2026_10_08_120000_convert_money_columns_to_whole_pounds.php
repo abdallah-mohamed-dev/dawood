@@ -76,6 +76,13 @@ return new class extends Migration
             return;
         }
 
+        // A fresh build (migrate:fresh, the client's reset.bat) has no money
+        // to convert yet — copying it would only leave an empty file behind
+        // in database/ on every reset.
+        if (! DB::table('cashbox_transactions')->exists() && ! DB::table('rooms')->exists()) {
+            return;
+        }
+
         $copy = dirname($path).DIRECTORY_SEPARATOR
             .'dawood-before-whole-pounds-'.date('Y-m-d-His').'.sqlite';
 

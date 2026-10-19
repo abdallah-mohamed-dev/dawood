@@ -3,6 +3,7 @@
 use App\Models\Customer;
 use App\Models\Room;
 use App\Models\User;
+use App\Support\DatabaseFile;
 use Illuminate\Support\Facades\File;
 
 beforeEach(function () {
@@ -25,6 +26,18 @@ test('the backup page shows a link to download the database', function () {
 });
 
 test('an admin can download a full copy of the database', function () {
+    // The download is a VACUUM INTO snapshot (WAL-safe), never the live file.
+    // VACUUM cannot run inside the test transaction, so the snapshot is
+    // faked here; DatabaseFile itself is covered in ResetDataTest.
+    $this->mock(DatabaseFile::class)->shouldReceive('copyTo')->once()
+        ->withArgs(fn (string $target) => str_contains($target, 'backup-tmp'))
+        ->andReturnUsing(function (string $target) {
+            File::ensureDirectoryExists(dirname($target));
+            file_put_contents($target, 'snapshot');
+
+            return $target;
+        });
+
     $response = $this->actingAs($this->admin)->get(route('backup.database'));
 
     $response->assertOk();

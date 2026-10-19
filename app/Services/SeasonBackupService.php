@@ -3,31 +3,29 @@
 namespace App\Services;
 
 use App\Exceptions\SeasonCloseFailedException;
-use Illuminate\Support\Facades\File;
+use App\Support\DatabaseFile;
+use Illuminate\Database\QueryException;
+use RuntimeException;
 
 /**
- * Copies the database file before a season closes (specs/012 ق-10). If the
+ * Copies the database before a season closes (specs/012 ق-10). If the
  * copy cannot be made, the close does not start.
+ *
+ * The copy goes through DatabaseFile (VACUUM INTO), not a plain file copy:
+ * in WAL mode the newest writes may not be in the main file yet.
  */
 class SeasonBackupService
 {
+    public function __construct(private readonly DatabaseFile $database = new DatabaseFile) {}
+
     public function create(): string
     {
-        $source = database_path('database.sqlite');
+        $target = storage_path('app/season-backups').DIRECTORY_SEPARATOR.'season-close-'.now()->format('Y-m-d-His').'.sqlite';
 
-        if (! is_file($source)) {
-            throw new SeasonCloseFailedException('ما لقيتش ملف قاعدة البيانات عشان أعمل نسخة احتياطية قبل الإقفال، فالإقفال اتوقف.');
+        try {
+            return $this->database->copyTo($target);
+        } catch (RuntimeException|QueryException $exception) {
+            throw new SeasonCloseFailedException('ماقدرتش أعمل نسخة احتياطية قبل الإقفال، فالإقفال اتوقف. ('.$exception->getMessage().')');
         }
-
-        $directory = storage_path('app/season-backups');
-        File::ensureDirectoryExists($directory);
-
-        $target = $directory.DIRECTORY_SEPARATOR.'season-close-'.now()->format('Y-m-d-His').'.sqlite';
-
-        if (! copy($source, $target)) {
-            throw new SeasonCloseFailedException('النسخة الاحتياطية اتعملت فشل، فالإقفال اتوقف.');
-        }
-
-        return $target;
     }
 }

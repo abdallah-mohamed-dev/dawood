@@ -22,6 +22,7 @@ use App\Models\Season;
 use App\Models\SeasonPartnerShare;
 use App\Models\Setting;
 use App\Services\SettingsService;
+use App\Support\DatabaseFile;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
@@ -62,14 +63,17 @@ class BackupController extends Controller
         ]);
     }
 
-    public function downloadDatabase(): BinaryFileResponse
+    public function downloadDatabase(DatabaseFile $database): BinaryFileResponse
     {
+        // A snapshot, not the live file: in WAL mode the newest writes may
+        // still be in database.sqlite-wal, and the raw file would miss them.
+        $snapshot = $database->copyTo(storage_path('app/backup-tmp').DIRECTORY_SEPARATOR.uniqid('dawood-db-').'.sqlite');
+
         $this->settings->set('last_backup_at', now()->toDateString());
 
-        return response()->download(
-            database_path('database.sqlite'),
-            'dawood-backup-'.now()->format('Y-m-d-His').'.sqlite',
-        );
+        return response()
+            ->download($snapshot, 'dawood-backup-'.now()->format('Y-m-d-His').'.sqlite')
+            ->deleteFileAfterSend();
     }
 
     public function downloadCsvArchive(): BinaryFileResponse
